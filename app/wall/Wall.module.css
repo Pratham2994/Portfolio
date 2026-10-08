@@ -136,7 +136,11 @@
 
   .grid {
     transform-style: preserve-3d;
-    transform: rotateX(calc(var(--view-y) * -4deg)) rotateY(calc(var(--view-x) * 4deg));
+    /* The pointer tilts the view a little. Scrolling away tips the whole wall back. */
+    transform: translateY(calc(var(--scroll, 0) * 9vh)) rotateX(calc(var(--view-y) * -4deg + var(--scroll, 0) * 34deg))
+      rotateY(calc(var(--view-x) * 4deg)) scale(calc(1 - var(--scroll, 0) * 0.12));
+    transform-origin: 50% 100%;
+    opacity: calc(1 - var(--scroll, 0) * 0.75);
   }
 
   .cell {

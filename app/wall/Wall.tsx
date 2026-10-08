@@ -10,6 +10,7 @@ import { Light } from './Light';
 import { Piece, PIECES } from './Piece';
 import { Poster } from './Poster';
 import { useDepth } from './useDepth';
+import { useScrollTilt } from './useScrollTilt';
 import styles from './Wall.module.css';
 
 type Columns = 2 | 3 | 5;
@@ -63,6 +64,7 @@ export function Wall() {
   const wall = useRef<HTMLElement>(null);
   const grid = useRef<HTMLDivElement>(null);
   useDepth(wall);
+  useScrollTilt(wall);
   useEffect(() => {
     if (wall.current) playEntry(wall.current);
   }, []);

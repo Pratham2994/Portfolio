@@ -742,3 +742,16 @@
 .watch {
   overflow-wrap: anywhere;
 }
+
+/* The other half of the camera move: the desk tips up into view as the wall tips away. */
+@media (min-width: 900px) and (orientation: landscape) and (hover: hover) and (pointer: fine) {
+  .desk {
+    perspective: 1600px;
+  }
+
+  .stage,
+  .side {
+    transform: rotateX(calc((1 - var(--scroll, 1)) * -26deg)) translateY(calc((1 - var(--scroll, 1)) * 8vh));
+    transform-origin: 50% 0;
+  }
+}

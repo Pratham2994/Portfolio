@@ -40,6 +40,21 @@ test('the pointer shifts the view only with a fine pointer', async ({ page }, in
   }
 });
 
+test('scrolling away tips the wall back, with a mouse on a wide screen', async ({ page }, info) => {
+  await open(page, '/');
+  const scroll = () => page.evaluate(() => Number(getComputedStyle(document.querySelector('main')!).getPropertyValue('--scroll') || 0));
+  expect(await scroll()).toBe(0);
+  await page.evaluate(() => window.scrollTo(0, window.innerHeight * 0.6));
+  if (fine(info.project.name)) {
+    await expect.poll(scroll).toBeGreaterThan(0.2);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect.poll(scroll).toBe(0);
+  } else {
+    await page.waitForTimeout(300);
+    expect(await scroll()).toBe(0);
+  }
+});
+
 test.describe('with reduced motion', () => {
   test.use({ reducedMotion: 'reduce' });
 
