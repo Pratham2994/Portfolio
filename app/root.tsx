@@ -50,3 +50,18 @@ export default function Root() {
 export function HydrateFallback() {
   return null;
 }
+
+/** Shown if a page throws. Plain markup, so it works when the rest of the app does not. */
+export function ErrorBoundary() {
+  return (
+    <main style={{ display: 'grid', placeContent: 'center', gap: '1rem', minHeight: '100svh', padding: '1.5rem', textAlign: 'center' }}>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--step-5)', lineHeight: 0.9, textTransform: 'uppercase' }}>
+        Something fell off the wall
+      </h1>
+      <p>That is on me, not you.</p>
+      <p>
+        <a href="/">Back to the wall</a>
+      </p>
+    </main>
+  );
+}

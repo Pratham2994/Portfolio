@@ -109,6 +109,17 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
     const onOut = () => {
       call = null;
     };
+    // A small secret: type "meow" and she gets the zoomies for a few seconds.
+    let typed = '';
+    let zoomies = 0;
+    const onKey = (event: KeyboardEvent) => {
+      typed = (typed + event.key.toLowerCase()).slice(-4);
+      if (typed !== 'meow') return;
+      zoomies = 5;
+      cat.rest = 0;
+      el.dataset.zoomies = '';
+    };
+    window.addEventListener('keydown', onKey);
     wall.addEventListener('pointerover', onOver);
     wall.addEventListener('pointerleave', onOut);
 
@@ -116,8 +127,12 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
       const ledge = path[cat.ledge];
       if (!ledge) return;
       cat.tick += dt;
-      const speed = call ? SPEED * 2.6 : SPEED;
-      if (call && !hop) {
+      if (zoomies > 0) {
+        zoomies -= dt;
+        if (zoomies <= 0) delete el.dataset.zoomies;
+      }
+      const speed = zoomies > 0 ? SPEED * 9 : call ? SPEED * 2.6 : SPEED;
+      if (call && !hop && zoomies <= 0) {
         if (call.ledge === cat.ledge && Math.abs(call.x - cat.x) < 3) {
           // Arrived: sit and wait for as long as the pointer stays.
           if (cat.rest <= 0) drawCat(ctx, 0, true);
@@ -159,12 +174,12 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
         const next = path[cat.ledge + cat.dir];
         if (!next) {
           cat.dir *= -1;
-          cat.rest = 2.2;
+          cat.rest = zoomies > 0 ? 0 : 2.2;
           if (Math.random() < 0.5) nudge(ledge.sheet);
         } else {
           hop = { t: 0, fromX: cat.x, fromY: cat.y, toX: cat.dir > 0 ? next.from : next.to, toY: next.y, ledge: cat.ledge + cat.dir };
         }
-      } else if (!call && Math.random() < dt * 0.06) {
+      } else if (!call && zoomies <= 0 && Math.random() < dt * 0.06) {
         cat.rest = 2.5;
       }
     };
@@ -193,6 +208,7 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
 
     return () => {
       stopMeasuring();
+      window.removeEventListener('keydown', onKey);
       wall.removeEventListener('pointerover', onOver);
       wall.removeEventListener('pointerleave', onOut);
       watch.disconnect();

@@ -23,7 +23,10 @@ export function ProjectPage({ project }: { project: Project }) {
   useLayoutEffect(() => {
     const node = page.current!;
     const poster = () => document.querySelector<HTMLElement>(`[data-poster="${project.slug}"]`);
-    if (takeIntent(project.slug)) void openFrom(poster(), node);
+    if (takeIntent(project.slug)) {
+      fromWall.current = true;
+      void openFrom(poster(), node);
+    }
     // A page that opens with a cut (history, next, previous) must not sit under a closing sheet.
     else cancelTransition();
     return () => {
@@ -39,11 +42,15 @@ export function ProjectPage({ project }: { project: Project }) {
 
   // Closes with the fold-down move, then goes to the wall. A second call while it runs does nothing.
   const closing = useRef(false);
+  const fromWall = useRef(false);
   const close = useCallback(() => {
     if (closing.current || !page.current) return;
     closing.current = true;
     const poster = document.querySelector<HTMLElement>(`[data-poster="${project.slug}"]`);
-    void closeLive(poster, page.current).then(() => navigate('/', { preventScrollReset: true }));
+    // Opened from the wall: step back in history, so the Back button does not reopen this page.
+    void closeLive(poster, page.current).then(() =>
+      fromWall.current ? navigate(-1) : navigate('/', { preventScrollReset: true }),
+    );
   }, [navigate, project.slug]);
 
   // A layout effect, so Escape works from the first frame the page is on screen.

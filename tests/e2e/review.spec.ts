@@ -123,3 +123,26 @@ test.describe('with reduced motion', () => {
     expect(await page.evaluate(() => (window as unknown as { moved: boolean }).moved)).toBe(false);
   });
 });
+
+test('after a poster is opened and closed, Back does not reopen it', async ({ page }) => {
+  await page.goto('about:blank');
+  await open(page, '/');
+  await page.locator('[data-poster="neat"]').click();
+  await expect(page.locator('#project-title')).toBeVisible();
+  await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator('[data-project]')).toHaveCount(0);
+  await page.goBack();
+  await expect(page).toHaveURL('about:blank');
+});
+
+test('typing meow gives the cat the zoomies', async ({ page }, info) => {
+  test.skip(['phone', 'tablet'].includes(info.project.name), 'needs a keyboard');
+  await open(page, '/');
+  const cat = page.locator('[data-cat]');
+  const before = (await cat.boundingBox())!.x;
+  await page.keyboard.type('meow');
+  await expect(cat).toHaveAttribute('data-zoomies', '');
+  await expect.poll(async () => Math.abs((await cat.boundingBox())!.x - before)).toBeGreaterThan(120);
+});
