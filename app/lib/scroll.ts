@@ -14,7 +14,7 @@ export function initScroll(): () => void {
 
   void import('lenis').then(({ default: Lenis }) => {
     if (stopped) return;
-    const lenis = new Lenis({ lerp: 0.12 });
+    const lenis = new Lenis({ lerp: 0.12, anchors: true });
     const tick = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(tick);
 

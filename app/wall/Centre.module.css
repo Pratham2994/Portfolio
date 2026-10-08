@@ -4,6 +4,8 @@
   gap: 0.5rem 0;
   min-width: 0;
   container-type: inline-size;
+  color: inherit;
+  text-decoration: none;
 }
 
 .word {
@@ -21,6 +23,9 @@
   border-radius: 2px;
   background: var(--panel);
   box-shadow: 0 0.9rem 1.6rem -0.7rem rgb(0 0 0 / 0.85);
+  transition:
+    translate var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out);
 }
 
 .letters {
@@ -30,6 +35,7 @@
   line-height: 0.8;
   letter-spacing: 0.02em;
   color: var(--bone);
+  transition: translate var(--dur-base) var(--ease-out);
 }
 
 .line {
@@ -44,4 +50,46 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--dim);
+}
+
+.cue {
+  margin-left: 1.2em;
+  color: var(--signal);
+}
+
+.cue::after {
+  content: ' 93';
+  display: inline-block;
+  transition: translate var(--dur-base) var(--ease-out);
+}
+
+/* The three panels shift out of line, like sheets lifted off the wall. */
+@media (hover: hover) and (pointer: fine) {
+  .centre:hover .panel:nth-of-type(odd) {
+    translate: 0 -3%;
+  }
+
+  .centre:hover .panel:nth-of-type(even) {
+    translate: 0 3%;
+  }
+
+  .centre:hover .panel {
+    background: color-mix(in srgb, var(--panel) 82%, var(--signal));
+  }
+
+  .centre:hover .panel:nth-of-type(odd) .letters {
+    translate: 0 3%;
+  }
+
+  .centre:hover .panel:nth-of-type(even) .letters {
+    translate: 0 -3%;
+  }
+
+  .centre:hover .cue::after {
+    translate: 0 0.3em;
+  }
+}
+
+.centre:focus-visible .cue::after {
+  translate: 0 0.3em;
 }

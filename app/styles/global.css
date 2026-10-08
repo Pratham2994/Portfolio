@@ -108,3 +108,10 @@ html[data-project-open] {
     translate: 0 1.5rem;
   }
 }
+
+/* Links inside the page glide to their target. Lenis does this itself where it runs. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.lenis) {
+    scroll-behavior: smooth;
+  }
+}

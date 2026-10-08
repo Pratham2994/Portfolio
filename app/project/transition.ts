@@ -108,3 +108,38 @@ export function closeTo(poster: HTMLElement | null, page: HTMLElement): Promise<
       .to(sheet, { opacity: 0, duration: 0.16, ease: 'none' }, 0.66);
   });
 }
+
+let closed = false;
+
+/** True once, right after `closeLive` has played, so the unmount does not play a second close. */
+export function takeClosed(): boolean {
+  const hit = closed;
+  closed = false;
+  return hit;
+}
+
+/**
+ * Plays the close on the page itself, before it leaves: the content steps back, the page
+ * folds down onto its poster, and the wall comes forward again. Used for Escape and the
+ * close link. The browser's own Back button cannot wait, so it uses `closeTo`.
+ */
+export function closeLive(poster: HTMLElement | null, page: HTMLElement): Promise<void> {
+  cancelTransition();
+  const main = wall();
+  if (!poster || !main || prefersReducedMotion()) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    const items = [...page.querySelectorAll('[data-in]')].reverse();
+    page.scrollTo({ top: 0 });
+    start(() => {
+      gsap.set(main, { clearProps: 'scale,opacity,transform,transformOrigin' });
+      closed = true;
+      resolve();
+    })
+      .set(main, { ...RECEDE, transformOrigin: origin() })
+      .to(items, { opacity: 0, y: 32, duration: 0.28, ease: 'power2.in', stagger: 0.025 }, 0)
+      .to(page, { clipPath: insetFor(poster.getBoundingClientRect()), duration: 0.8, ease: 'expo.inOut' }, 0.12)
+      .to(main, { scale: 1, opacity: 1, duration: 0.8, ease: 'expo.inOut' }, 0.12)
+      .to(page, { opacity: 0, duration: 0.18, ease: 'none' }, 0.8);
+  });
+}

@@ -27,17 +27,20 @@ test('reopening by history during the close leaves no sheet over the page', asyn
   await page.locator('[data-poster="neat"]').click();
   await expect(page.locator('#project-title')).toBeVisible();
   await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
-  await page.keyboard.press('Escape');
-  await expect(page).toHaveURL(/\/$/);
-  // Escape adds a history entry, so Back is the way to the page that was just closed.
+  // The browser's Back button closes with a sheet. Forward reopens the page while it runs.
   await page.goBack();
+  await expect(page.locator('[data-ghost]')).toHaveCount(1);
+  await page.goForward();
   await expect(page.locator('#project-title')).toHaveText('Neat');
   await expect(page.locator('[data-ghost]')).toHaveCount(0, { timeout: 250 });
 });
 
 test('opening another poster during the close ends on that page, with nothing left over', async ({ page }) => {
-  await open(page, '/work/neat');
-  await page.keyboard.press('Escape');
+  await open(page, '/');
+  await page.locator('[data-poster="neat"]').click();
+  await expect(page.locator('#project-title')).toBeVisible();
+  await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
+  await page.goBack();
   await expect(page.locator('[data-ghost]')).toHaveCount(1);
   await page.locator('[data-poster="scrub"]').click({ force: true });
   await expect(page).toHaveURL(/\/work\/scrub$/);
@@ -53,7 +56,7 @@ test('after a resize, the close aims at where the poster is now', async ({ page 
   await expect(page.locator('#project-title')).toBeVisible();
   await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
   await page.setViewportSize({ width: 700, height: 900 });
-  await page.keyboard.press('Escape');
+  await page.goBack();
   const target = await page.locator('[data-ghost]').getAttribute('data-target');
   await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
   const box = (await page.locator('[data-poster="neat"]').boundingBox())!;
@@ -61,6 +64,24 @@ test('after a resize, the close aims at where the poster is now', async ({ page 
   const [top, right, bottom, left] = target!.match(/-?[\d.]+/g)!.map(Number);
   expect(Math.abs((left + 700 - right) / 2 - (box.x + box.width / 2))).toBeLessThan(3);
   expect(Math.abs((top + 900 - bottom) / 2 - (box.y + box.height / 2))).toBeLessThan(3);
+});
+
+test('Escape folds the page down onto its poster before it leaves', async ({ page }) => {
+  await open(page, '/');
+  await page.locator('[data-poster="scrub"]').click();
+  await expect(page.locator('#project-title')).toBeVisible();
+  await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(450);
+  // Half way: the page is still there, already clipped toward the poster.
+  const mid = await page.locator('[data-project]').evaluate((el) => getComputedStyle(el).clipPath);
+  expect(mid).toMatch(/^inset\(/);
+  expect(mid).not.toBe('inset(0px)');
+  await expect(page).toHaveURL(/\/work\/scrub$/);
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator('[data-project]')).toHaveCount(0);
+  await expect(page.locator('[data-ghost]')).toHaveCount(0);
+  await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
 });
 
 test('the entry sequence is armed only on a wide screen with a mouse', async ({ page }, info) => {

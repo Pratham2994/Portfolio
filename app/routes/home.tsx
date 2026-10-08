@@ -18,7 +18,7 @@ export default function Home() {
   // When a project closes, hand focus back to its poster.
   useEffect(() => {
     if (!slug && last.current) {
-      document.querySelector<HTMLElement>(`[data-poster="${last.current}"]`)?.focus({ preventScroll: true });
+      document.querySelector<HTMLElement>(`[data-poster="${CSS.escape(last.current)}"]`)?.focus({ preventScroll: true });
     }
     last.current = slug;
   }, [slug]);

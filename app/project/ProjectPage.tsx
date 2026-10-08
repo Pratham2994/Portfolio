@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, type CSSProperties } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, type CSSProperties, type MouseEvent } from 'react';
 import Markdown from 'react-markdown';
 import { Link, useNavigate } from 'react-router';
 
@@ -6,7 +6,7 @@ import { neighbours, projects } from '~/content';
 import type { Project } from '~/content/schema';
 
 import s from './ProjectPage.module.css';
-import { cancelTransition, closeTo, openFrom, takeIntent } from './transition';
+import { cancelTransition, closeLive, closeTo, openFrom, takeClosed, takeIntent } from './transition';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const longestWord = (text: string) => Math.max(...text.split(/\s+/).map((word) => word.length));
@@ -26,6 +26,7 @@ export function ProjectPage({ project }: { project: Project }) {
     else cancelTransition();
     return () => {
       // Runs before the page leaves the DOM. Only a return to the wall shrinks back to the poster.
+      if (takeClosed()) return;
       if (window.location.pathname === '/') void closeTo(poster(), node);
     };
   }, [project.slug]);
@@ -34,10 +35,19 @@ export function ProjectPage({ project }: { project: Project }) {
     title.current?.focus({ preventScroll: true });
   }, [project.slug]);
 
+  // Closes with the fold-down move, then goes to the wall. A second call while it runs does nothing.
+  const closing = useRef(false);
+  const close = useCallback(() => {
+    if (closing.current || !page.current) return;
+    closing.current = true;
+    const poster = document.querySelector<HTMLElement>(`[data-poster="${project.slug}"]`);
+    void closeLive(poster, page.current).then(() => navigate('/', { preventScrollReset: true }));
+  }, [navigate, project.slug]);
+
   // A layout effect, so Escape works from the first frame the page is on screen.
   useLayoutEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') navigate('/', { preventScrollReset: true });
+      if (event.key === 'Escape') close();
     };
     window.addEventListener('keydown', onKey);
     document.documentElement.dataset.projectOpen = '';
@@ -45,7 +55,14 @@ export function ProjectPage({ project }: { project: Project }) {
       window.removeEventListener('keydown', onKey);
       delete document.documentElement.dataset.projectOpen;
     };
-  }, [navigate]);
+  }, [close]);
+
+  // A plain click plays the close. A modified click (new tab) is left to the browser.
+  const onCloseClick = (event: MouseEvent) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+    event.preventDefault();
+    close();
+  };
 
   const style = {
     '--bg': project.palette.bg,
@@ -66,7 +83,7 @@ export function ProjectPage({ project }: { project: Project }) {
     >
       <div className={s.inner}>
         <header className={s.bar} data-in>
-          <Link to="/" className={s.close} data-close preventScrollReset>
+          <Link to="/" className={s.close} data-close preventScrollReset onClick={onCloseClick}>
             Back to the wall
           </Link>
           <span className={s.count}>
