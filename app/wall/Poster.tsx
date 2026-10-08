@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 
 import type { Project } from '~/content/schema';
 
+import { Art } from './art';
 import styles from './Poster.module.css';
 
 // A small fixed tilt per poster, as if pinned by hand.
@@ -25,6 +26,7 @@ export function Poster({ project, index }: { project: Project; index: number }) 
       style={style}
       preventScrollReset
     >
+      <Art art={project.art} />
       <span className={styles.caption}>
         <strong className={styles.title}>{project.title}</strong>
         <span className={styles.tagline}>{project.tagline}</span>
