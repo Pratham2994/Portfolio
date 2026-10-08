@@ -271,3 +271,17 @@ Made on the owner's feedback after he saw the built site. Where these differ fro
 - **Entry sequence (replaces 4.5):** it plays on every load of the wall, on wide screens with a mouse. Phones and tablets show the wall at once.
 - **Project page (adds to 5):** wider layout in two columns, with the poster's art drawn large in swapped colours beside the title.
 - **Content (changes 12):** content files are parsed and checked at build time by `content.plugin.ts`. Text is plain paragraphs, with no Markdown formatting.
+
+## 20. Second round of changes (2026-10-09)
+
+Agreed with the owner after the first round. Where these differ from the sections above, these apply.
+
+- **Wall, wide screens (replaces the layout in section 19):** hung in real paper sizes, like the owner's own poster wall. One A3 hero (Scrub) hangs left of the centre piece and into the next row. Seven A4 posters. Five A5 pieces at the corners, one of them outside the block on the right. Equal gaps, tilt under one degree, nothing stretched. `hero: true` in a project file marks the hero; `size: poster` is A4 and `size: postcard` is A5.
+- **Personal pieces:** three A5 pieces that are not projects: a match ticket and a "right now" note (both lead to the desk) and a boarding pass BOM to PNQ (leads to "Me"). Their text is in `content/site/pieces.md`.
+- **Boot-up (replaces 4.5):** boot lines, a hard cut to the word on the centre piece, a pull back to the whole wall, then the sheets are dealt onto it with a small knock for each. Any key or click skips it. Wide screens with a mouse only.
+- **Calm wall:** with a mouse, poster art holds still and plays only on the sheet under the pointer or focus. On touch screens it keeps moving.
+- **The cat** walks to the sheet under the pointer and sits there.
+- **Scroll:** as the wall scrolls away it tips back, and the desk tips up into view.
+- **The desk (replaces 7):** drawn from the owner's real setup. Seven objects open seven cards, each with its own design: scoreboard, game launcher, manga panels, minutes counter, spec sheet, stopwatch, terminal. A wall clock shows the time in Pune. A switch changes the room light from white to purple. Text is in `content/site/desk.md`.
+- **Project pages:** each has one small working part of its own (`app/project/Demo.tsx`). Numbers in the Local LLM lab part are real. The FloatChat, iDEA, Chronicle, MalShield and Prats-Deck parts use labelled sample data.
+- **Text rules from the owner:** collaborative projects are presented as his, with no split of who did what. No accuracy figure for the iDEA project. No mention of how far a team went, except the iDEA 3rd prize. The paper is "submitted, under review" and nothing more.
