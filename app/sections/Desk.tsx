@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import Markdown from 'react-markdown';
 
 import { desk } from '~/content';
 import type { DeskItem } from '~/content/schema';
+import { Paragraphs } from '~/lib/Paragraphs';
 
 import s from './Desk.module.css';
 
@@ -92,7 +92,7 @@ export function Desk() {
               </button>
             </h3>
             <div id={`desk-${item.id}`} className={s.panel} role="region" aria-label={item.title}>
-              <Markdown>{item.body}</Markdown>
+              <Paragraphs text={item.body} />
             </div>
           </div>
         ))}

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, type CSSProperties, type MouseEvent } from 'react';
-import Markdown from 'react-markdown';
 import { Link, useNavigate } from 'react-router';
 
 import { neighbours, projects } from '~/content';
 import type { Project } from '~/content/schema';
 import { Art } from '~/wall/art';
+import { Paragraphs } from '~/lib/Paragraphs';
 
 import s from './ProjectPage.module.css';
 import { cancelTransition, closeLive, closeTo, openFrom, takeClosed, takeIntent } from './transition';
@@ -123,7 +123,7 @@ export function ProjectPage({ project }: { project: Project }) {
 
         <div className={s.brief}>
           <div className={s.why} data-in>
-            <Markdown>{project.body}</Markdown>
+            <Paragraphs text={project.body} />
           </div>
 
           <dl className={s.stats} data-in>

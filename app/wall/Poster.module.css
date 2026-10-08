@@ -128,3 +128,32 @@
     height: auto;
   }
 }
+
+/* A piece that hangs over two columns is a wide sheet, whatever its size on other screens. */
+@media (min-width: 900px) and (orientation: landscape) {
+  :global([data-wide]) > .poster,
+  :global([data-wide]) > .poster[data-size='postcard'] {
+    width: calc(94% * var(--size, 1));
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  :global([data-wide]) > .poster .title {
+    font-size: clamp(1.25rem, 8cqw, 3.5rem);
+  }
+
+  :global([data-wide]) > .poster .tagline {
+    max-width: 34ch;
+    font-size: clamp(0.75rem, 2.6cqw, 1rem);
+  }
+
+  :global([data-wide]) > .poster .caption {
+    inset: auto 4cqw 3.5cqw;
+  }
+
+  :global([data-wide]) > .poster .caption::before {
+    width: 12cqw;
+    height: 0.8cqw;
+    margin-bottom: 0.8cqw;
+  }
+}

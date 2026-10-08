@@ -14,7 +14,6 @@ import styles from './Wall.module.css';
 type Columns = 2 | 3 | 5;
 
 const PLAN = placeWall(projects);
-const LAST_ROW = PLAN.places.filter((place) => place.row === PLAN.rows).length;
 
 // Hung by hand: each piece has its own size, place in its cell, and distance from the wall.
 const HANG = [
@@ -68,20 +67,18 @@ export function Wall() {
       <Light />
       <div className={styles.grid} style={style} ref={grid}>
         <Centre className={styles.centre} />
-        {PLAN.places.map(({ project, col, row }, i) => {
+        {PLAN.places.map(({ project, col, row, span }, i) => {
           const hang = HANG[i % HANG.length];
-          // A short last row hangs close under the row above, and leans in toward its gaps.
-          const loose = row === PLAN.rows && LAST_ROW < 5;
           const cell = {
-            '--col': col,
+            '--col': `${col} / span ${span}`,
             '--row': row,
             '--z': `${hang.z}px`,
             '--size': hang.size,
-            '--x': loose ? (col < 3 ? 'end' : col > 3 ? 'start' : 'center') : hang.x,
-            '--y': loose ? 'start' : hang.y,
+            '--x': span === 2 ? 'center' : hang.x,
+            '--y': hang.y,
           } as CSSProperties;
           return (
-            <div key={project.slug} className={styles.cell} style={cell}>
+            <div key={project.slug} className={styles.cell} style={cell} data-wide={span === 2 || undefined}>
               <Poster project={project} index={i} />
             </div>
           );

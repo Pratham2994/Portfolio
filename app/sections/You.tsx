@@ -1,7 +1,7 @@
-import Markdown from 'react-markdown';
 
 import portrait from '~/assets/portrait.webp';
 import { timeline, you } from '~/content';
+import { Paragraphs } from '~/lib/Paragraphs';
 
 import s from './You.module.css';
 
@@ -15,7 +15,7 @@ export function You() {
       <div className={s.text} data-reveal>
         <h2 id="you-title">Me</h2>
         <div className={s.body}>
-          <Markdown>{you.body}</Markdown>
+          <Paragraphs text={you.body} />
         </div>
       </div>
 

@@ -353,3 +353,13 @@
   scale: 0.56;
   transform-origin: 0 0;
 }
+
+/* A wide sheet draws the art at half size along its top edge. */
+@media (min-width: 900px) and (orientation: landscape) {
+  :global([data-wide]) > [data-size] > .art {
+    width: 200%;
+    height: 200%;
+    scale: 0.5;
+    transform-origin: 0 0;
+  }
+}

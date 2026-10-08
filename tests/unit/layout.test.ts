@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Project } from '~/content/schema';
-import { placeWall, wallOrder } from '~/wall/layout';
+import { placeWall, wallOrder, type Place } from '~/wall/layout';
 
 const make = (posters: number, postcards: number) =>
   [
     ...Array.from({ length: posters }, (_, i) => ({ slug: `big${i}`, size: 'poster' })),
     ...Array.from({ length: postcards }, (_, i) => ({ slug: `small${i}`, size: 'postcard' })),
   ] as Project[];
+
+const cells = (places: Place[]) =>
+  places.flatMap((p) => Array.from({ length: p.span }, (_, i) => `${p.col + i},${p.row}`));
 
 describe('wallOrder', () => {
   it('keeps every project once and each size in its own order', () => {
@@ -31,27 +34,33 @@ describe('wallOrder', () => {
 
 describe('placeWall', () => {
   for (let n = 4; n <= 18; n++) {
-    it(`gives ${n} projects one free cell each, clear of the centre piece`, () => {
+    it(`gives ${n} projects their own cells, clear of the centre piece`, () => {
       const { rows, centreRow, places } = placeWall(make(Math.ceil(n * 0.6), Math.floor(n * 0.4)));
       expect(places).toHaveLength(n);
-      expect(new Set(places.map((p) => `${p.col},${p.row}`)).size).toBe(n);
+      const used = cells(places);
+      expect(new Set(used).size).toBe(used.length);
       for (const place of places) {
         expect(place.col).toBeGreaterThanOrEqual(1);
-        expect(place.col).toBeLessThanOrEqual(5);
+        expect(place.col + place.span - 1).toBeLessThanOrEqual(5);
         expect(place.row).toBeLessThanOrEqual(rows);
         if (place.row === centreRow) expect([1, 5]).toContain(place.col);
       }
     });
   }
 
-  it('spreads a short last row to both corners', () => {
+  it('fills a short last row with two wide pieces, postcards first', () => {
     const { rows, places } = placeWall(make(6, 4));
     expect(rows).toBe(3);
-    expect(places.filter((p) => p.row === 3).map((p) => p.col)).toEqual([1, 3, 5]);
+    const last = places.filter((p) => p.row === 3);
+    expect(last.map((p) => [p.col, p.span])).toEqual([
+      [1, 2],
+      [3, 1],
+      [4, 2],
+    ]);
+    expect(last.filter((p) => p.span === 2).every((p) => p.project.size === 'postcard')).toBe(true);
   });
 
-  it('centres a single leftover poster', () => {
-    const { rows, places } = placeWall(make(5, 3));
-    expect(places.filter((p) => p.row === rows).map((p) => p.col)).toEqual([3]);
+  it('leaves no empty cell when ten to twelve projects hang on three rows', () => {
+    for (const n of [10, 11, 12]) expect(cells(placeWall(make(n - 4, 4)).places)).toHaveLength(12);
   });
 });
