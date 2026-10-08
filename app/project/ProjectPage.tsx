@@ -6,6 +6,7 @@ import type { Project } from '~/content/schema';
 import { Art } from '~/wall/art';
 import { Paragraphs } from '~/lib/Paragraphs';
 
+import { Demo } from './Demo';
 import s from './ProjectPage.module.css';
 import { cancelTransition, closeLive, closeTo, openFrom, takeClosed, takeIntent } from './transition';
 
@@ -148,6 +149,8 @@ export function ProjectPage({ project }: { project: Project }) {
             ))}
           </ol>
         </section>
+
+        <Demo slug={project.slug} />
 
         {project.media.length > 0 && (
           <section className={s.media} data-media data-in>
