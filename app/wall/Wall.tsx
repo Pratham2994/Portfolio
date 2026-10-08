@@ -2,7 +2,9 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 
 import { projects } from '~/content';
 
+import { Cat } from './Cat';
 import { Centre } from './Centre';
+import { playEntry } from './entry';
 import { computeWall, wallRows, type Columns } from './layout';
 import { Light } from './Light';
 import { Poster } from './Poster';
@@ -36,7 +38,11 @@ function useColumns(): Columns {
 export function Wall() {
   const columns = useColumns();
   const wall = useRef<HTMLElement>(null);
+  const grid = useRef<HTMLDivElement>(null);
   useDepth(wall);
+  useEffect(() => {
+    if (wall.current) playEntry(wall.current);
+  }, []);
   const frames = Math.max(...MODES.map((m) => EMPTY[m]));
   const style = { '--rows': ROWS, '--middle': Math.floor(ROWS / 2) + 1 } as CSSProperties;
 
@@ -51,7 +57,7 @@ export function Wall() {
       aria-label="Projects"
     >
       <Light />
-      <div className={styles.grid} style={style}>
+      <div className={styles.grid} style={style} ref={grid}>
         <Centre className={styles.centre} />
         {projects.map((project, i) => (
           <div key={project.slug} className={styles.cell} style={{ '--z': `${DEPTHS[i % DEPTHS.length]}px` } as CSSProperties}>
@@ -68,6 +74,7 @@ export function Wall() {
             <div className={styles.frame} />
           </div>
         ))}
+        <Cat grid={grid} />
       </div>
     </section>
   );

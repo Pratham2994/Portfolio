@@ -108,6 +108,21 @@
   }
 }
 
+.cat {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  image-rendering: pixelated;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-base) linear;
+}
+
+.wall[data-entered] .cat {
+  opacity: 1;
+}
+
 /* Depth: the pointer shifts the view a little, and posters stand off the wall. */
 @media (min-width: 900px) and (orientation: landscape) and (hover: hover) and (pointer: fine) {
   .wall {

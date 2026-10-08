@@ -87,3 +87,8 @@ canvas {
 html[data-project-open] {
   overflow: hidden;
 }
+
+/* Set by a head script just before the entry sequence, and removed when it starts. */
+.entry-pending :is([data-poster], [data-empty], [data-centre] > *) {
+  opacity: 0;
+}
