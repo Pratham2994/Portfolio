@@ -67,8 +67,8 @@
   display: grid;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(0.875rem, 12cqw, 1.75rem);
-  line-height: 1.02;
+  font-size: clamp(0.75rem, 10cqw, 1.75rem);
+  line-height: 1;
   text-transform: uppercase;
 }
 
