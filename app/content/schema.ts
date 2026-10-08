@@ -35,11 +35,22 @@ export type Sector = z.infer<typeof sector>;
 export type Media = z.infer<typeof media>;
 export type Project = z.infer<typeof project> & { slug: string; body: string };
 
-const deskItem = z.object({
-  id: z.enum(['sports', 'games', 'anime', 'music', 'now', 'cube']),
-  object: z.string(),
-  title: z.string(),
-  body: z.string(),
+// The desk: one card per object in the drawing.
+const desk = z.object({
+  sports: z.object({ title: z.string(), note: z.string(), rows: z.array(z.object({ sport: z.string(), side: z.string() })) }),
+  games: z.object({
+    title: z.string(),
+    note: z.string(),
+    main: z.string(),
+    story: z.array(z.string()),
+    coop: z.array(z.string()),
+    first: z.string(),
+  }),
+  anime: z.object({ title: z.string(), note: z.string(), list: z.array(z.string()) }),
+  music: z.object({ title: z.string(), minutes: z.string(), note: z.string() }),
+  pc: z.object({ title: z.string(), note: z.string(), specs: z.array(z.object({ part: z.string(), name: z.string() })) }),
+  cube: z.object({ title: z.string(), best: z.number(), note: z.string() }),
+  now: z.object({ title: z.string(), lines: z.array(z.string()) }),
 });
 const timelineItem = z.object({ org: z.string(), role: z.string(), when: z.string() });
 const you = z.object({ portraitAlt: z.string().min(1), quiet: z.string(), email: z.email(), github: z.url(), linkedin: z.url() });
@@ -60,7 +71,8 @@ const pieces = z.object({
 });
 
 export type Pieces = z.infer<typeof pieces>;
-export type DeskItem = z.infer<typeof deskItem>;
+export type Desk = z.infer<typeof desk>;
+export type DeskId = keyof Desk;
 export type TimelineItem = z.infer<typeof timelineItem>;
 export type You = z.infer<typeof you> & { body: string };
 
@@ -79,8 +91,8 @@ export function parseProject(raw: string, slug: string): Project {
   return { ...data, slug, body };
 }
 
-export function parseDesk(raw: string): DeskItem[] {
-  return parse(z.object({ items: z.array(deskItem) }), raw, 'site/desk').data.items;
+export function parseDesk(raw: string): Desk {
+  return parse(desk, raw, 'site/desk').data;
 }
 
 export function parsePieces(raw: string): Pieces {

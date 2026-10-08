@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 
+import { open } from './helpers';
+
 test('wall shows every project and the centre piece', async ({ page }) => {
-  await page.goto('/');
+  await open(page, '/');
   await expect(page.locator('[data-poster]')).toHaveCount(10);
   await expect(page.locator('[data-centre]')).toContainText('ALMOST');
 });
@@ -10,7 +12,7 @@ const wideOnly = ['phone', 'tablet', 'portrait'];
 
 test('the wide wall is hung in paper sizes: one A3, seven A4, five A5', async ({ page }, info) => {
   test.skip(wideOnly.includes(info.project.name), 'the wide wall only');
-  await page.goto('/');
+  await open(page, '/');
   const papers = await page.evaluate(() =>
     [...document.querySelectorAll<HTMLElement>('[data-wall] [data-paper]')].map((cell) => {
       const sheet = cell.firstElementChild!.getBoundingClientRect();
@@ -28,7 +30,7 @@ test('the wide wall is hung in paper sizes: one A3, seven A4, five A5', async ({
 
 test('no two sheets overlap, and every corner of the wall has one', async ({ page }, info) => {
   test.skip(wideOnly.includes(info.project.name), 'the wide wall only');
-  await page.goto('/');
+  await open(page, '/');
   const wall = await page.evaluate(() => {
     const sheets = [...document.querySelectorAll('[data-poster], [data-piece]')];
     const boxes = sheets.map((el) => el.getBoundingClientRect());
@@ -49,7 +51,7 @@ test('no two sheets overlap, and every corner of the wall has one', async ({ pag
 });
 
 test('the personal pieces lead to the sections below', async ({ page }) => {
-  await page.goto('/');
+  await open(page, '/');
   await expect(page.locator('[data-piece="pass"]')).toHaveAttribute('href', '#you');
   await expect(page.locator('[data-piece="ticket"]')).toHaveAttribute('href', '#desk');
   await expect(page.locator('[data-piece="pass"]')).toContainText('BOM');
@@ -57,7 +59,7 @@ test('the personal pieces lead to the sections below', async ({ page }) => {
 });
 
 test('no poster is clipped or overflowing', async ({ page }) => {
-  await page.goto('/');
+  await open(page, '/');
   const bad = await page.evaluate(
     () =>
       [...document.querySelectorAll('[data-poster]')].filter((el) => {
@@ -70,7 +72,7 @@ test('no poster is clipped or overflowing', async ({ page }) => {
 });
 
 test('200% zoom keeps the wall usable', async ({ page }) => {
-  await page.goto('/');
+  await open(page, '/');
   await page.evaluate(() => {
     document.documentElement.style.fontSize = '200%';
   });
@@ -78,7 +80,7 @@ test('200% zoom keeps the wall usable', async ({ page }) => {
 });
 
 test('the wall reports its column count', async ({ page }, info) => {
-  await page.goto('/');
+  await open(page, '/');
   const expected = { phone: '2', tablet: '3', portrait: '3' }[info.project.name] ?? '5';
   await expect(page.locator('[data-wall]')).toHaveAttribute('data-columns', expected);
 });

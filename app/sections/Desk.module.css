@@ -1,14 +1,31 @@
 .desk {
+  /* The room light. White by default; the switch turns it purple, like the real room. */
+  --room: var(--wall);
+  --lamp: #2f6bff;
+  --lamp-soft: #1b2a55;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5) var(--space-7);
-  max-width: 84rem;
+  max-width: 100rem;
   margin-inline: auto;
   padding: var(--space-8) var(--gutter) var(--space-7);
+  transition: background-color var(--dur-slow) var(--ease-out);
+}
+
+.desk[data-room='purple'] {
+  --lamp: #a45cff;
+  --lamp-soft: #3a2470;
 }
 
 .desk > * {
   min-width: 0;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-2) var(--space-4);
 }
 
 .head h2 {
@@ -20,37 +37,148 @@
 }
 
 .head p {
-  margin-top: var(--space-2);
+  grid-column: 1;
   color: var(--dim);
 }
 
-.drawing {
+.switch {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.6em 0.9em;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.switch::before {
+  content: '';
+  width: 0.9em;
+  height: 0.9em;
+  border-radius: 50%;
+  background: var(--lamp);
+  transition: background-color var(--dur-base) linear;
+}
+
+/* The drawing */
+.stage {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--lamp-soft) 16%, var(--wall));
+  transition: background-color var(--dur-slow) var(--ease-out);
+}
+
+.scene {
+  position: relative;
+}
+
+.scene svg {
   width: 100%;
   height: auto;
 }
 
-.top,
-.leg {
-  fill: var(--line);
+.time {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
 }
 
-.line {
-  fill: none;
-  stroke: var(--dim);
+.top {
+  fill: var(--bone);
+}
+
+.leg,
+.footrest {
+  fill: #3a3835;
+}
+
+.bezel,
+.keys,
+.tower {
+  fill: #15161a;
+  stroke: #3a3835;
   stroke-width: 2;
-  transition: stroke var(--dur-fast) linear;
 }
 
-.fill {
-  fill: var(--dim);
-  transition: fill var(--dur-fast) linear;
+.wallpaper {
+  fill: color-mix(in srgb, var(--lamp) 55%, #06102b);
+  transition: fill var(--dur-slow) var(--ease-out);
 }
 
-.screen {
-  fill: var(--panel);
+.wallpaperDeep {
+  fill: color-mix(in srgb, var(--lamp) 22%, #050a1c);
+  transition: fill var(--dur-slow) var(--ease-out);
+}
+
+.peak {
+  fill: color-mix(in srgb, var(--lamp) 30%, #030816);
+}
+
+.peakDeep {
+  fill: #03060f;
+}
+
+.moon {
+  fill: var(--bone);
+}
+
+.stand,
+.bar {
+  fill: #3a3835;
+}
+
+.pad {
+  fill: #1c1d21;
+}
+
+.keyYellow {
+  fill: #ffc21a;
+}
+
+.knob {
+  fill: #8f8a80;
 }
 
 .mouse,
+.figBody {
+  fill: var(--signal);
+}
+
+.figHat {
+  fill: #ffc21a;
+}
+
+.band {
+  fill: none;
+  stroke: #15161a;
+  stroke-width: 7;
+}
+
+.cup {
+  fill: #c8102e;
+}
+
+.laptop {
+  fill: var(--bone);
+}
+
+.laptopLine {
+  fill: none;
+  stroke: #b9b4a8;
+  stroke-width: 1.5;
+}
+
 .deck {
   fill: var(--signal);
 }
@@ -59,83 +187,528 @@
   fill: var(--wall-shade);
 }
 
-.object {
-  cursor: pointer;
+.helmet {
+  fill: #1b2a55;
 }
 
-.object[data-active] .line {
+.grill {
+  fill: none;
   stroke: var(--bone);
+  stroke-width: 1.4;
 }
 
-.object[data-active] .fill {
+.bottle {
+  fill: #c8102e;
+}
+
+.cubeFace {
   fill: var(--bone);
 }
 
-.object[data-active] .screen {
-  fill: color-mix(in srgb, var(--panel) 55%, var(--signal));
+.cubeLine {
+  fill: none;
+  stroke: var(--wall-shade);
+  stroke-width: 1.2;
 }
 
-.items {
+.cubeA {
+  fill: #ffc21a;
+}
+
+.cubeB {
+  fill: #3ddc84;
+}
+
+.cubeC {
+  fill: #ff3b3b;
+}
+
+.glass {
+  fill: color-mix(in srgb, var(--lamp) 26%, #05060a);
+  transition: fill var(--dur-slow) var(--ease-out);
+}
+
+.fanRing {
+  fill: none;
+  stroke: var(--lamp);
+  stroke-width: 4;
+  transition: stroke var(--dur-slow) var(--ease-out);
+}
+
+.fanBlade {
+  fill: none;
+  stroke: var(--bone);
+  stroke-width: 2;
+  opacity: 0.7;
+}
+
+.fan {
+  animation: spin 1.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.gpu {
+  fill: #3a3835;
+}
+
+.clockRim {
+  fill: #15161a;
+}
+
+.clockFace {
+  fill: #0b0b0d;
+}
+
+.hand,
+.handThin {
+  stroke: var(--bone);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.handThin {
+  stroke-width: 2.4;
+}
+
+/* Objects that open a card lift a little, and the open one keeps a mark under it. */
+.object {
+  cursor: pointer;
+  transition: translate var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .object:hover {
+    translate: 0 -6px;
+  }
+}
+
+.object[data-active] {
+  translate: 0 -6px;
+}
+
+.object[data-active] :is(.bezel, .tower) {
+  stroke: var(--signal);
+}
+
+.object[data-object='pc'] {
+  transform-box: fill-box;
+}
+
+/* The cards */
+.side {
   display: grid;
   align-content: start;
+  gap: var(--space-4);
 }
 
-.item {
-  border-top: 1px solid var(--line);
-}
-
-.item:last-child {
-  border-bottom: 1px solid var(--line);
-}
-
-.item button {
+.tabs {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  width: 100%;
-  padding: var(--space-3) 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--step-3);
-  line-height: 1;
-  text-transform: uppercase;
-  text-align: left;
-  color: var(--dim);
-  transition: color var(--dur-fast) linear;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
-.item button::after {
-  content: '+';
+.tabs button {
+  padding: 0.55em 0.85em;
+  border: 1px solid var(--line);
+  border-radius: 2px;
   font-family: var(--font-mono);
-  font-size: var(--step-1);
-  font-weight: 400;
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dim);
+  transition:
+    color var(--dur-fast) linear,
+    background-color var(--dur-fast) linear;
 }
 
-.item[data-open] button {
-  color: var(--bone);
+.tabs button[aria-expanded='true'] {
+  border-color: var(--bone);
+  background: var(--bone);
+  color: var(--wall-shade);
 }
 
-.item[data-open] button::after {
-  content: '';
-  width: 0.6em;
-  height: 0.6em;
-  border-radius: 50%;
-  background: var(--signal);
-}
-
-.panel {
+.card {
   display: grid;
-  gap: 0.7em;
-  max-width: 54ch;
-  padding-bottom: var(--space-4);
+  gap: var(--space-4);
+  padding: clamp(1rem, 2.4vw, 1.75rem);
+  border-radius: 2px;
 }
 
-/* Without scripts every panel stays readable. With them, only the open one shows. */
-:global(html[data-ready]) .item:not([data-open]) .panel {
+.card h3 {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.note {
+  max-width: 46ch;
+  font-size: var(--step-0);
+}
+
+/* Without scripts every card stays readable. With them, only the open one shows. */
+:global(html[data-ready]) .card:not([data-open]) {
   display: none;
 }
 
-@media (min-width: 900px) {
+@media (prefers-reduced-motion: no-preference) {
+  :global(html[data-ready]) .card[data-open] > * {
+    animation: card-in var(--dur-base) var(--ease-out) both;
+  }
+
+  :global(html[data-ready]) .card[data-open] > :nth-child(2) {
+    animation-delay: 60ms;
+  }
+
+  :global(html[data-ready]) .card[data-open] > :nth-child(3) {
+    animation-delay: 120ms;
+  }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    translate: 0 0.9rem;
+  }
+}
+
+/* Sport: a stadium scoreboard */
+.card[data-card='sports'] {
+  background: #0b0b0d;
+  border: 2px solid #2a2725;
+  color: #ffc21a;
+}
+
+.board {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.board thead th {
+  padding-bottom: 0.6em;
+  font-size: var(--step--1);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-align: left;
+  color: #b89a45;
+}
+
+.board tbody th,
+.board td {
+  padding: 0.5em 0;
+  border-top: 1px solid #2a2725;
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.board tbody th {
+  padding-right: 1em;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-3);
+  line-height: 1;
+}
+
+.board td {
+  font-size: var(--step-0);
+  color: var(--bone);
+}
+
+.card[data-card='sports'] .note {
+  color: #b89a45;
+}
+
+/* Games: a launcher */
+.card[data-card='games'] {
+  background: #14161c;
+  color: var(--bone);
+}
+
+.launcher {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.launcher h4 {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.featured {
+  display: grid;
+  gap: 0.2rem;
+  padding: var(--space-4);
+  border-radius: 2px;
+  background: #ff4655;
+  color: #1a0306;
+}
+
+.featured span,
+.first span {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.featured strong {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-5);
+  line-height: 0.85;
+  text-transform: uppercase;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--space-2);
+}
+
+.tiles li {
+  display: flex;
+  align-items: end;
+  min-height: 3.6rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 2px;
+  background: #23262f;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.first {
+  padding-top: var(--space-3);
+  border-top: 1px dashed #3a3f4c;
+  font-weight: 600;
+}
+
+.first span {
+  margin-right: 0.8em;
+  color: #3ddc84;
+}
+
+.card[data-card='games'] .note {
+  color: var(--dim);
+}
+
+/* Anime: a page of panels */
+.card[data-card='anime'] {
+  background: var(--bone);
+  color: #14161c;
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.panels li {
+  grid-column: span 2;
+  display: flex;
+  align-items: end;
+  min-height: 4.4rem;
+  padding: 0.5rem 0.6rem;
+  border: 2px solid #14161c;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-1);
+  line-height: 0.95;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+/* Uneven panels, the way a manga page is cut. */
+.panels li:nth-child(1),
+.panels li:nth-child(5),
+.panels li:nth-child(9) {
+  grid-column: span 3;
+}
+
+.panels li:nth-child(2),
+.panels li:nth-child(4) {
+  grid-column: span 3;
+}
+
+.panels li:nth-child(3n + 1) {
+  background: #14161c;
+  color: var(--bone);
+}
+
+.panels li:nth-child(6) {
+  grid-column: span 4;
+}
+
+.card[data-card='anime'] .note {
+  color: #4a4d57;
+}
+
+/* Music: one number */
+.card[data-card='music'] {
+  background: #0d3b28;
+  color: #c9f7da;
+}
+
+.music {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.minutes {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(3.5rem, 11vw, 8rem);
+  line-height: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+.levels {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 3.5rem;
+}
+
+.levels i {
+  flex: 1;
+  height: 100%;
+  background: #3ddc84;
+  transform-origin: bottom;
+  animation: level 1s ease-in-out infinite alternate;
+}
+
+@keyframes level {
+  from {
+    transform: scaleY(0.12);
+  }
+}
+
+/* The PC: a spec sheet */
+.card[data-card='pc'] {
+  background: #0b0b0d;
+  border: 1px solid var(--lamp);
+  color: var(--bone);
+  transition: border-color var(--dur-slow) var(--ease-out);
+}
+
+.specs {
+  display: grid;
+  margin: 0;
+}
+
+.specs > div {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: 0.55em 0;
+  border-top: 1px solid #2a2725;
+}
+
+.specs dt {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lamp);
+  transition: color var(--dur-slow) var(--ease-out);
+}
+
+.specs dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.card[data-card='pc'] .note {
+  color: var(--dim);
+}
+
+/* The cube: a stopwatch */
+.card[data-card='cube'] {
+  background: #ffc21a;
+  color: #191200;
+}
+
+.cube {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.face {
+  display: grid;
+  grid-template-columns: repeat(3, 1.7rem);
+  gap: 3px;
+  padding: 3px;
+  background: #191200;
+}
+
+.face i {
+  aspect-ratio: 1;
+}
+
+.watch {
+  display: grid;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  line-height: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+.watch span {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Right now: a terminal */
+.card[data-card='now'] {
+  background: #05060a;
+  border: 1px solid #2a2725;
+  color: #3ddc84;
+}
+
+.terminal {
+  display: grid;
+  gap: 0.5em;
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+}
+
+.terminal li::before {
+  content: '> ';
+  color: var(--dim);
+}
+
+.terminal li:last-child::after {
+  content: '_';
+  animation: caret 0.9s steps(1) infinite;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (min-width: 1000px) {
   .desk {
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
     align-items: start;
@@ -144,4 +717,28 @@
   .head {
     grid-column: 1 / -1;
   }
+
+  .stage {
+    position: sticky;
+    top: var(--space-5);
+  }
+}
+
+/* Large text must wrap inside the cards, never widen the page. */
+.side > *,
+.card > * {
+  min-width: 0;
+}
+
+.board {
+  table-layout: fixed;
+}
+
+.board th,
+.board td,
+.specs dd,
+.tiles li,
+.minutes,
+.watch {
+  overflow-wrap: anywhere;
 }
