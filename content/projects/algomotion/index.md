@@ -1,23 +1,23 @@
 ---
 title: Algomotion
 size: postcard
-order: 8
+order: 10
 status: Live
 tagline: Sorting and pathfinding, one step at a time.
 palette: { bg: '#171a24', fg: '#ece8df', accent: '#2f6bff' }
 art: { template: bars, motif: sort }
 stats:
-  - { value: '11', label: sorting algorithms }
-  - { value: '6', label: pathfinding algorithms }
-  - { value: '3', label: A* heuristics }
+  - { value: '11', label: ways to sort }
+  - { value: '6', label: ways to find a path }
+  - { value: '1', label: speed slider }
 sectors:
-  - title: Sorting arena
-    body: Speed control, with counts of comparisons and writes.
-  - title: Pathfinding arena
-    body: Mazes, weighted paths and diagonal moves.
-  - title: Complexity explorer
-    body: Benchmarks against Big-O curves, with CSV export.
+  - title: Sorting
+    body: Eleven algorithms, slowed down until you can see every swap, with a count of how much work each one did.
+  - title: Pathfinding
+    body: Draw walls, build a maze, drop weights, and watch six algorithms look for the way out.
+  - title: The curve
+    body: Run them on bigger and bigger inputs and see the Big-O line you were told about show up by itself.
 stack: [React, Vite]
 links: { repo: 'https://github.com/Pratham2994/Algomotion', live: 'https://algomotion.vercel.app' }
 ---
-I understood algorithms better once I could watch them. So I built the thing I wanted when I was learning them.
+I only understood algorithms once I could watch them move. This is the thing I wanted back when I was learning them.

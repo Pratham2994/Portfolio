@@ -3,24 +3,26 @@ title: Scrub
 size: poster
 order: 1
 hero: true
-status: Local tool
-tagline: A local ffmpeg GUI that can hit an exact file size.
+status: Runs on your own PC
+tagline: ffmpeg, minus the terminal.
 palette: { bg: '#ece8df', fg: '#14161c', accent: '#ff5a1f' }
 art: { template: frames }
 stats:
-  - { value: '24', label: operations }
-  - { value: '2', label: pass encode to fit a size }
-  - { value: '0', label: bytes sent to the internet }
+  - { value: '24', label: things it can do to a file }
+  - { value: '0', label: files that leave your PC }
+  - { value: '1', label: window instead of a terminal }
 sectors:
-  - title: Fit a size
-    body: Pick Discord, WhatsApp or email. Scrub works out the bitrate from the limit and the length, then encodes in two passes to get under it.
-  - title: Command on screen
-    body: The exact ffmpeg command is shown before it runs. You can copy it or edit it.
-  - title: Trim on real frames
-    body: Drag handles over frames from your own file. Crop works the same way.
+  - title: Cut and join
+    body: Trim by dragging over the real frames of your video. Merge clips, and crossfade from one into the next.
+  - title: Convert and shrink
+    body: Change the format, or compress to what you need. Pick a quality, or pick a hard limit like 10 MB and it works out the rest.
+  - title: Everything else
+    body: Make a GIF, pull the audio out, swap it, resize, crop, speed up, loop. The exact command is on screen before it runs, if you want to learn it.
 stack: [TypeScript, ffmpeg]
 links: { repo: 'https://github.com/Pratham2994/Scrub' }
 ---
-I kept needing to get a clip under a size limit, and every ffmpeg front-end asked me how good I wanted it to look. That is the wrong question when Discord says 10 MB.
+ffmpeg can do anything to a video. The catch is that you have to remember how to ask, and nobody does.
 
-So Scrub asks for the limit and does the maths. It runs on my machine and nothing leaves it.
+Scrub is the window I wanted in front of it. Drop a file in, pick what you want, and see the frames while you do it. Trim, merge, crossfade, convert, compress, make a GIF.
+
+It all runs on your own machine. Nothing is uploaded anywhere, so you can use it on things you would not paste into some website.

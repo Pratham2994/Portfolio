@@ -3,24 +3,25 @@ title: FloatChat
 size: poster
 order: 5
 status: Smart India Hackathon 2025
-tagline: Ask the ocean a question in plain language.
+tagline: Ask the ocean a question. Get a map back.
 palette: { bg: '#06243a', fg: '#cfeeff', accent: '#ffc21a' }
 art: { template: waves }
 stats:
-  - { value: '22/75', label: commits }
-  - { value: '5', label: MCP tools }
-  - { value: '3', label: layers }
+  - { value: '5', label: tools the model can call }
+  - { value: '3', label: 'layers: app, server, analytics' }
+  - { value: '0', label: lines of SQL you have to write }
 sectors:
-  - title: Data
-    body: Argo float profiles in NetCDF files go through ETL into Postgres and a vector store.
-  - title: Tools
-    body: An MCP server gives the model SQL, heatmaps, map points and time series, so answers come from data and not from memory.
-  - title: Chat
-    body: Streamed answers with plots, a map picker and a prediction panel.
+  - title: The data
+    body: Thousands of Argo floats drift around the oceans measuring temperature and salt. Their files get cleaned, loaded into Postgres and indexed for search.
+  - title: The tools
+    body: The model does not answer from memory. It calls tools that run real queries, draw heatmaps, plot points on a map and build time series.
+  - title: The chat
+    body: You type a question in plain words. The answer streams back with a chart or a map next to it, and a panel for predictions.
 stack: [React, Node, Python, PostgreSQL, ChromaDB, MCP]
 links: { repo: 'https://github.com/VarnikaBajpai4/FloatChat_DebugDynasty_SiH' }
-role: Team of five. I worked on the chat client, the prompts and the wiring between the client and the model.
 ---
-Ocean data is public, but you need to know NetCDF and a fair amount of scripting to ask it anything.
+Ocean data is public. Reading it is another matter: odd file formats, a lot of scripting, and you need to know what you are looking for before you start.
 
-FloatChat lets you ask in plain language and answers with real Argo float data, on a map or a chart.
+FloatChat lets you just ask. "How warm was the Arabian Sea last March?" comes back as a real answer from real float data, with the map to prove it.
+
+We built it in 2025, when wiring a language model to tools was still new here and nothing came with a tutorial.

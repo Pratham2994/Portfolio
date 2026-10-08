@@ -21,11 +21,11 @@ test('direct load shows the page, and close leads home', async ({ page }) => {
 });
 
 test('next and previous walk the wall in order and wrap', async ({ page }) => {
-  await open(page, '/work/local-llm-lab');
+  await open(page, '/work/algomotion');
   await page.locator('[data-next]').click();
   await expect(page).toHaveURL(/\/work\/scrub$/);
   await page.locator('[data-prev]').click();
-  await expect(page).toHaveURL(/\/work\/local-llm-lab$/);
+  await expect(page).toHaveURL(/\/work\/algomotion$/);
 });
 
 test('unknown slug shows the not-found page with a way home', async ({ page }) => {
