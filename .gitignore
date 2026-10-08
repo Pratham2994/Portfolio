@@ -1,0 +1,11 @@
+node_modules/
+build/
+.react-router/
+.superpowers/
+test-results/
+playwright-report/
+*.HEIC
+.env
+.env.*
+.DS_Store
+Thumbs.db

@@ -1,0 +1,39 @@
+:root {
+  color-scheme: dark;
+
+  --wall: #0f0e0d;
+  --wall-shade: #070606;
+  --bone: #ece8df;
+  --dim: #8f8a80;
+  --signal: #ff7a1a;
+  --line: #2a2725;
+
+  --font-display: 'Big Shoulders Display Variable', 'Arial Narrow', Impact, sans-serif;
+  --font-text: 'Hanken Grotesk Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  --step--1: clamp(0.75rem, 0.72rem + 0.12vw, 0.8125rem);
+  --step-0: clamp(0.9375rem, 0.9rem + 0.18vw, 1.0625rem);
+  --step-1: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+  --step-2: clamp(1.25rem, 1.12rem + 0.6vw, 1.625rem);
+  --step-3: clamp(1.5rem, 1.25rem + 1.2vw, 2.25rem);
+  --step-4: clamp(2rem, 1.5rem + 2.4vw, 3.5rem);
+  --step-5: clamp(2.75rem, 1.8rem + 4.6vw, 5.5rem);
+  --step-6: clamp(3.5rem, 1.6rem + 9vw, 9rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2.5rem;
+  --space-7: 4rem;
+  --space-8: 7rem;
+  --gutter: clamp(1rem, 4vw, 3.5rem);
+
+  --dur-fast: 160ms;
+  --dur-base: 450ms;
+  --dur-slow: 900ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+}
