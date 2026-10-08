@@ -107,7 +107,12 @@
   color: var(--dim);
 }
 
-@media (min-width: 600px) {
+/* Sized by the column, not the screen, so large text falls back to one column. */
+.history {
+  container-type: inline-size;
+}
+
+@container (min-width: 28rem) {
   .history li {
     grid-template-columns: 9.5rem minmax(0, 1fr);
   }
@@ -120,7 +125,7 @@
 
 @media (min-width: 900px) {
   .you {
-    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, min(22rem, 34%)) minmax(0, 1fr);
     align-items: start;
   }
 
