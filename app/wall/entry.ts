@@ -8,8 +8,9 @@ export const PENDING = 'entry-pending';
 /**
  * Runs in the document head, before the first paint. It hides the posters only when the
  * entry sequence is about to play, and shows them again by itself if the app never starts.
+ * Phones and tablets skip the sequence, so their first paint never waits for scripts.
  */
-export const pendingScript = `try{if(!sessionStorage.getItem('${KEY}')&&location.pathname==='/'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){var d=document.documentElement;d.classList.add('${PENDING}');setTimeout(function(){d.classList.remove('${PENDING}')},4000)}}catch(e){}`;
+export const pendingScript = `try{if(!sessionStorage.getItem('${KEY}')&&location.pathname==='/'&&matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){var d=document.documentElement;d.classList.add('${PENDING}');setTimeout(function(){d.classList.remove('${PENDING}')},4000)}}catch(e){}`;
 
 function seenBefore(): boolean {
   try {

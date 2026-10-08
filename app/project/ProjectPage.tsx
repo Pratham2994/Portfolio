@@ -14,7 +14,7 @@ const longestWord = (text: string) => Math.max(...text.split(/\s+/).map((word) =
 export function ProjectPage({ project }: { project: Project }) {
   const navigate = useNavigate();
   const title = useRef<HTMLHeadingElement>(null);
-  const page = useRef<HTMLElement>(null);
+  const page = useRef<HTMLDivElement>(null);
   const { prev, next } = neighbours(project.slug);
   const position = projects.findIndex((p) => p.slug === project.slug) + 1;
 
@@ -52,7 +52,7 @@ export function ProjectPage({ project }: { project: Project }) {
   } as CSSProperties;
 
   return (
-    <article
+    <div
       className={s.page}
       style={style}
       ref={page}
@@ -163,6 +163,6 @@ export function ProjectPage({ project }: { project: Project }) {
           </Link>
         </nav>
       </div>
-    </article>
+    </div>
   );
 }

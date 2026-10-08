@@ -1,7 +1,8 @@
-// Static preview server. Unknown paths get the SPA fallback, as the host does.
+// Static preview server. Unknown paths get 404.html with a 404 status, as the host does.
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve as resolvePath, sep } from 'node:path';
+import { gzipSync } from 'node:zlib';
 
 const root = resolvePath('build/client');
 const port = Number(process.env.PORT ?? 4173);
@@ -20,7 +21,7 @@ async function resolve(pathname) {
     const info = await stat(file).catch(() => null);
     if (info?.isFile()) return { file, status: 200 };
   }
-  return { file: join(root, '__spa-fallback.html'), status: 200 };
+  return { file: join(root, '404.html'), status: 404 };
 }
 
 createServer(async (req, res) => {
@@ -28,8 +29,11 @@ createServer(async (req, res) => {
   const { file, status } = await resolve(pathname);
   try {
     const body = await readFile(file);
-    res.writeHead(status, { 'content-type': types[extname(file)] ?? 'application/octet-stream' });
-    res.end(body);
+    const type = types[extname(file)] ?? 'application/octet-stream';
+    // The host compresses text, so the preview does too.
+    const zip = /^(text|application\/json|image\/svg)/.test(type) && (req.headers['accept-encoding'] ?? '').includes('gzip');
+    res.writeHead(status, { 'content-type': type, ...(zip && { 'content-encoding': 'gzip' }) });
+    res.end(zip ? gzipSync(body) : body);
   } catch {
     res.writeHead(404).end('Not found');
   }

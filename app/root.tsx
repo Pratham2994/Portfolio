@@ -2,18 +2,19 @@ import { useEffect, type ReactNode } from 'react';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
 import '@fontsource-variable/big-shoulders-display';
+import displayFont from '@fontsource-variable/big-shoulders-display/files/big-shoulders-display-latin-wght-normal.woff2?url';
 import '@fontsource-variable/hanken-grotesk';
+import textFont from '@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2?url';
 import '@fontsource-variable/jetbrains-mono';
 import { initReveals, initScroll } from './lib/scroll';
 import { pendingScript } from './wall/entry';
 import './styles/tokens.css';
 import './styles/global.css';
 
-export function meta() {
-  return [
-    { title: 'Pratham Panchal' },
-    { name: 'description', content: 'Software engineer. I build tools because the one I had almost did the job.' },
-  ];
+export function links() {
+  // The two faces used above the fold load with the page, so text does not shift when they arrive.
+  const font = (href: string) => ({ rel: 'preload', as: 'font', type: 'font/woff2', href, crossOrigin: 'anonymous' as const });
+  return [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }, font(displayFont), font(textFont)];
 }
 
 export function Layout({ children }: { children: ReactNode }) {
