@@ -1,0 +1,46 @@
+.centre {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  gap: 0.5rem 0;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.word {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap);
+  min-height: 0;
+}
+
+.panel {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--panel);
+  box-shadow: 0 0.9rem 1.6rem -0.7rem rgb(0 0 0 / 0.85);
+}
+
+.letters {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 19cqw;
+  line-height: 0.8;
+  letter-spacing: 0.02em;
+  color: var(--bone);
+}
+
+.line {
+  font-size: clamp(0.8125rem, 2.5cqw, 1.25rem);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.name {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6875rem, 1.6cqw, 0.8125rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}

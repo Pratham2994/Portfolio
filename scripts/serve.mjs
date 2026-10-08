@@ -1,9 +1,9 @@
 // Static preview server. Unknown paths get the SPA fallback, as the host does.
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { extname, join, normalize } from 'node:path';
+import { extname, join, normalize, resolve as resolvePath, sep } from 'node:path';
 
-const root = 'build/client';
+const root = resolvePath('build/client');
 const port = Number(process.env.PORT ?? 4173);
 const types = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css',
@@ -16,7 +16,7 @@ async function resolve(pathname) {
   const clean = normalize(decodeURIComponent(pathname)).replace(/^[\\/]+/, '');
   for (const candidate of [clean, join(clean, 'index.html')]) {
     const file = join(root, candidate);
-    if (!file.startsWith(root)) continue;
+    if (!file.startsWith(root + sep)) continue;
     const info = await stat(file).catch(() => null);
     if (info?.isFile()) return { file, status: 200 };
   }

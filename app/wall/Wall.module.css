@@ -1,0 +1,97 @@
+.wall {
+  --gap: clamp(0.5rem, 1.4vmin, 1.1rem);
+  --cell-ratio: 1.08;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5) var(--gutter) var(--space-6);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
+  width: 100%;
+}
+
+.cell {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+}
+
+.cell[data-empty] {
+  display: none;
+}
+
+.cell[data-empty].show2 {
+  display: grid;
+}
+
+.centre {
+  grid-column: 1 / -1;
+  aspect-ratio: 2 / 1;
+}
+
+.frame {
+  width: 86%;
+  aspect-ratio: 4 / 3;
+  border: 1px dashed var(--line);
+  border-radius: 2px;
+}
+
+@media (min-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 62rem;
+  }
+
+  .cell[data-empty] {
+    display: none;
+  }
+
+  .cell[data-empty].show3 {
+    display: grid;
+  }
+
+  .centre {
+    aspect-ratio: 3 / 1.15;
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .wall {
+    min-height: 100svh;
+  }
+
+  .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
+    grid-auto-flow: row dense;
+    max-width: none;
+    width: max(
+      min(100%, 105rem, calc((100svh - 6rem) * 5 / (var(--rows) * var(--cell-ratio)))),
+      min(100%, 46rem)
+    );
+    aspect-ratio: 5 / calc(var(--rows) * var(--cell-ratio));
+  }
+
+  .cell {
+    height: 100%;
+  }
+
+  .cell[data-empty] {
+    display: none;
+  }
+
+  .cell[data-empty].show5 {
+    display: grid;
+  }
+
+  .centre {
+    grid-column: 2 / span 3;
+    grid-row: var(--middle);
+    aspect-ratio: auto;
+    height: 100%;
+  }
+}

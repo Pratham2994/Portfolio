@@ -1,0 +1,92 @@
+.poster {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--bg);
+  color: var(--fg);
+  text-decoration: none;
+  rotate: var(--tilt);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.06) inset,
+    0 0.9rem 1.6rem -0.7rem rgb(0 0 0 / 0.85);
+  transition:
+    rotate var(--dur-base) var(--ease-out),
+    scale var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+.poster[data-size='postcard'] {
+  width: 86%;
+  aspect-ratio: 4 / 3;
+}
+
+.caption {
+  position: absolute;
+  inset: auto 7cqw 6cqw;
+  display: grid;
+  gap: 0.35em;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.05rem, 14cqw, 3.25rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.tagline {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6875rem, 5.2cqw, 0.9375rem);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+.poster[data-size='postcard'] .title {
+  font-size: clamp(0.95rem, 11cqw, 2.25rem);
+}
+
+.poster[data-size='postcard'] .tagline {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .poster:hover {
+    rotate: 0deg;
+    scale: 1.06;
+    z-index: 2;
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.06) inset,
+      0 2rem 2.6rem -1rem rgb(0 0 0 / 0.9);
+  }
+}
+
+.poster:focus-visible {
+  rotate: 0deg;
+  scale: 1.06;
+  z-index: 2;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .poster {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+  }
+
+  .poster[data-size='postcard'] {
+    width: 86%;
+    height: auto;
+  }
+}
