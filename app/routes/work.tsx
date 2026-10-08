@@ -13,5 +13,5 @@ export function meta({ params }: { params: { slug?: string } }) {
 export default function Work() {
   const { slug } = useParams();
   const project = slug ? getProject(slug) : undefined;
-  return project ? <ProjectPage project={project} /> : <NotOnWall />;
+  return project ? <ProjectPage key={project.slug} project={project} /> : <NotOnWall />;
 }

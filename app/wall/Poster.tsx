@@ -3,6 +3,8 @@ import { Link } from 'react-router';
 
 import type { Project } from '~/content/schema';
 
+import { markIntent } from '~/project/transition';
+
 import { Art } from './art';
 import styles from './Poster.module.css';
 
@@ -25,6 +27,7 @@ export function Poster({ project, index }: { project: Project; index: number }) 
       data-size={project.size}
       style={style}
       preventScrollReset
+      onClick={() => markIntent(project.slug)}
     >
       <Art art={project.art} />
       <span className={styles.caption}>

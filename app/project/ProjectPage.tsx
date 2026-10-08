@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useRef, type CSSProperties } from 'react';
 import Markdown from 'react-markdown';
 import { Link, useNavigate } from 'react-router';
 
@@ -6,6 +6,7 @@ import { neighbours, projects } from '~/content';
 import type { Project } from '~/content/schema';
 
 import s from './ProjectPage.module.css';
+import { closeTo, openFrom, takeIntent } from './transition';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const longestWord = (text: string) => Math.max(...text.split(/\s+/).map((word) => word.length));
@@ -13,14 +14,26 @@ const longestWord = (text: string) => Math.max(...text.split(/\s+/).map((word) =
 export function ProjectPage({ project }: { project: Project }) {
   const navigate = useNavigate();
   const title = useRef<HTMLHeadingElement>(null);
+  const page = useRef<HTMLElement>(null);
   const { prev, next } = neighbours(project.slug);
   const position = projects.findIndex((p) => p.slug === project.slug) + 1;
+
+  useLayoutEffect(() => {
+    const node = page.current!;
+    const poster = () => document.querySelector<HTMLElement>(`[data-poster="${project.slug}"]`);
+    if (takeIntent(project.slug)) void openFrom(poster(), node);
+    return () => {
+      // Runs before the page leaves the DOM. Only a return to the wall shrinks back to the poster.
+      if (window.location.pathname === '/') void closeTo(poster(), node);
+    };
+  }, [project.slug]);
 
   useEffect(() => {
     title.current?.focus({ preventScroll: true });
   }, [project.slug]);
 
-  useEffect(() => {
+  // A layout effect, so Escape works from the first frame the page is on screen.
+  useLayoutEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') navigate('/', { preventScrollReset: true });
     };
@@ -42,6 +55,7 @@ export function ProjectPage({ project }: { project: Project }) {
     <article
       className={s.page}
       style={style}
+      ref={page}
       data-project={project.slug}
       role="dialog"
       aria-modal="true"

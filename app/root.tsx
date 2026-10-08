@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
 import '@fontsource-variable/big-shoulders-display';
@@ -34,6 +34,10 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export default function Root() {
+  // Marks the page as interactive, for tests and for styles that need scripts.
+  useEffect(() => {
+    document.documentElement.dataset.ready = '';
+  }, []);
   return <Outlet />;
 }
 
