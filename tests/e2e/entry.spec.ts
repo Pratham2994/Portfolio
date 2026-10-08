@@ -84,3 +84,17 @@ test.describe('with reduced motion', () => {
     expect(await cat.boundingBox()).toEqual(before);
   });
 });
+
+test('the cat comes to the poster under the pointer', async ({ page }, info) => {
+  test.skip(['phone', 'tablet'].includes(info.project.name), 'needs a mouse');
+  await page.goto('/');
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 6000 });
+  const gap = () =>
+    page.evaluate(() => {
+      const cat = document.querySelector('[data-cat]')!.getBoundingClientRect();
+      const box = document.querySelector('[data-poster="omnicompiler"]')!.getBoundingClientRect();
+      return Math.abs((cat.left + cat.right) / 2 - (box.left + box.right) / 2);
+    });
+  await page.locator('[data-poster="omnicompiler"]').hover();
+  await expect.poll(gap, { timeout: 12000 }).toBeLessThan(30);
+});

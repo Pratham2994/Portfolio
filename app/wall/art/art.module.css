@@ -152,13 +152,15 @@
   background: var(--accent);
 }
 
+/* At rest the bars are full. On play they reset and grow back, like results coming in. */
 @keyframes rank {
-  0% {
-    transform: scaleX(0);
-  }
-  30%,
+  0%,
+  45%,
   100% {
     transform: scaleX(1);
+  }
+  8% {
+    transform: scaleX(0);
   }
 }
 
@@ -367,5 +369,21 @@
     height: 178.5%;
     scale: 0.56;
     transform-origin: 0 0;
+  }
+}
+
+/*
+ * With a mouse, the wall is calm: art holds still and plays only on the sheet under the
+ * pointer or the keyboard focus. Touch screens have no hover, so there it keeps moving.
+ */
+@media (hover: hover) and (pointer: fine) {
+  :global([data-poster]) .art *,
+  :global([data-poster]) .art *::after {
+    animation-play-state: paused;
+  }
+
+  :global([data-poster]:is(:hover, :focus-visible)) .art *,
+  :global([data-poster]:is(:hover, :focus-visible)) .art *::after {
+    animation-play-state: running;
   }
 }

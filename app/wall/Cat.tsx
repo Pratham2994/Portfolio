@@ -95,10 +95,38 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
       setTimeout(() => sheet.style.removeProperty('--nudge'), 700);
     };
 
+    // She comes to the sheet you point at: the ledge above it, and the spot nearest the pointer.
+    let call: { ledge: number; x: number } | null = null;
+    const onOver = (event: PointerEvent) => {
+      const sheet = (event.target as Element).closest<HTMLElement>('[data-poster], [data-piece]');
+      if (event.pointerType !== 'mouse' || !sheet || !path.length) return;
+      const mid = offsetIn(wall, sheet).x + sheet.offsetWidth / 2;
+      const centre = (l: Ledge) => (l.from + l.to + WIDTH) / 2;
+      const ledge = path.reduce((best, l, i) => (Math.abs(centre(l) - mid) < Math.abs(centre(path[best]) - mid) ? i : best), 0);
+      call = { ledge, x: Math.min(Math.max(mid - WIDTH / 2, path[ledge].from), path[ledge].to) };
+      cat.rest = 0;
+    };
+    const onOut = () => {
+      call = null;
+    };
+    wall.addEventListener('pointerover', onOver);
+    wall.addEventListener('pointerleave', onOut);
+
     const step = (dt: number) => {
       const ledge = path[cat.ledge];
       if (!ledge) return;
       cat.tick += dt;
+      const speed = call ? SPEED * 2.6 : SPEED;
+      if (call && !hop) {
+        if (call.ledge === cat.ledge && Math.abs(call.x - cat.x) < 3) {
+          // Arrived: sit and wait for as long as the pointer stays.
+          if (cat.rest <= 0) drawCat(ctx, 0, true);
+          cat.rest = 0.4;
+        } else {
+          cat.rest = 0;
+          cat.dir = call.ledge === cat.ledge ? Math.sign(call.x - cat.x) || 1 : Math.sign(call.ledge - cat.ledge);
+        }
+      }
       if (cat.rest > 0) {
         cat.rest -= dt;
         if (cat.tick > 0.5) {
@@ -119,8 +147,9 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
         }
         return;
       }
-      cat.x += cat.dir * SPEED * dt;
-      if (cat.tick > 0.16) {
+      cat.x += cat.dir * speed * dt;
+      if (call && call.ledge === cat.ledge && (call.x - cat.x) * cat.dir < 0) cat.x = call.x;
+      if (cat.tick > (call ? 0.09 : 0.16)) {
         cat.tick = 0;
         cat.frame = cat.frame ? 0 : 1;
         drawCat(ctx, cat.frame);
@@ -135,7 +164,7 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
         } else {
           hop = { t: 0, fromX: cat.x, fromY: cat.y, toX: cat.dir > 0 ? next.from : next.to, toY: next.y, ledge: cat.ledge + cat.dir };
         }
-      } else if (Math.random() < dt * 0.06) {
+      } else if (!call && Math.random() < dt * 0.06) {
         cat.rest = 2.5;
       }
     };
@@ -164,6 +193,8 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
 
     return () => {
       stopMeasuring();
+      wall.removeEventListener('pointerover', onOver);
+      wall.removeEventListener('pointerleave', onOut);
       watch.disconnect();
       cancelAnimationFrame(frame);
     };
