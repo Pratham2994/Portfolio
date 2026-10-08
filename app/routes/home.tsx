@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useParams } from 'react-router';
 
+import { Contact } from '~/sections/Contact';
 import { Desk } from '~/sections/Desk';
+import { You } from '~/sections/You';
 import { Wall } from '~/wall/Wall';
 
 export default function Home() {
@@ -22,6 +24,8 @@ export default function Home() {
         <h1 className="sr-only">Pratham Panchal</h1>
         <Wall />
         <Desk />
+        <You />
+        <Contact />
       </main>
       <Outlet />
     </>

@@ -7,6 +7,10 @@
   padding: var(--space-8) var(--gutter) var(--space-7);
 }
 
+.desk > * {
+  min-width: 0;
+}
+
 .head h2 {
   font-family: var(--font-display);
   font-weight: 900;
