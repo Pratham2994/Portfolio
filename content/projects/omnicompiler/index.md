@@ -4,7 +4,7 @@ size: poster
 order: 4
 status: Paper under review
 tagline: Run and debug five languages in one place.
-palette: { bg: '#2f5bff', fg: '#f3f5ff', accent: '#ff3b3b' }
+palette: { bg: '#2447d8', fg: '#f3f5ff', accent: '#ff3b3b' }
 art: { template: code }
 stats:
   - { value: '5', label: languages }

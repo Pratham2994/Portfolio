@@ -4,6 +4,7 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
 import '@fontsource-variable/big-shoulders-display';
 import '@fontsource-variable/hanken-grotesk';
 import '@fontsource-variable/jetbrains-mono';
+import { initReveals, initScroll } from './lib/scroll';
 import { pendingScript } from './wall/entry';
 import './styles/tokens.css';
 import './styles/global.css';
@@ -38,7 +39,13 @@ export function Layout({ children }: { children: ReactNode }) {
 export default function Root() {
   // Marks the page as interactive, for tests and for styles that need scripts.
   useEffect(() => {
+    const stopReveals = initReveals();
+    const stopScroll = initScroll();
     document.documentElement.dataset.ready = '';
+    return () => {
+      stopReveals();
+      stopScroll();
+    };
   }, []);
   return <Outlet />;
 }

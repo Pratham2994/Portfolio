@@ -1,5 +1,5 @@
 .page {
-  --muted: color-mix(in srgb, var(--fg) 72%, var(--bg));
+  --muted: color-mix(in srgb, var(--fg) 88%, var(--bg));
   --rule: color-mix(in srgb, var(--fg) 28%, var(--bg));
   position: fixed;
   inset: 0;

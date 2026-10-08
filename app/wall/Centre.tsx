@@ -5,7 +5,8 @@ const PANELS = ['AL', 'MO', 'ST'];
 export function Centre({ className }: { className?: string }) {
   return (
     <div className={`${styles.centre} ${className ?? ''}`} data-centre>
-      <p className={styles.word} aria-label="ALMOST">
+      <p className={styles.word}>
+        <span className="sr-only">ALMOST</span>
         {PANELS.map((pair) => (
           <span key={pair} className={styles.panel} aria-hidden="true">
             <span className={styles.letters}>{pair}</span>

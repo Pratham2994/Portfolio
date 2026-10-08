@@ -8,18 +8,18 @@ import s from './You.module.css';
 export function You() {
   return (
     <section id="you" className={s.you} aria-labelledby="you-title">
-      <figure className={s.portrait}>
+      <figure className={s.portrait} data-reveal>
         <img src={portrait} alt={you.portraitAlt} width={960} height={1200} loading="lazy" decoding="async" />
       </figure>
 
-      <div className={s.text}>
+      <div className={s.text} data-reveal>
         <h2 id="you-title">Me</h2>
         <div className={s.body}>
           <Markdown>{you.body}</Markdown>
         </div>
       </div>
 
-      <div className={s.history}>
+      <div className={s.history} data-reveal>
         <h3>So far</h3>
         <ol>
           {timeline.map((item) => (

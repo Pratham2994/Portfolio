@@ -57,6 +57,7 @@ export function ProjectPage({ project }: { project: Project }) {
       style={style}
       ref={page}
       data-project={project.slug}
+      data-lenis-prevent
       role="dialog"
       aria-modal="true"
       aria-labelledby="project-title"

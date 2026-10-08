@@ -4,7 +4,7 @@ size: poster
 order: 6
 status: 'P3, iDEA Hackathon'
 tagline: A customer service platform for a bank, built in two days.
-palette: { bg: '#c8102e', fg: '#fff4ee', accent: '#ffc21a' }
+palette: { bg: '#a90d26', fg: '#fff4ee', accent: '#ffc21a' }
 art: { template: type, motif: P3 }
 stats:
   - { value: 'P3', label: result }

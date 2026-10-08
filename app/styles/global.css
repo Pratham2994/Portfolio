@@ -92,3 +92,17 @@ html[data-project-open] {
 .entry-pending :is([data-poster], [data-empty], [data-centre] > *) {
   opacity: 0;
 }
+
+/* Sections below the wall rise into place as they scroll into view. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    transition:
+      opacity var(--dur-slow) var(--ease-out),
+      translate var(--dur-slow) var(--ease-out);
+  }
+
+  html[data-ready] [data-reveal]:not([data-seen]) {
+    opacity: 0;
+    translate: 0 1.5rem;
+  }
+}

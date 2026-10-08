@@ -17,7 +17,7 @@ function Drawing({ active, onPick }: { active: Id; onPick: (id: Id) => void }) {
   });
 
   return (
-    <svg className={s.drawing} viewBox="0 0 800 400" aria-hidden="true">
+    <svg className={s.drawing} viewBox="0 0 800 400" aria-hidden="true" data-reveal>
       <rect className={s.top} x="0" y="330" width="800" height="8" />
       <rect className={s.leg} x="60" y="338" width="10" height="62" />
       <rect className={s.leg} x="730" y="338" width="10" height="62" />
@@ -76,14 +76,14 @@ export function Desk() {
 
   return (
     <section id="desk" className={s.desk} aria-labelledby="desk-title">
-      <header className={s.head}>
+      <header className={s.head} data-reveal>
         <h2 id="desk-title">The desk</h2>
         <p>Under the wall. What I do when I am not building.</p>
       </header>
 
       <Drawing active={active} onPick={setActive} />
 
-      <div className={s.items}>
+      <div className={s.items} data-reveal>
         {desk.map((item) => (
           <div key={item.id} className={s.item} data-open={active === item.id || undefined}>
             <h3>
