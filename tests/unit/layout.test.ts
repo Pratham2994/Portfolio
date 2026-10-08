@@ -1,33 +1,57 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Project } from '~/content/schema';
-import { computeWall, type Columns } from '~/wall/layout';
+import { placeWall, wallOrder } from '~/wall/layout';
 
-const make = (n: number) => Array.from({ length: n }, (_, i) => ({ slug: `p${i}`, order: i }) as Project);
-const slugs = (cells: ReturnType<typeof computeWall>) =>
-  cells.flatMap((c) => (c.kind === 'project' ? [c.project.slug] : []));
+const make = (posters: number, postcards: number) =>
+  [
+    ...Array.from({ length: posters }, (_, i) => ({ slug: `big${i}`, size: 'poster' })),
+    ...Array.from({ length: postcards }, (_, i) => ({ slug: `small${i}`, size: 'postcard' })),
+  ] as Project[];
 
-describe('computeWall', () => {
-  for (const columns of [2, 3, 5] as Columns[]) {
-    for (let n = 6; n <= 16; n++) {
-      it(`places ${n} projects in ${columns} columns once each, in order, with one centre and an empty frame`, () => {
-        const cells = computeWall(make(n), columns);
-        expect(slugs(cells)).toEqual(make(n).map((p) => p.slug));
-        expect(cells.filter((c) => c.kind === 'centre')).toHaveLength(1);
-        expect(cells.filter((c) => c.kind === 'empty').length).toBeGreaterThanOrEqual(1);
-      });
-    }
-  }
-
-  it('gives 13 cells with 2 empty frames for 10 projects in 5 columns', () => {
-    const cells = computeWall(make(10), 5);
-    expect(cells).toHaveLength(13);
-    expect(cells.filter((c) => c.kind === 'empty')).toHaveLength(2);
+describe('wallOrder', () => {
+  it('keeps every project once and each size in its own order', () => {
+    const mixed = wallOrder(make(6, 4));
+    expect(mixed).toHaveLength(10);
+    expect(mixed.filter((p) => p.size === 'poster').map((p) => p.slug)).toEqual(['big0', 'big1', 'big2', 'big3', 'big4', 'big5']);
+    expect(mixed.filter((p) => p.size === 'postcard').map((p) => p.slug)).toEqual(['small0', 'small1', 'small2', 'small3']);
   });
 
-  it('puts the centre in the middle row for 5 columns and first otherwise', () => {
-    expect(computeWall(make(10), 5).findIndex((c) => c.kind === 'centre')).toBe(6);
-    expect(computeWall(make(10), 3)[0].kind).toBe('centre');
-    expect(computeWall(make(10), 2)[0].kind).toBe('centre');
+  it('never puts more than two postcards side by side', () => {
+    const sizes = wallOrder(make(6, 4)).map((p) => p.size).join(' ');
+    expect(sizes).not.toContain('postcard postcard postcard');
+    expect(sizes.startsWith('poster')).toBe(true);
+  });
+
+  it('works with only one size', () => {
+    expect(wallOrder(make(5, 0))).toHaveLength(5);
+    expect(wallOrder(make(0, 5))).toHaveLength(5);
+  });
+});
+
+describe('placeWall', () => {
+  for (let n = 4; n <= 18; n++) {
+    it(`gives ${n} projects one free cell each, clear of the centre piece`, () => {
+      const { rows, centreRow, places } = placeWall(make(Math.ceil(n * 0.6), Math.floor(n * 0.4)));
+      expect(places).toHaveLength(n);
+      expect(new Set(places.map((p) => `${p.col},${p.row}`)).size).toBe(n);
+      for (const place of places) {
+        expect(place.col).toBeGreaterThanOrEqual(1);
+        expect(place.col).toBeLessThanOrEqual(5);
+        expect(place.row).toBeLessThanOrEqual(rows);
+        if (place.row === centreRow) expect([1, 5]).toContain(place.col);
+      }
+    });
+  }
+
+  it('spreads a short last row to both corners', () => {
+    const { rows, places } = placeWall(make(6, 4));
+    expect(rows).toBe(3);
+    expect(places.filter((p) => p.row === 3).map((p) => p.col)).toEqual([1, 3, 5]);
+  });
+
+  it('centres a single leftover poster', () => {
+    const { rows, places } = placeWall(make(5, 3));
+    expect(places.filter((p) => p.row === rows).map((p) => p.col)).toEqual([3]);
   });
 });

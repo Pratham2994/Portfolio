@@ -5,18 +5,27 @@ import { projects } from '~/content';
 import { Cat } from './Cat';
 import { Centre } from './Centre';
 import { playEntry } from './entry';
-import { computeWall, wallRows, type Columns } from './layout';
+import { placeWall } from './layout';
 import { Light } from './Light';
 import { Poster } from './Poster';
 import { useDepth } from './useDepth';
 import styles from './Wall.module.css';
 
-const MODES: Columns[] = [2, 3, 5];
-const emptyCount = (columns: Columns) => computeWall(projects, columns).filter((c) => c.kind === 'empty').length;
-const EMPTY = { 2: emptyCount(2), 3: emptyCount(3), 5: emptyCount(5) };
-const ROWS = wallRows(projects.length);
-// How far each poster stands off the wall, in pixels.
-const DEPTHS = [10, 28, 6, 34, 18, 40, 14, 30, 8, 24];
+type Columns = 2 | 3 | 5;
+
+const PLAN = placeWall(projects);
+const LAST_ROW = PLAN.places.filter((place) => place.row === PLAN.rows).length;
+
+// Hung by hand: each piece has its own size, place in its cell, and distance from the wall.
+const HANG = [
+  { size: 1, x: 'center', y: 'end', z: 10 },
+  { size: 0.9, x: 'start', y: 'start', z: 28 },
+  { size: 1, x: 'end', y: 'center', z: 6 },
+  { size: 0.94, x: 'center', y: 'start', z: 34 },
+  { size: 0.86, x: 'start', y: 'end', z: 18 },
+  { size: 1, x: 'end', y: 'start', z: 40 },
+  { size: 0.92, x: 'center', y: 'center', z: 14 },
+];
 
 function useColumns(): Columns {
   const [columns, setColumns] = useState<Columns>(5);
@@ -43,8 +52,8 @@ export function Wall() {
   useEffect(() => {
     if (wall.current) playEntry(wall.current);
   }, []);
-  const frames = Math.max(...MODES.map((m) => EMPTY[m]));
-  const style = { '--rows': ROWS, '--middle': Math.floor(ROWS / 2) + 1 } as CSSProperties;
+
+  const style = { '--rows': PLAN.rows, '--middle': PLAN.centreRow } as CSSProperties;
 
   return (
     <section
@@ -59,21 +68,24 @@ export function Wall() {
       <Light />
       <div className={styles.grid} style={style} ref={grid}>
         <Centre className={styles.centre} />
-        {projects.map((project, i) => (
-          <div key={project.slug} className={styles.cell} style={{ '--z': `${DEPTHS[i % DEPTHS.length]}px` } as CSSProperties}>
-            <Poster project={project} index={i} />
-          </div>
-        ))}
-        {Array.from({ length: frames }, (_, i) => (
-          <div
-            key={i}
-            className={[styles.cell, ...MODES.filter((m) => i < EMPTY[m]).map((m) => styles[`show${m}`])].join(' ')}
-            data-empty
-            aria-hidden="true"
-          >
-            <div className={styles.frame} />
-          </div>
-        ))}
+        {PLAN.places.map(({ project, col, row }, i) => {
+          const hang = HANG[i % HANG.length];
+          // A short last row hangs close under the row above, and leans in toward its gaps.
+          const loose = row === PLAN.rows && LAST_ROW < 5;
+          const cell = {
+            '--col': col,
+            '--row': row,
+            '--z': `${hang.z}px`,
+            '--size': hang.size,
+            '--x': loose ? (col < 3 ? 'end' : col > 3 ? 'start' : 'center') : hang.x,
+            '--y': loose ? 'start' : hang.y,
+          } as CSSProperties;
+          return (
+            <div key={project.slug} className={styles.cell} style={cell}>
+              <Poster project={project} index={i} />
+            </div>
+          );
+        })}
         <Cat grid={grid} />
       </div>
     </section>

@@ -4,7 +4,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  padding: var(--space-5) var(--gutter) var(--space-6);
+  /* Room above the top row for the cat to walk and hop. */
+  padding: var(--space-7) var(--gutter) var(--space-6);
   background: var(--wall) url('/textures/wall.webp');
   overflow: clip;
 }
@@ -32,38 +33,15 @@
   min-width: 0;
 }
 
-.cell[data-empty] {
-  display: none;
-}
-
-.cell[data-empty].show2 {
-  display: grid;
-}
-
 .centre {
   grid-column: 1 / -1;
   aspect-ratio: 2 / 1;
-}
-
-.frame {
-  width: 86%;
-  aspect-ratio: 4 / 3;
-  border: 1px dashed var(--line);
-  border-radius: 2px;
 }
 
 @media (min-width: 600px) {
   .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     max-width: 62rem;
-  }
-
-  .cell[data-empty] {
-    display: none;
-  }
-
-  .cell[data-empty].show3 {
-    display: grid;
   }
 
   .centre {
@@ -79,25 +57,20 @@
   .grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
     grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
-    grid-auto-flow: row dense;
     max-width: none;
     width: max(
-      min(100%, 105rem, calc((100svh - 6rem) * 5 / (var(--rows) * var(--cell-ratio)))),
+      min(100%, 105rem, calc((100svh - 8.5rem) * 5 / (var(--rows) * var(--cell-ratio)))),
       min(100%, 46rem)
     );
     aspect-ratio: 5 / calc(var(--rows) * var(--cell-ratio));
   }
 
+  /* Each piece has a fixed cell, and its own size and corner inside it. */
   .cell {
+    grid-column: var(--col);
+    grid-row: var(--row);
+    place-items: var(--y) var(--x);
     height: 100%;
-  }
-
-  .cell[data-empty] {
-    display: none;
-  }
-
-  .cell[data-empty].show5 {
-    display: grid;
   }
 
   .centre {
@@ -137,5 +110,12 @@
   .cell {
     transform: translateZ(var(--z, 0px));
     transform-style: preserve-3d;
+  }
+}
+
+/* The poster under the pointer keeps its light. The rest step back. */
+@media (hover: hover) and (pointer: fine) {
+  .grid:has([data-poster]:hover) [data-poster]:not(:hover) {
+    filter: brightness(0.5) saturate(0.7);
   }
 }

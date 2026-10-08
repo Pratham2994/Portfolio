@@ -10,12 +10,15 @@
   color: var(--fg);
   text-decoration: none;
   rotate: calc(var(--tilt) + var(--nudge, 0deg));
+  /* --rx and --ry are set while the pointer is over the poster. */
+  transform: perspective(42rem) rotateX(calc(var(--rx, 0) * 1deg)) rotateY(calc(var(--ry, 0) * 1deg));
   box-shadow:
     0 1px 0 rgb(255 255 255 / 0.06) inset,
-    0 0.9rem 1.6rem -0.7rem rgb(0 0 0 / 0.85);
+    calc(var(--ry, 0) * -0.09rem) calc(0.9rem + var(--rx, 0) * 0.07rem) 1.6rem -0.7rem rgb(0 0 0 / 0.85);
   transition:
     rotate var(--dur-base) var(--ease-out),
     scale var(--dur-base) var(--ease-out),
+    filter var(--dur-base) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out);
 }
 
@@ -39,6 +42,19 @@
   inset: auto 7cqw 6cqw;
   display: grid;
   gap: 0.35em;
+  transition: translate var(--dur-base) var(--ease-out);
+}
+
+/* A short rule in the accent colour draws in above the title on hover. */
+.caption::before {
+  content: '';
+  width: 22cqw;
+  height: 1.4cqw;
+  margin-bottom: 1.2cqw;
+  background: var(--accent);
+  scale: 0 1;
+  transform-origin: left;
+  transition: scale var(--dur-base) var(--ease-out);
 }
 
 .title {
@@ -74,29 +90,41 @@
 @media (hover: hover) and (pointer: fine) {
   .poster:hover {
     rotate: 0deg;
-    scale: 1.06;
+    scale: 1.09;
     z-index: 2;
     box-shadow:
-      0 1px 0 rgb(255 255 255 / 0.06) inset,
-      0 2rem 2.6rem -1rem rgb(0 0 0 / 0.9);
+      0 1px 0 rgb(255 255 255 / 0.08) inset,
+      calc(var(--ry, 0) * -0.22rem) calc(2.2rem + var(--rx, 0) * 0.16rem) 3rem -1rem rgb(0 0 0 / 0.95);
+  }
+
+  .poster:hover .caption {
+    translate: 0 -2cqw;
+  }
+
+  .poster:hover .caption::before {
+    scale: 1 1;
   }
 }
 
 .poster:focus-visible {
   rotate: 0deg;
-  scale: 1.06;
+  scale: 1.09;
   z-index: 2;
+}
+
+.poster:focus-visible .caption::before {
+  scale: 1 1;
 }
 
 @media (min-width: 900px) and (orientation: landscape) {
   .poster {
     width: auto;
-    height: 100%;
+    height: calc(100% * var(--size, 1));
     max-width: 100%;
   }
 
   .poster[data-size='postcard'] {
-    width: 86%;
+    width: calc(90% * var(--size, 1));
     height: auto;
   }
 }
