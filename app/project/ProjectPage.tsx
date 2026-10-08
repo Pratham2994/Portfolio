@@ -6,7 +6,7 @@ import { neighbours, projects } from '~/content';
 import type { Project } from '~/content/schema';
 
 import s from './ProjectPage.module.css';
-import { closeTo, openFrom, takeIntent } from './transition';
+import { cancelTransition, closeTo, openFrom, takeIntent } from './transition';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const longestWord = (text: string) => Math.max(...text.split(/\s+/).map((word) => word.length));
@@ -22,6 +22,8 @@ export function ProjectPage({ project }: { project: Project }) {
     const node = page.current!;
     const poster = () => document.querySelector<HTMLElement>(`[data-poster="${project.slug}"]`);
     if (takeIntent(project.slug)) void openFrom(poster(), node);
+    // A page that opens with a cut (history, next, previous) must not sit under a closing sheet.
+    else cancelTransition();
     return () => {
       // Runs before the page leaves the DOM. Only a return to the wall shrinks back to the poster.
       if (window.location.pathname === '/') void closeTo(poster(), node);

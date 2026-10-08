@@ -6,7 +6,7 @@ import displayFont from '@fontsource-variable/big-shoulders-display/files/big-sh
 import '@fontsource-variable/hanken-grotesk';
 import textFont from '@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2?url';
 import '@fontsource-variable/jetbrains-mono';
-import { initReveals, initScroll } from './lib/scroll';
+import { initScroll } from './lib/scroll';
 import { pendingScript } from './wall/entry';
 import './styles/tokens.css';
 import './styles/global.css';
@@ -40,13 +40,9 @@ export function Layout({ children }: { children: ReactNode }) {
 export default function Root() {
   // Marks the page as interactive, for tests and for styles that need scripts.
   useEffect(() => {
-    const stopReveals = initReveals();
     const stopScroll = initScroll();
     document.documentElement.dataset.ready = '';
-    return () => {
-      stopReveals();
-      stopScroll();
-    };
+    return stopScroll;
   }, []);
   return <Outlet />;
 }

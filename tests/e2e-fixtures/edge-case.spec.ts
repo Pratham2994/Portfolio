@@ -34,3 +34,12 @@ test('the long title fits its poster on the wall', async ({ page }) => {
   });
   expect(clipped).toBe(false);
 });
+
+test('a hidden project has no poster and no page', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('[data-poster="edge-case"]')).toHaveCount(1);
+  await expect(page.locator('[data-poster="hidden-one"]')).toHaveCount(0);
+  const response = await page.goto('/work/hidden-one');
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole('heading', { name: /not on the wall/i })).toBeVisible();
+});

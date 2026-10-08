@@ -7,6 +7,8 @@
 html {
   -webkit-text-size-adjust: 100%;
   background: var(--wall);
+  /* Keeps the page the same width when a project page locks scrolling. */
+  scrollbar-gutter: stable;
 }
 
 body {

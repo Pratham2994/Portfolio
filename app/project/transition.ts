@@ -91,6 +91,9 @@ export function closeTo(poster: HTMLElement | null, page: HTMLElement): Promise<
       pointerEvents: 'none',
       background: getComputedStyle(page).backgroundColor,
     });
+    // Measured now, not when the page opened, so a resize in between is taken into account.
+    const target = insetFor(poster.getBoundingClientRect());
+    sheet.dataset.target = target;
     document.body.append(sheet);
     ghost = sheet;
 
@@ -100,7 +103,7 @@ export function closeTo(poster: HTMLElement | null, page: HTMLElement): Promise<
     })
       .set(sheet, { clipPath: FULL })
       .set(main, { ...RECEDE, transformOrigin: origin() })
-      .to(sheet, { clipPath: insetFor(poster.getBoundingClientRect()), duration: 0.7, ease: 'expo.inOut' }, 0)
+      .to(sheet, { clipPath: target, duration: 0.7, ease: 'expo.inOut' }, 0)
       .to(main, { scale: 1, opacity: 1, duration: 0.7, ease: 'expo.inOut' }, 0)
       .to(sheet, { opacity: 0, duration: 0.16, ease: 'none' }, 0.66);
   });
