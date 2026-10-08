@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useParams } from 'react-router';
 
+import { Desk } from '~/sections/Desk';
 import { Wall } from '~/wall/Wall';
 
 export default function Home() {
@@ -20,6 +21,7 @@ export default function Home() {
       <main inert={slug !== undefined}>
         <h1 className="sr-only">Pratham Panchal</h1>
         <Wall />
+        <Desk />
       </main>
       <Outlet />
     </>

@@ -1,0 +1,143 @@
+.desk {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5) var(--space-7);
+  max-width: 84rem;
+  margin-inline: auto;
+  padding: var(--space-8) var(--gutter) var(--space-7);
+}
+
+.head h2 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-5);
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.head p {
+  margin-top: var(--space-2);
+  color: var(--dim);
+}
+
+.drawing {
+  width: 100%;
+  height: auto;
+}
+
+.top,
+.leg {
+  fill: var(--line);
+}
+
+.line {
+  fill: none;
+  stroke: var(--dim);
+  stroke-width: 2;
+  transition: stroke var(--dur-fast) linear;
+}
+
+.fill {
+  fill: var(--dim);
+  transition: fill var(--dur-fast) linear;
+}
+
+.screen {
+  fill: var(--panel);
+}
+
+.mouse,
+.deck {
+  fill: var(--signal);
+}
+
+.deckScreen {
+  fill: var(--wall-shade);
+}
+
+.object {
+  cursor: pointer;
+}
+
+.object[data-active] .line {
+  stroke: var(--bone);
+}
+
+.object[data-active] .fill {
+  fill: var(--bone);
+}
+
+.object[data-active] .screen {
+  fill: color-mix(in srgb, var(--panel) 55%, var(--signal));
+}
+
+.items {
+  display: grid;
+  align-content: start;
+}
+
+.item {
+  border-top: 1px solid var(--line);
+}
+
+.item:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.item button {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  padding: var(--space-3) 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--step-3);
+  line-height: 1;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--dim);
+  transition: color var(--dur-fast) linear;
+}
+
+.item button::after {
+  content: '+';
+  font-family: var(--font-mono);
+  font-size: var(--step-1);
+  font-weight: 400;
+}
+
+.item[data-open] button {
+  color: var(--bone);
+}
+
+.item[data-open] button::after {
+  content: '';
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: var(--signal);
+}
+
+.panel {
+  display: grid;
+  gap: 0.7em;
+  max-width: 54ch;
+  padding-bottom: var(--space-4);
+}
+
+/* Without scripts every panel stays readable. With them, only the open one shows. */
+:global(html[data-ready]) .item:not([data-open]) .panel {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .desk {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .head {
+    grid-column: 1 / -1;
+  }
+}
