@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "typecheck": "react-router typegen && tsc --noEmit",
     "test:unit": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test && playwright test -c playwright.fixtures.config.ts"
   },
   "dependencies": {
     "@fontsource-variable/big-shoulders-display": "^5.3.0",

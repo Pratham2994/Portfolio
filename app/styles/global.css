@@ -83,3 +83,7 @@ canvas {
     scroll-behavior: auto !important;
   }
 }
+
+html[data-project-open] {
+  overflow: hidden;
+}
