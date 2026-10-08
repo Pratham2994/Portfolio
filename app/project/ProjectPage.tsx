@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router';
 
 import { neighbours, projects } from '~/content';
 import type { Project } from '~/content/schema';
+import { Art } from '~/wall/art';
 
 import s from './ProjectPage.module.css';
 import { cancelTransition, closeLive, closeTo, openFrom, takeClosed, takeIntent } from './transition';
@@ -49,13 +50,17 @@ export function ProjectPage({ project }: { project: Project }) {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') close();
     };
+    const root = document.documentElement;
     window.addEventListener('keydown', onKey);
-    document.documentElement.dataset.projectOpen = '';
+    root.dataset.projectOpen = '';
+    // The scrollbar gutter shows the root background, so it takes the page colour while open.
+    root.style.backgroundColor = project.palette.bg;
     return () => {
       window.removeEventListener('keydown', onKey);
-      delete document.documentElement.dataset.projectOpen;
+      delete root.dataset.projectOpen;
+      root.style.backgroundColor = '';
     };
-  }, [close]);
+  }, [close, project.palette.bg]);
 
   // A plain click plays the close. A modified click (new tab) is left to the browser.
   const onCloseClick = (event: MouseEvent) => {
@@ -68,6 +73,8 @@ export function ProjectPage({ project }: { project: Project }) {
     '--bg': project.palette.bg,
     '--fg': project.palette.fg,
     '--accent': project.palette.accent,
+    '--page-bg': project.palette.bg,
+    '--page-fg': project.palette.fg,
   } as CSSProperties;
 
   return (
@@ -92,32 +99,42 @@ export function ProjectPage({ project }: { project: Project }) {
           <span className={s.status}>{project.status}</span>
         </header>
 
-        <h1
-          id="project-title"
-          className={s.title}
-          style={{ '--chars': longestWord(project.title) } as CSSProperties}
-          tabIndex={-1}
-          ref={title}
-          data-in
-        >
-          {project.title}
-        </h1>
-        <p className={s.tagline} data-in>
-          {project.tagline}
-        </p>
-
-        <div className={s.why} data-in>
-          <Markdown>{project.body}</Markdown>
+        <div className={s.hero}>
+          <div className={s.heroText}>
+            <h1
+              id="project-title"
+              className={s.title}
+              style={{ '--chars': longestWord(project.title) } as CSSProperties}
+              tabIndex={-1}
+              ref={title}
+              data-in
+            >
+              {project.title}
+            </h1>
+            <p className={s.tagline} data-in>
+              {project.tagline}
+            </p>
+          </div>
+          {/* The poster's own art, drawn large in swapped colours. */}
+          <div className={s.plate} data-in>
+            <Art art={project.art} />
+          </div>
         </div>
 
-        <dl className={s.stats} data-in>
-          {project.stats.map((stat) => (
-            <div key={stat.label}>
-              <dt>{stat.label}</dt>
-              <dd>{stat.value}</dd>
-            </div>
-          ))}
-        </dl>
+        <div className={s.brief}>
+          <div className={s.why} data-in>
+            <Markdown>{project.body}</Markdown>
+          </div>
+
+          <dl className={s.stats} data-in>
+            {project.stats.map((stat) => (
+              <div key={stat.label}>
+                <dt>{stat.label}</dt>
+                <dd>{stat.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
 
         <section className={s.sectors} data-in>
           <h2>How it works</h2>

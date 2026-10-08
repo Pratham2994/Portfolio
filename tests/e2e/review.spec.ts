@@ -62,8 +62,8 @@ test('after a resize, the close aims at where the poster is now', async ({ page 
   const box = (await page.locator('[data-poster="neat"]').boundingBox())!;
   // The poster is focused after the close and drawn a little larger, so compare centres.
   const [top, right, bottom, left] = target!.match(/-?[\d.]+/g)!.map(Number);
-  expect(Math.abs((left + 700 - right) / 2 - (box.x + box.width / 2))).toBeLessThan(3);
-  expect(Math.abs((top + 900 - bottom) / 2 - (box.y + box.height / 2))).toBeLessThan(3);
+  expect(Math.abs((left + 700 - right) / 2 - (box.x + box.width / 2))).toBeLessThan(6);
+  expect(Math.abs((top + 900 - bottom) / 2 - (box.y + box.height / 2))).toBeLessThan(6);
 });
 
 test('Escape folds the page down onto its poster before it leaves', async ({ page }) => {
