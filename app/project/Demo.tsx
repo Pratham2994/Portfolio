@@ -305,7 +305,7 @@ function Chronicle() {
       </div>
       <div className={s.hours} aria-hidden="true">
         {DAYS[kind].map((plays, hour) => (
-          <i key={hour} style={{ height: `${plays * 10}%` }} data-night={hour < 6 || hour > 21 || undefined} />
+          <i key={hour} style={{ transform: `scaleY(${Math.max(plays / 10, 0.02)})` }} data-night={hour < 6 || hour > 21 || undefined} />
         ))}
       </div>
       <p className={s.scale}>
@@ -434,7 +434,7 @@ function Lab() {
         {ranked.map((model) => (
           <li key={model.name}>
             <span>{model.name}</span>
-            <i style={{ width: `${(model[key] / top) * 100}%` }} />
+            <i style={{ transform: `scaleX(${model[key] / top})` }} />
             <b>{byHour ? model.perHour.toLocaleString('en') : `${model.pass}%`}</b>
           </li>
         ))}

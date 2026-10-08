@@ -368,7 +368,13 @@
   flex: 1;
   min-height: 2px;
   background: var(--ink);
-  transition: height var(--dur-base) var(--ease-out);
+}
+
+/* Bars change by scaling, which costs no layout work. */
+.hours i {
+  height: 100%;
+  transform-origin: bottom;
+  transition: transform var(--dur-base) var(--ease-out);
 }
 
 .hours i[data-night] {
@@ -384,10 +390,6 @@
 }
 
 /* Algomotion */
-.sortBars i {
-  transition: none;
-}
-
 .sortBars i[data-at] {
   background: var(--accent);
 }
@@ -442,7 +444,8 @@
 .ranks i {
   height: 1.1rem;
   background: var(--ink);
-  transition: width var(--dur-slow) var(--ease-out);
+  transform-origin: left;
+  transition: transform var(--dur-slow) var(--ease-out);
 }
 
 .ranks li:first-child i {
