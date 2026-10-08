@@ -19,6 +19,16 @@
     box-shadow var(--dur-base) var(--ease-out);
 }
 
+.poster::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/textures/paper.webp');
+  mix-blend-mode: multiply;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
 .poster[data-size='postcard'] {
   width: 86%;
   aspect-ratio: 4 / 3;
