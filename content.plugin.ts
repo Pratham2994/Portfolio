@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import type { Plugin } from 'vite';
 
-import { parseDesk, parseProject, parseTimeline, parseYou } from './app/content/schema.ts';
+import { parseDesk, parsePieces, parseProject, parseTimeline, parseYou } from './app/content/schema.ts';
 
 const ID = 'virtual:content';
 const RESOLVED = '\0' + ID;
@@ -41,6 +41,7 @@ export function content(): Plugin {
         desk: parseDesk(read('content/site/desk.md')),
         timeline: parseTimeline(read('content/site/timeline.md')),
         you: parseYou(read('content/site/you.md')),
+        pieces: parsePieces(read('content/site/pieces.md')),
       };
       return `export default ${JSON.stringify(data)};`;
     },

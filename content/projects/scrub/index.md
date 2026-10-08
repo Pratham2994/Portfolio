@@ -2,6 +2,7 @@
 title: Scrub
 size: poster
 order: 1
+hero: true
 status: Local tool
 tagline: A local ffmpeg GUI that can hit an exact file size.
 palette: { bg: '#ece8df', fg: '#14161c', accent: '#ff5a1f' }

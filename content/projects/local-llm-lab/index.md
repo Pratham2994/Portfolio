@@ -1,6 +1,6 @@
 ---
 title: Local LLM lab
-size: postcard
+size: poster
 order: 10
 status: 'Closed, verdict written'
 tagline: Which local model gets the most right per hour on my PC.

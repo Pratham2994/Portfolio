@@ -1,66 +1,54 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Project } from '~/content/schema';
-import { placeWall, wallOrder, type Place } from '~/wall/layout';
+import { CENTRE, hangWall, OUTSIDE, type WallItem, type Weight } from '~/wall/layout';
 
-const make = (posters: number, postcards: number) =>
-  [
-    ...Array.from({ length: posters }, (_, i) => ({ slug: `big${i}`, size: 'poster' })),
-    ...Array.from({ length: postcards }, (_, i) => ({ slug: `small${i}`, size: 'postcard' })),
-  ] as Project[];
+const make = (hero: number, large: number, small: number): WallItem[] => {
+  const of = (weight: Weight, count: number) => Array.from({ length: count }, (_, i) => ({ key: `${weight}${i}`, weight }));
+  return [...of('hero', hero), ...of('large', large), ...of('small', small)];
+};
 
-const cells = (places: Place[]) =>
-  places.flatMap((p) => Array.from({ length: p.span }, (_, i) => `${p.col + i},${p.row}`));
+const cellOf = (piece: { col: number; row: number }) => `${piece.col},${piece.row}`;
 
-describe('wallOrder', () => {
-  it('keeps every project once and each size in its own order', () => {
-    const mixed = wallOrder(make(6, 4));
-    expect(mixed).toHaveLength(10);
-    expect(mixed.filter((p) => p.size === 'poster').map((p) => p.slug)).toEqual(['big0', 'big1', 'big2', 'big3', 'big4', 'big5']);
-    expect(mixed.filter((p) => p.size === 'postcard').map((p) => p.slug)).toEqual(['small0', 'small1', 'small2', 'small3']);
-  });
-
-  it('never puts more than two postcards side by side', () => {
-    const sizes = wallOrder(make(6, 4)).map((p) => p.size).join(' ');
-    expect(sizes).not.toContain('postcard postcard postcard');
-    expect(sizes.startsWith('poster')).toBe(true);
-  });
-
-  it('works with only one size', () => {
-    expect(wallOrder(make(5, 0))).toHaveLength(5);
-    expect(wallOrder(make(0, 5))).toHaveLength(5);
-  });
-});
-
-describe('placeWall', () => {
-  for (let n = 4; n <= 18; n++) {
-    it(`gives ${n} projects their own cells, clear of the centre piece`, () => {
-      const { rows, centreRow, places } = placeWall(make(Math.ceil(n * 0.6), Math.floor(n * 0.4)));
-      expect(places).toHaveLength(n);
-      const used = cells(places);
-      expect(new Set(used).size).toBe(used.length);
-      for (const place of places) {
-        expect(place.col).toBeGreaterThanOrEqual(1);
-        expect(place.col + place.span - 1).toBeLessThanOrEqual(5);
-        expect(place.row).toBeLessThanOrEqual(rows);
-        if (place.row === centreRow) expect([1, 5]).toContain(place.col);
-      }
-    });
-  }
-
-  it('fills a short last row with two wide pieces, postcards first', () => {
-    const { rows, places } = placeWall(make(6, 4));
+describe('hangWall', () => {
+  it('hangs the launch wall like the real one: an A3 hero, seven A4, five A5', () => {
+    const { rows, hung } = hangWall(make(1, 7, 5));
     expect(rows).toBe(3);
-    const last = places.filter((p) => p.row === 3);
-    expect(last.map((p) => [p.col, p.span])).toEqual([
-      [1, 2],
-      [3, 1],
-      [4, 2],
-    ]);
-    expect(last.filter((p) => p.span === 2).every((p) => p.project.size === 'postcard')).toBe(true);
+    expect(hung).toHaveLength(13);
+    expect(hung.filter((p) => p.paper === 'a3')).toEqual([expect.objectContaining({ key: 'hero0', col: 1, row: 2 })]);
+    expect(hung.filter((p) => p.paper === 'a4')).toHaveLength(7);
+    expect(hung.filter((p) => p.paper.startsWith('a5'))).toHaveLength(5);
   });
 
-  it('leaves no empty cell when ten to twelve projects hang on three rows', () => {
-    for (const n of [10, 11, 12]) expect(cells(placeWall(make(n - 4, 4)).places)).toHaveLength(12);
+  it('puts small pieces in the four corners and one outside the block', () => {
+    const small = hangWall(make(1, 7, 5)).hung.filter((p) => p.paper.startsWith('a5'));
+    expect(small.map(cellOf).sort()).toEqual(['1,1', '1,3', '5,1', '5,3', `${OUTSIDE},2`].sort());
+  });
+
+  it('never hangs a piece over the centre, and shares a cell only below the hero', () => {
+    for (let large = 3; large <= 14; large++) {
+      for (let small = 0; small <= 8; small++) {
+        const { hung } = hangWall(make(1, large, small));
+        expect(hung).toHaveLength(1 + large + small);
+        expect(new Set(hung.map((p) => p.key)).size).toBe(hung.length);
+        const cells = hung.filter((p) => p.paper !== 'a3').map(cellOf);
+        expect(new Set(cells).size).toBe(cells.length);
+        for (const piece of hung) {
+          const overCentre = piece.row === CENTRE.row && piece.col >= CENTRE.from && piece.col <= CENTRE.to;
+          expect(overCentre).toBe(false);
+        }
+      }
+    }
+  });
+
+  it('adds rows below when the first three are full', () => {
+    const { rows, hung } = hangWall(make(1, 9, 5));
+    expect(rows).toBe(4);
+    expect(hung.filter((p) => p.row === 4)).toHaveLength(2);
+  });
+
+  it('gives the hero place to an A4 piece when there is no hero', () => {
+    const { hung } = hangWall(make(0, 8, 0));
+    expect(hung.every((p) => p.paper === 'a4')).toBe(true);
+    expect(hung[0]).toMatchObject({ col: 1, row: 2 });
   });
 });

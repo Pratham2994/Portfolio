@@ -1,6 +1,5 @@
 .wall {
   --gap: clamp(0.5rem, 1.4vmin, 1.1rem);
-  --cell-ratio: 1.08;
   position: relative;
   display: grid;
   place-items: center;
@@ -31,6 +30,12 @@
   display: grid;
   place-items: center;
   min-width: 0;
+  /* Cells can overlap (the hero hangs into the next row), so only the sheets take clicks. */
+  pointer-events: none;
+}
+
+.cell > * {
+  pointer-events: auto;
 }
 
 .centre {
@@ -49,33 +54,60 @@
   }
 }
 
+/*
+ * The wide wall. Five columns of A4 cells and a narrow sixth for the piece that hangs
+ * outside the block. Paper sizes are real: A3 is 1.414 times A4 each way, A5 is 0.707.
+ */
 @media (min-width: 900px) and (orientation: landscape) {
   .wall {
+    --units: 5.66;
+    --a4: 1.414;
     min-height: 100svh;
   }
 
   .grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(0, 0.66fr);
     grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
     max-width: none;
     width: max(
-      min(100%, 105rem, calc((100svh - 8.5rem) * 5 / (var(--rows) * var(--cell-ratio)))),
-      min(100%, 46rem)
+      min(88%, 105rem, calc((100svh - 7.5rem) * var(--units) / (var(--rows) * var(--a4)))),
+      min(88%, 46rem)
     );
-    aspect-ratio: 5 / calc(var(--rows) * var(--cell-ratio));
+    aspect-ratio: var(--units) / calc(var(--rows) * var(--a4));
   }
 
-  /* Each piece has a fixed cell, and its own size and corner inside it. */
   .cell {
+    --w: 88%;
+    --ratio: 1 / 1.414;
     grid-column: var(--col);
     grid-row: var(--row);
     place-items: var(--y) var(--x);
     height: 100%;
   }
 
+  .cell[data-paper='a5-tall'] {
+    --w: 64%;
+  }
+
+  .cell[data-paper='a5-wide'] {
+    --ratio: 1.414 / 1;
+  }
+
+  /* The hero is wider than its column and taller than its row, like the one large poster on a real wall. */
+  .cell[data-paper='a3'] {
+    --w: 124.4%;
+    grid-row: var(--row) / span 2;
+    z-index: 1;
+  }
+
+  /* The sixth column is narrow, so the piece in it fills more of its cell. */
+  .cell[data-outside] {
+    --w: 97%;
+  }
+
   .centre {
     grid-column: 2 / span 3;
-    grid-row: var(--middle);
+    grid-row: 2;
     aspect-ratio: auto;
     height: 100%;
   }
@@ -96,7 +128,7 @@
   opacity: 1;
 }
 
-/* Depth: the pointer shifts the view a little, and posters stand off the wall. */
+/* Depth: the pointer shifts the view a little, and pieces stand off the wall. */
 @media (min-width: 900px) and (orientation: landscape) and (hover: hover) and (pointer: fine) {
   .wall {
     perspective: 1600px;
@@ -113,9 +145,9 @@
   }
 }
 
-/* The poster under the pointer keeps its light. The rest step back. */
+/* The piece under the pointer keeps its light. The rest step back. */
 @media (hover: hover) and (pointer: fine) {
-  .grid:has([data-poster]:hover) [data-poster]:not(:hover) {
+  .grid:has(:is([data-poster], [data-piece]):hover) :is([data-poster], [data-piece]):not(:hover) {
     filter: brightness(0.5) saturate(0.7);
   }
 }

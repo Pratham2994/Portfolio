@@ -1,30 +1,29 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
 import { projects } from '~/content';
 
 import { Cat } from './Cat';
 import { Centre } from './Centre';
 import { playEntry } from './entry';
-import { placeWall } from './layout';
+import { hangWall, OUTSIDE, type WallItem } from './layout';
 import { Light } from './Light';
+import { Piece, PIECES } from './Piece';
 import { Poster } from './Poster';
 import { useDepth } from './useDepth';
 import styles from './Wall.module.css';
 
 type Columns = 2 | 3 | 5;
 
-const PLAN = placeWall(projects);
-
-// Hung by hand: each piece has its own size, place in its cell, and distance from the wall.
-const HANG = [
-  { size: 1, x: 'center', y: 'end', z: 10 },
-  { size: 0.9, x: 'start', y: 'start', z: 28 },
-  { size: 1, x: 'end', y: 'center', z: 6 },
-  { size: 0.94, x: 'center', y: 'start', z: 34 },
-  { size: 0.86, x: 'start', y: 'end', z: 18 },
-  { size: 1, x: 'end', y: 'start', z: 40 },
-  { size: 0.92, x: 'center', y: 'center', z: 14 },
+// Projects first, in their own order, then the personal pieces.
+const ITEMS: WallItem[] = [
+  ...projects.map((p) => ({ key: p.slug, weight: p.hero ? ('hero' as const) : p.size === 'poster' ? ('large' as const) : ('small' as const) })),
+  ...PIECES.map((key) => ({ key, weight: 'small' as const })),
 ];
+const PLAN = hangWall(ITEMS);
+const PLACE = new Map(PLAN.hung.map((piece) => [piece.key, piece]));
+
+// How far each piece stands off the wall, in pixels.
+const DEPTHS = [10, 28, 6, 34, 18, 40, 14, 30, 8, 24, 20, 12, 36];
 
 function useColumns(): Columns {
   const [columns, setColumns] = useState<Columns>(5);
@@ -43,6 +42,22 @@ function useColumns(): Columns {
   return columns;
 }
 
+function Cell({ id, index, children }: { id: string; index: number; children: ReactNode }) {
+  const place = PLACE.get(id)!;
+  const style = {
+    '--col': place.col,
+    '--row': place.row,
+    '--x': place.x,
+    '--y': place.y,
+    '--z': `${DEPTHS[index % DEPTHS.length]}px`,
+  } as CSSProperties;
+  return (
+    <div className={styles.cell} style={style} data-paper={place.paper} data-outside={place.col === OUTSIDE || undefined}>
+      {children}
+    </div>
+  );
+}
+
 export function Wall() {
   const columns = useColumns();
   const wall = useRef<HTMLElement>(null);
@@ -51,8 +66,6 @@ export function Wall() {
   useEffect(() => {
     if (wall.current) playEntry(wall.current);
   }, []);
-
-  const style = { '--rows': PLAN.rows, '--middle': PLAN.centreRow } as CSSProperties;
 
   return (
     <section
@@ -65,24 +78,18 @@ export function Wall() {
       aria-label="Projects"
     >
       <Light />
-      <div className={styles.grid} style={style} ref={grid}>
+      <div className={styles.grid} style={{ '--rows': PLAN.rows } as CSSProperties} ref={grid}>
         <Centre className={styles.centre} />
-        {PLAN.places.map(({ project, col, row, span }, i) => {
-          const hang = HANG[i % HANG.length];
-          const cell = {
-            '--col': `${col} / span ${span}`,
-            '--row': row,
-            '--z': `${hang.z}px`,
-            '--size': hang.size,
-            '--x': span === 2 ? 'center' : hang.x,
-            '--y': hang.y,
-          } as CSSProperties;
-          return (
-            <div key={project.slug} className={styles.cell} style={cell} data-wide={span === 2 || undefined}>
-              <Poster project={project} index={i} />
-            </div>
-          );
-        })}
+        {projects.map((project, i) => (
+          <Cell key={project.slug} id={project.slug} index={i}>
+            <Poster project={project} index={i} />
+          </Cell>
+        ))}
+        {PIECES.map((id, i) => (
+          <Cell key={id} id={id} index={projects.length + i}>
+            <Piece id={id} index={projects.length + i} />
+          </Cell>
+        ))}
         <Cat grid={grid} />
       </div>
     </section>

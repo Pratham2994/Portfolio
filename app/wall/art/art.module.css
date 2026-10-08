@@ -354,12 +354,18 @@
   transform-origin: 0 0;
 }
 
-/* A wide sheet draws the art at half size along its top edge. */
+/* On the wide wall the paper size decides: only a small wide sheet draws the art smaller. */
 @media (min-width: 900px) and (orientation: landscape) {
-  :global([data-wide]) > [data-size] > .art {
-    width: 200%;
-    height: 200%;
-    scale: 0.5;
+  :global([data-paper]) > [data-size] > .art {
+    width: 100%;
+    height: 100%;
+    scale: 1;
+  }
+
+  :global([data-paper='a5-wide']) > [data-size] > .art {
+    width: 178.5%;
+    height: 178.5%;
+    scale: 0.56;
     transform-origin: 0 0;
   }
 }

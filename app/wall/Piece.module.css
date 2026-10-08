@@ -1,0 +1,142 @@
+/* Personal pieces: a match ticket, a boarding pass, a note. Sized in cqw like the posters. */
+.piece {
+  position: relative;
+  display: block;
+  width: 100%;
+  /* Without these, the text height would push the sheet wider than its paper size. */
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  container-type: inline-size;
+  border-radius: 2px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  text-decoration: none;
+  rotate: calc(var(--tilt) + var(--nudge, 0deg));
+  transform: perspective(42rem) rotateX(calc(var(--rx, 0) * 1deg)) rotateY(calc(var(--ry, 0) * 1deg));
+  box-shadow: calc(var(--ry, 0) * -0.09rem) calc(0.9rem + var(--rx, 0) * 0.07rem) 1.6rem -0.7rem rgb(0 0 0 / 0.85);
+  transition:
+    rotate var(--dur-base) var(--ease-out),
+    scale var(--dur-base) var(--ease-out),
+    filter var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+/* The sheet is the size container, so everything measured in cqw lives one level inside it. */
+.body {
+  display: grid;
+  align-content: space-between;
+  gap: 3cqw;
+  height: 100%;
+  padding: 7cqw;
+  font-size: clamp(0.6875rem, 5.4cqw, 0.9375rem);
+  line-height: 1.25;
+}
+
+.piece::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/textures/paper.webp');
+  mix-blend-mode: multiply;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.piece strong {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.kicker {
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Match ticket */
+.ticket {
+  --paper: #ff7a1a;
+  --ink: #1f0d00;
+}
+
+.fixtures {
+  display: grid;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(0.875rem, 12cqw, 1.75rem);
+  line-height: 1.02;
+  text-transform: uppercase;
+}
+
+/* Boarding pass */
+.pass {
+  --paper: #ece8df;
+  --ink: #14161c;
+}
+
+.route {
+  display: flex;
+  align-items: center;
+  gap: 3cqw;
+}
+
+.route strong {
+  font-size: clamp(1.25rem, 21cqw, 4rem);
+  line-height: 0.8;
+}
+
+.route i {
+  flex: 1;
+  height: 0;
+  border-top: 2px dashed currentColor;
+}
+
+.note {
+  padding-top: 2cqw;
+  border-top: 1px solid currentColor;
+  color: #a8320f;
+  font-weight: 700;
+}
+
+/* Note */
+.now {
+  --paper: #ffc21a;
+  --ink: #191200;
+}
+
+.lines {
+  display: grid;
+  gap: 2.4cqw;
+}
+
+.lines li {
+  padding-bottom: 2.4cqw;
+  border-bottom: 1px solid rgb(25 18 0 / 0.35);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .piece:hover {
+    rotate: 0deg;
+    scale: 1.09;
+    z-index: 2;
+  }
+}
+
+.piece:focus-visible {
+  rotate: 0deg;
+  scale: 1.09;
+  z-index: 2;
+  outline-color: var(--bone);
+}
+
+/* On the wide wall, the cell's paper size sets the sheet. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .piece {
+    width: var(--w);
+    aspect-ratio: var(--ratio);
+  }
+}

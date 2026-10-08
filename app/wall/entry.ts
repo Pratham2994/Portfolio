@@ -22,7 +22,7 @@ export function playEntry(wall: HTMLElement): void {
   // The head script decides whether to play. A page that opened on a project has not armed it.
   if (!pending || prefersReducedMotion()) return done();
 
-  const posters = gsap.utils.toArray<HTMLElement>('[data-poster], [data-empty]', wall);
+  const posters = gsap.utils.toArray<HTMLElement>('[data-poster], [data-piece]', wall);
   const centre = wall.querySelectorAll('[data-centre] > *');
   const light = wall.querySelector('[data-light]');
 

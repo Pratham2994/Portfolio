@@ -60,7 +60,7 @@
 .title {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(1.05rem, 14cqw, 3.25rem);
+  font-size: clamp(1.05rem, 14cqw, 4.5rem);
   line-height: 0.9;
   text-transform: uppercase;
   text-wrap: balance;
@@ -69,7 +69,7 @@
 
 .tagline {
   font-family: var(--font-mono);
-  font-size: clamp(0.6875rem, 5.2cqw, 0.9375rem);
+  font-size: clamp(0.6875rem, 5.2cqw, 1.0625rem);
   line-height: 1.25;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -116,44 +116,36 @@
   scale: 1 1;
 }
 
+/* On the wide wall, the cell's paper size sets the sheet, whatever the project's own size. */
 @media (min-width: 900px) and (orientation: landscape) {
-  .poster {
-    width: auto;
-    height: calc(100% * var(--size, 1));
-    max-width: 100%;
-  }
-
+  .poster,
   .poster[data-size='postcard'] {
-    width: calc(90% * var(--size, 1));
+    width: var(--w);
     height: auto;
-  }
-}
-
-/* A piece that hangs over two columns is a wide sheet, whatever its size on other screens. */
-@media (min-width: 900px) and (orientation: landscape) {
-  :global([data-wide]) > .poster,
-  :global([data-wide]) > .poster[data-size='postcard'] {
-    width: calc(94% * var(--size, 1));
-    height: auto;
-    aspect-ratio: 16 / 9;
+    max-width: none;
+    aspect-ratio: var(--ratio);
   }
 
-  :global([data-wide]) > .poster .title {
-    font-size: clamp(1.25rem, 8cqw, 3.5rem);
+  /* A small upright sheet has room for the title only. */
+  :global([data-paper='a5-tall']) > .poster .tagline {
+    display: none;
   }
 
-  :global([data-wide]) > .poster .tagline {
-    max-width: 34ch;
-    font-size: clamp(0.75rem, 2.6cqw, 1rem);
+  :global([data-paper='a5-tall']) > .poster .title {
+    font-size: clamp(0.8125rem, 15cqw, 2rem);
   }
 
-  :global([data-wide]) > .poster .caption {
-    inset: auto 4cqw 3.5cqw;
+  :global([data-paper='a5-wide']) > .poster .title {
+    font-size: clamp(0.95rem, 11cqw, 2.25rem);
   }
 
-  :global([data-wide]) > .poster .caption::before {
-    width: 12cqw;
-    height: 0.8cqw;
-    margin-bottom: 0.8cqw;
+  :global([data-paper='a5-wide']) > .poster .tagline {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  :global([data-paper='a4']) > .poster[data-size='postcard'] .title,
+  :global([data-paper='a3']) > .poster .title {
+    font-size: clamp(1.05rem, 14cqw, 4.5rem);
   }
 }

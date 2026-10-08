@@ -5,31 +5,47 @@ import { prefersReducedMotion } from '~/lib/motion';
 import { CAT_HEIGHT, CAT_SCALE, CAT_WIDTH, drawCat, type CatFrame } from './cat-sprite';
 import styles from './Wall.module.css';
 
-type Ledge = { poster: HTMLElement; from: number; to: number; y: number };
+type Ledge = { sheet: HTMLElement; from: number; to: number; y: number; z: number };
 
 const WIDTH = CAT_WIDTH * CAT_SCALE;
 const HEIGHT = CAT_HEIGHT * CAT_SCALE;
 const SPEED = 34; // pixels per second
 const HOP = 0.5; // seconds
 
-/** The top edges of the first row of posters, left to right, in the grid's own coordinates. */
+/** Where an element sits inside the grid, in layout pixels. Transforms do not change this. */
+function offsetIn(grid: HTMLElement, el: HTMLElement) {
+  let x = 0;
+  let y = 0;
+  for (let node: HTMLElement | null = el; node && node !== grid; node = node.offsetParent as HTMLElement | null) {
+    x += node.offsetLeft;
+    y += node.offsetTop;
+  }
+  return { x, y };
+}
+
+/**
+ * The top edges of the first row of sheets, left to right. Each ledge keeps the distance its
+ * sheet stands off the wall, so the cat is drawn at the same depth and stays on the edge
+ * when the view tilts.
+ */
 function ledges(grid: HTMLElement): Ledge[] {
-  const origin = grid.getBoundingClientRect();
-  const posters = [...grid.querySelectorAll<HTMLElement>('[data-poster]')].map((poster) => ({
-    poster,
-    box: poster.getBoundingClientRect(),
-  }));
-  if (!posters.length) return [];
-  const top = Math.min(...posters.map((p) => p.box.top));
-  return posters
-    .filter((p) => p.box.top - top < p.box.height / 2 && p.box.width > WIDTH * 1.5)
-    .sort((a, b) => a.box.left - b.box.left)
-    .map(({ poster, box }) => ({
-      poster,
-      from: box.left - origin.left,
-      to: box.right - origin.left - WIDTH,
-      y: box.top - origin.top - HEIGHT + CAT_SCALE,
-    }));
+  const sheets = [...grid.querySelectorAll<HTMLElement>('[data-poster], [data-piece]')].map((sheet) => {
+    const cell = sheet.parentElement!;
+    const lifted = getComputedStyle(cell).transform !== 'none';
+    return {
+      sheet,
+      ...offsetIn(grid, sheet),
+      width: sheet.offsetWidth,
+      height: sheet.offsetHeight,
+      z: lifted ? parseFloat(getComputedStyle(cell).getPropertyValue('--z')) || 0 : 0,
+    };
+  });
+  if (!sheets.length) return [];
+  const top = Math.min(...sheets.map((s) => s.y));
+  return sheets
+    .filter((s) => s.y - top < s.height / 2 && s.width > WIDTH * 1.5)
+    .sort((a, b) => a.x - b.x)
+    .map((s) => ({ sheet: s.sheet, from: s.x, to: s.x + s.width - WIDTH, y: s.y - HEIGHT + CAT_SCALE, z: s.z }));
 }
 
 export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
@@ -46,7 +62,7 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
     let hop: { t: number; fromX: number; fromY: number; toX: number; toY: number; ledge: number } | null = null;
 
     const place = () => {
-      el.style.transform = `translate3d(${cat.x.toFixed(1)}px, ${cat.y.toFixed(1)}px, 44px) scaleX(${cat.dir})`;
+      el.style.transform = `translate3d(${cat.x.toFixed(1)}px, ${cat.y.toFixed(1)}px, ${path[cat.ledge]?.z ?? 0}px) scaleX(${cat.dir})`;
     };
     const measure = () => {
       path = ledges(wall);
@@ -74,9 +90,9 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
     };
     if (prefersReducedMotion()) return stopMeasuring;
 
-    const nudge = (poster: HTMLElement) => {
-      poster.style.setProperty('--nudge', `${cat.dir * 3}deg`);
-      setTimeout(() => poster.style.removeProperty('--nudge'), 700);
+    const nudge = (sheet: HTMLElement) => {
+      sheet.style.setProperty('--nudge', `${cat.dir * 3}deg`);
+      setTimeout(() => sheet.style.removeProperty('--nudge'), 700);
     };
 
     const step = (dt: number) => {
@@ -115,7 +131,7 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
         if (!next) {
           cat.dir *= -1;
           cat.rest = 2.2;
-          if (Math.random() < 0.5) nudge(ledge.poster);
+          if (Math.random() < 0.5) nudge(ledge.sheet);
         } else {
           hop = { t: 0, fromX: cat.x, fromY: cat.y, toX: cat.dir > 0 ? next.from : next.to, toY: next.y, ledge: cat.ledge + cat.dir };
         }

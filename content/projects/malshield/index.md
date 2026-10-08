@@ -1,6 +1,6 @@
 ---
 title: MalShield
-size: postcard
+size: poster
 order: 9
 status: Hackathon build
 tagline: Malware detection with static analysis, dynamic analysis and YARA rules.

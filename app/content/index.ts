@@ -15,4 +15,4 @@ export function neighbours(slug: string): { prev: Project; next: Project } {
   return { prev: projects[(i - 1 + n) % n], next: projects[(i + 1) % n] };
 }
 
-export const { desk, timeline, you } = data;
+export const { desk, timeline, you, pieces } = data;

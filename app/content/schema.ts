@@ -14,6 +14,8 @@ const project = z.object({
   size: z.enum(['poster', 'postcard']),
   order: z.number(),
   hidden: z.boolean().default(false),
+  // One project may be the hero: the single A3 poster on the wall.
+  hero: z.boolean().default(false),
   status: z.string(),
   tagline: z.string(),
   palette: z.object({ bg: hex, fg: hex, accent: hex }),
@@ -42,6 +44,22 @@ const deskItem = z.object({
 const timelineItem = z.object({ org: z.string(), role: z.string(), when: z.string() });
 const you = z.object({ portraitAlt: z.string().min(1), quiet: z.string(), email: z.email(), github: z.url(), linkedin: z.url() });
 
+// Small personal pieces on the wall that are not projects.
+const pieces = z.object({
+  pass: z.object({
+    from: z.string(),
+    fromCity: z.string(),
+    to: z.string(),
+    toCity: z.string(),
+    name: z.string(),
+    seat: z.string(),
+    note: z.string(),
+  }),
+  ticket: z.object({ title: z.string(), fixtures: z.array(z.object({ sport: z.string(), side: z.string() })) }),
+  now: z.object({ title: z.string(), lines: z.array(z.string()) }),
+});
+
+export type Pieces = z.infer<typeof pieces>;
 export type DeskItem = z.infer<typeof deskItem>;
 export type TimelineItem = z.infer<typeof timelineItem>;
 export type You = z.infer<typeof you> & { body: string };
@@ -63,6 +81,10 @@ export function parseProject(raw: string, slug: string): Project {
 
 export function parseDesk(raw: string): DeskItem[] {
   return parse(z.object({ items: z.array(deskItem) }), raw, 'site/desk').data.items;
+}
+
+export function parsePieces(raw: string): Pieces {
+  return parse(pieces, raw, 'site/pieces').data;
 }
 
 export function parseTimeline(raw: string): TimelineItem[] {

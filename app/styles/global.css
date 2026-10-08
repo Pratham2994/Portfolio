@@ -91,7 +91,7 @@ html[data-project-open] {
 }
 
 /* Set by a head script just before the entry sequence, and removed when it starts. */
-.entry-pending :is([data-poster], [data-empty], [data-centre] > *) {
+.entry-pending :is([data-poster], [data-piece], [data-centre] > *) {
   opacity: 0;
 }
 
