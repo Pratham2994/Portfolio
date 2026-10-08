@@ -259,3 +259,15 @@ Each can be added later without redesign.
 - Commits carry Pratham's git identity only. No co-author trailers and no mention of AI tools in commit messages.
 - No force pushes and no rewriting of pushed history.
 - No secrets in the repository.
+
+## 19. Changes after the first build (2026-10-09)
+
+Made on the owner's feedback after he saw the built site. Where these differ from the sections above, these apply.
+
+- **Wall layout (replaces 4.1 empty frames and the strict grid):** posters and postcards are mixed across rows. Each piece has its own size, corner and tilt. There are no empty frames. When the wall has spare cells, some pieces hang double-wide to fill them, postcards first.
+- **Poster hover (adds to 4.3):** a poster leans toward the pointer and springs back, a short rule draws in above its title, and the other posters step back.
+- **Centre piece (adds to 4.1):** it is a link to the "Me" section.
+- **Close (replaces part of 6.1):** Escape and the close link play the fold-down on the page itself, then go to the wall. The browser's Back button uses a plain sheet, because it cannot wait.
+- **Entry sequence (replaces 4.5):** it plays on every load of the wall, on wide screens with a mouse. Phones and tablets show the wall at once.
+- **Project page (adds to 5):** wider layout in two columns, with the poster's art drawn large in swapped colours beside the title.
+- **Content (changes 12):** content files are parsed and checked at build time by `content.plugin.ts`. Text is plain paragraphs, with no Markdown formatting.
