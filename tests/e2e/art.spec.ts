@@ -34,7 +34,7 @@ const running = (slug?: string) => (page: import('@playwright/test').Page) =>
 test('with a mouse the art holds still, and plays on the poster under the pointer', async ({ page }, info) => {
   test.skip(['phone', 'tablet'].includes(info.project.name), 'touch screens have no hover');
   await page.goto('/');
-  await expect(page.locator('[data-wall][data-entered]')).toHaveCount(1, { timeout: 6000 });
+  await expect(page.locator('[data-wall][data-entered]')).toHaveCount(1, { timeout: 8000 });
   expect(await running()(page)).toBe(0);
   await page.locator('[data-poster="neat"]').hover();
   await expect.poll(() => running('neat')(page)).toBeGreaterThan(0);

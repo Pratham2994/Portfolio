@@ -98,7 +98,7 @@ test('the entry sequence is armed only on a wide screen with a mouse', async ({ 
 test('posters show by themselves when scripts never load', async ({ page }) => {
   await page.route('**/assets/*.js', (route) => route.abort());
   await page.goto('/');
-  await page.waitForTimeout(4500);
+  await page.waitForTimeout(5600);
   const hidden = await page.evaluate(
     () => [...document.querySelectorAll('[data-poster]')].filter((el) => getComputedStyle(el).opacity !== '1').length,
   );

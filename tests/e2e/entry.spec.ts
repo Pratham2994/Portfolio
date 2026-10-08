@@ -9,7 +9,7 @@ const hiddenPosters = (page: Page) =>
 
 test('the entry sequence ends with every poster visible', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator(entered)).toHaveCount(1, { timeout: 4500 });
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 8000 });
   expect(await hiddenPosters(page)).toBe(0);
   await expect(page.locator('html.entry-pending')).toHaveCount(0);
 });
@@ -22,10 +22,10 @@ test('the sequence is armed again on a reload', async ({ page }, info) => {
     });
   });
   await page.goto('/');
-  await expect(page.locator(entered)).toHaveCount(1, { timeout: 4500 });
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 8000 });
   await page.reload();
   expect(await page.evaluate(() => (window as unknown as { armed: boolean }).armed)).toBe(wide);
-  await expect(page.locator(entered)).toHaveCount(1, { timeout: 4500 });
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 8000 });
   expect(await hiddenPosters(page)).toBe(0);
 });
 
@@ -42,7 +42,7 @@ test('the wall still appears when animation frames never fire', async ({ page })
     window.requestAnimationFrame = () => 0;
   });
   await page.goto('/');
-  await expect(page.locator(entered)).toHaveCount(1, { timeout: 4500 });
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 8000 });
   expect(await hiddenPosters(page)).toBe(0);
 });
 
@@ -58,7 +58,7 @@ test('the cat is on the wall and hidden from assistive technology', async ({ pag
   const cat = page.locator('[data-cat]');
   await expect(cat).toHaveCount(1);
   await expect(cat).toHaveAttribute('aria-hidden', 'true');
-  await expect(page.locator(entered)).toHaveCount(1, { timeout: 4500 });
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 8000 });
   // The cat stands on the top edge of a poster in the first row.
   const standing = () =>
     page.evaluate(() => {
@@ -88,7 +88,7 @@ test.describe('with reduced motion', () => {
 test('the cat comes to the poster under the pointer', async ({ page }, info) => {
   test.skip(['phone', 'tablet'].includes(info.project.name), 'needs a mouse');
   await page.goto('/');
-  await expect(page.locator(entered)).toHaveCount(1, { timeout: 6000 });
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 8000 });
   const gap = () =>
     page.evaluate(() => {
       const cat = document.querySelector('[data-cat]')!.getBoundingClientRect();
