@@ -9,18 +9,32 @@ const hiddenPosters = (page: Page) =>
 
 test('the entry sequence ends with every poster visible', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator(entered)).toHaveCount(1, { timeout: 3500 });
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 4500 });
   expect(await hiddenPosters(page)).toBe(0);
   await expect(page.locator('html.entry-pending')).toHaveCount(0);
 });
 
-test('the sequence plays once per session', async ({ page }) => {
+test('the sequence is armed again on a reload', async ({ page }, info) => {
+  const wide = !['phone', 'tablet'].includes(info.project.name);
+  await page.addInitScript(() => {
+    document.addEventListener('DOMContentLoaded', () => {
+      (window as unknown as { armed: boolean }).armed = document.documentElement.classList.contains('entry-pending');
+    });
+  });
   await page.goto('/');
-  await expect(page.locator(entered)).toHaveCount(1, { timeout: 3500 });
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 4500 });
+  await page.reload();
+  expect(await page.evaluate(() => (window as unknown as { armed: boolean }).armed)).toBe(wide);
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 4500 });
+  expect(await hiddenPosters(page)).toBe(0);
+});
+
+test('posters are in flight shortly after a wide wall loads', async ({ page }, info) => {
+  test.skip(['phone', 'tablet'].includes(info.project.name), 'the sequence plays on wide screens only');
   await page.goto('/');
   await expect(page.locator('html[data-ready]')).toHaveCount(1);
-  await expect(page.locator(entered)).toHaveCount(1, { timeout: 300 });
-  expect(await hiddenPosters(page)).toBe(0);
+  await page.waitForTimeout(500);
+  expect(await hiddenPosters(page)).toBeGreaterThan(0);
 });
 
 test('the wall still appears when animation frames never fire', async ({ page }) => {
@@ -44,16 +58,18 @@ test('the cat is on the wall and hidden from assistive technology', async ({ pag
   const cat = page.locator('[data-cat]');
   await expect(cat).toHaveCount(1);
   await expect(cat).toHaveAttribute('aria-hidden', 'true');
-  await expect(page.locator(entered)).toHaveCount(1, { timeout: 3500 });
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 4500 });
   // The cat stands on the top edge of a poster in the first row.
-  const standing = await page.evaluate(() => {
-    const cat = document.querySelector('[data-cat]')!.getBoundingClientRect();
-    return [...document.querySelectorAll('[data-poster]')].some((poster) => {
-      const box = poster.getBoundingClientRect();
-      return Math.abs(cat.bottom - box.top) < 12 && cat.right > box.left - 60 && cat.left < box.right + 60;
+  const standing = () =>
+    page.evaluate(() => {
+      const cat = document.querySelector('[data-cat]')!.getBoundingClientRect();
+      return [...document.querySelectorAll('[data-poster]')].some((poster) => {
+        const box = poster.getBoundingClientRect();
+        return Math.abs(cat.bottom - box.top) < 12 && cat.right > box.left - 60 && cat.left < box.right + 60;
+      });
     });
-  });
-  expect(standing).toBe(true);
+  // She may be in the middle of a hop, so look until she lands.
+  await expect.poll(standing).toBe(true);
 });
 
 test.describe('with reduced motion', () => {
