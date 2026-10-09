@@ -70,7 +70,7 @@
     grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
     max-width: none;
     width: max(
-      min(88%, 105rem, calc((100svh - 7.5rem) * var(--units) / (var(--rows) * var(--a4)))),
+      min(88%, 105rem, calc((100svh - 6.5rem) * var(--units) / (var(--rows) * var(--a4)))),
       min(88%, 46rem)
     );
     aspect-ratio: var(--units) / calc(var(--rows) * var(--a4));

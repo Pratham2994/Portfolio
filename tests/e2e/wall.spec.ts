@@ -84,3 +84,31 @@ test('the wall reports its column count', async ({ page }, info) => {
   const expected = { phone: '2', tablet: '3', portrait: '3' }[info.project.name] ?? '5';
   await expect(page.locator('[data-wall]')).toHaveAttribute('data-columns', expected);
 });
+
+test('on a 13 inch laptop no poster art runs into its text', async ({ page }, info) => {
+  test.skip(info.project.name !== 'laptop', 'sets its own window sizes');
+  for (const [width, height] of [
+    [1280, 715],
+    [1440, 790],
+    [1366, 768],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await open(page, '/');
+    const clashes = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('[data-poster]')]
+        .filter((poster) => {
+          // The drawn part of the art, and the first line of text under it.
+          const art = poster.querySelector('[data-art] > *')!.getBoundingClientRect();
+          const title = poster.querySelector('strong')!.getBoundingClientRect();
+          // Waves and the big word are drawn behind the text on purpose.
+          if (poster.querySelector('[data-art] svg') || art.height > poster.getBoundingClientRect().height * 0.75) return false;
+          return art.bottom > title.top + 2;
+        })
+        .map((poster) => poster.dataset.poster),
+    );
+    expect(clashes, `${width}x${height}`).toEqual([]);
+    // The whole wall fits in the window: nothing is cut off at the bottom.
+    const lowest = await page.evaluate(() => Math.max(...[...document.querySelectorAll('[data-poster], [data-piece]')].map((el) => el.getBoundingClientRect().bottom)));
+    expect(lowest, `${width}x${height}`).toBeLessThanOrEqual(height);
+  }
+});

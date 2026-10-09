@@ -149,3 +149,13 @@
     font-size: clamp(1.05rem, 14cqw, 4.5rem);
   }
 }
+
+/*
+ * On a small laptop screen the small wide sheet is only about 120px across. The art and
+ * two lines of text do not both fit, so below that width it keeps the title alone.
+ */
+@container (max-width: 10.5rem) {
+  :global([data-paper='a5-wide']) > .poster .tagline {
+    display: none;
+  }
+}
