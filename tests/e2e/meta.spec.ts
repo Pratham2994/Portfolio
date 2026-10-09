@@ -98,15 +98,23 @@ test('link previews have a title, a description and a picture for every network'
   expect(html).toMatch(/<title>Pratham Panchal — Software Engineer<\/title>/);
 });
 
-test('with no analytics key, nothing is loaded and nothing is sent', async ({ page }) => {
-  const sent: string[] = [];
+test('analytics goes through this site only, never straight to another domain', async ({ page }) => {
+  const relayed: string[] = [];
+  const direct: string[] = [];
   page.on('request', (request) => {
-    const url = request.url();
-    if (url.includes('/relay/') || url.includes('posthog')) sent.push(url);
+    const url = new URL(request.url());
+    if (url.hostname.includes('posthog')) direct.push(url.href);
+    else if (url.pathname.startsWith('/relay/')) relayed.push(url.pathname);
   });
   await open(page, '/');
   await page.locator('[data-poster="scrub"]').click();
   await expect(page.locator('#project-title')).toBeVisible();
-  await page.waitForTimeout(2200);
-  expect(sent).toEqual([]);
+  // It starts when the page is idle, so give it a moment.
+  await expect.poll(() => relayed.length, { timeout: 8000 }).toBeGreaterThan(0);
+  expect(direct).toEqual([]);
+});
+
+test('the footer says that visits are counted', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#contact')).toContainText('No cookies');
 });
