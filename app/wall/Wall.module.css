@@ -146,6 +146,47 @@
 
 .wall[data-entered] .cat {
   opacity: 1;
+  /* She can be petted. */
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* What floats up from the cat: a heart, a z, or a warning. */
+.puff {
+  position: absolute;
+  z-index: 4;
+  margin: -0.9em 0 0 -0.3em;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--bone);
+  pointer-events: none;
+  animation: puff 1s var(--ease-out) forwards;
+}
+
+.puff[data-puff='heart'] {
+  color: #ff5d7a;
+}
+
+.puff[data-puff='!'] {
+  color: var(--signal);
+}
+
+@keyframes puff {
+  from {
+    opacity: 0;
+    translate: 0 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    translate: 0.5rem -2rem;
+  }
 }
 
 /* Depth: the pointer shifts the view a little, and pieces stand off the wall. */

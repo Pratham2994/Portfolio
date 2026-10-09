@@ -12,6 +12,7 @@ const WIDTH = CAT_WIDTH * CAT_SCALE;
 const HEIGHT = CAT_HEIGHT * CAT_SCALE;
 const SPEED = 34; // pixels per second
 const HOP = 0.5; // seconds
+const SLEEP = 40_000; // she dozes off when nobody has moved for this long, in milliseconds
 
 /** Where an element sits inside the grid, in layout pixels. Transforms do not change this. */
 function offsetIn(grid: HTMLElement, el: HTMLElement) {
@@ -140,6 +141,51 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
       setTimeout(() => sheet.style.removeProperty('--nudge'), 700);
     };
 
+    // Small things float up from her: a heart when she is petted, a z when she sleeps.
+    const puff = (text: string) => {
+      const bit = document.createElement('span');
+      bit.className = styles.puff;
+      bit.textContent = text;
+      bit.dataset.puff = text === '!' || text === 'z' ? text : 'heart';
+      bit.style.left = `${cat.x + WIDTH / 2}px`;
+      bit.style.top = `${cat.y}px`;
+      bit.style.transform = `translateZ(${(path[cat.ledge]?.z ?? 0) + 1}px)`;
+      wall.append(bit);
+      bit.addEventListener('animationend', () => bit.remove(), { once: true });
+    };
+
+    // A click is a pet. Five in a row is too many, and she storms off.
+    let pets: number[] = [];
+    const onPet = () => {
+      if (fall) return;
+      const now = performance.now();
+      pets = [...pets.filter((at) => now - at < 4000), now];
+      if (pets.length >= 5) {
+        pets = [];
+        puff('!');
+        zoomies = 2.5;
+        cat.rest = 0;
+        track('cat_annoyed');
+        return;
+      }
+      puff('\u2665');
+      if (pets.length === 1) track('cat_petted');
+      if (!hop) {
+        cat.rest = 1.4;
+        drawCat(ctx, 0, true);
+      }
+    };
+    el.addEventListener('pointerdown', onPet);
+
+    // When nobody has moved for a while, she sleeps where she is.
+    let active = performance.now();
+    let doze = 0;
+    const awake = () => {
+      active = performance.now();
+    };
+    window.addEventListener('pointermove', awake, { passive: true });
+    window.addEventListener('pointerdown', awake, { passive: true });
+
     // She comes to the sheet you point at: the ledge above it, and the spot nearest the pointer.
     let call: { ledge: number; x: number } | null = null;
     const onOver = (event: PointerEvent) => {
@@ -158,9 +204,11 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
     let typed = '';
     let zoomies = 0;
     const onKey = (event: KeyboardEvent) => {
+      awake();
       typed = (typed + event.key.toLowerCase()).slice(-4);
       if (typed !== 'meow') return;
       track('meow');
+      window.dispatchEvent(new Event('wall:meow'));
       zoomies = 5;
       cat.rest = 0;
       el.dataset.zoomies = '';
@@ -216,6 +264,15 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
       if (zoomies > 0) {
         zoomies -= dt;
         if (zoomies <= 0) delete el.dataset.zoomies;
+      }
+      if (!hop && zoomies <= 0 && performance.now() - active > SLEEP) {
+        doze -= dt;
+        if (doze <= 0) {
+          doze = 1.8;
+          drawCat(ctx, 0, true);
+          puff('z');
+        }
+        return;
       }
       const speed = zoomies > 0 ? SPEED * 9 : call ? SPEED * 2.6 : SPEED;
       if (call && !hop && zoomies <= 0) {
@@ -295,6 +352,9 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
     return () => {
       stopMeasuring();
       window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointermove', awake);
+      window.removeEventListener('pointerdown', awake);
+      el.removeEventListener('pointerdown', onPet);
       wall.removeEventListener('pointerover', onOver);
       wall.removeEventListener('pointerleave', onOut);
       watch.disconnect();
