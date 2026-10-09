@@ -41,15 +41,23 @@ export default function Brief() {
         <Link to="/" onClick={() => track('brief_to_wall')}>
           ← The full site
         </Link>
-        <button
-          type="button"
-          onClick={() => {
-            track('brief_printed');
-            window.print();
-          }}
-        >
-          Print, or save as PDF
-        </button>
+        <span className={s.actions}>
+          {you.resume && (
+            <a href={you.resume} download className={s.action} onClick={() => track('resume_downloaded', { from: 'brief' })} data-resume>
+              Resume (PDF)
+            </a>
+          )}
+          <button
+            type="button"
+            className={s.action}
+            onClick={() => {
+              track('brief_printed');
+              window.print();
+            }}
+          >
+            Print this page
+          </button>
+        </span>
       </nav>
 
       <header className={s.head}>
@@ -86,6 +94,13 @@ export default function Brief() {
               <b>{item.org}</b>
               <span>{item.role}</span>
               <time>{item.when}</time>
+              {item.points && (
+                <ul className={s.points}>
+                  {item.points.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
+              )}
             </li>
           ))}
         </ul>

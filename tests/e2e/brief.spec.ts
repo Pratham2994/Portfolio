@@ -27,3 +27,14 @@ test('the one-page version has no serious accessibility violations', async ({ pa
   const results = await new AxeBuilder({ page }).include('main').analyze();
   expect(results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical').map((v) => v.id)).toEqual([]);
 });
+
+test('the resume can be downloaded from the one-page version and from the contact section', async ({ page, request }) => {
+  await open(page, '/brief');
+  const href = await page.locator('[data-resume]').getAttribute('href');
+  expect(href).toMatch(/\.pdf$/);
+  const file = await request.get(href!);
+  expect(file.status()).toBe(200);
+  expect(file.headers()['content-type']).toContain('pdf');
+  await open(page, '/');
+  await expect(page.locator('#contact [data-resume]')).toHaveAttribute('href', href!);
+});

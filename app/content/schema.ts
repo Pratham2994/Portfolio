@@ -78,14 +78,14 @@ const desk = z.object({
   cube: z.object({ title: text, best: z.number(), note: text }),
   now: z.object({ title: text, lines: z.array(text) }),
 });
-const timelineItem = z.object({ org: text, role: text, when: text });
+const timelineItem = z.object({ org: text, role: text, when: text, points: z.array(text).optional() });
 // What I build with. A language names the projects it is used in, so each one comes with its proof.
 const stack = z.object({
   note: text,
   languages: z.array(z.object({ name: text, first: z.boolean().default(false), used: z.array(text).min(1) })),
   groups: z.array(z.object({ name: text, items: z.array(text).min(1) })),
 });
-const you = z.object({ portraitAlt: z.string().min(1), quiet: text, email: z.email(), github: z.url(), linkedin: z.url(), stack });
+const you = z.object({ portraitAlt: z.string().min(1), quiet: text, email: z.email(), github: z.url(), linkedin: z.url(), resume: text.optional(), stack });
 
 // Small personal pieces on the wall that are not projects.
 const pieces = z.object({

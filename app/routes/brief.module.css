@@ -58,7 +58,13 @@
   letter-spacing: 0.06em;
 }
 
-.bar button {
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.bar .action {
   padding: 0.55em 0.9em;
   border: 1px solid var(--ink);
   border-radius: 2px;
@@ -67,9 +73,12 @@
   font: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
+  text-decoration: none;
 }
 
-.bar button:hover {
+/* The resume is the first thing a reader in a hurry wants, so it is the filled one. */
+.bar a.action,
+.bar .action:hover {
   background: var(--ink);
   color: var(--paper);
 }
@@ -121,13 +130,25 @@
   text-transform: uppercase;
 }
 
-.rows li {
+.rows > li {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
   gap: 0.1em var(--space-4);
   align-items: baseline;
   padding-block: var(--space-2);
   border-bottom: 1px solid var(--rule);
+}
+
+/* What was done in a role: full width under its row, in the quiet colour. */
+.points {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.2em;
+  margin-top: 0.2em;
+  padding-left: 1.1em;
+  list-style: disc;
+  color: var(--soft);
+  font-size: 0.94em;
 }
 
 .rows time,
@@ -171,7 +192,7 @@
 }
 
 @media (max-width: 34rem) {
-  .rows li {
+  .rows > li {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
@@ -201,8 +222,8 @@
     min-height: 0;
     padding: 0;
     background: none;
-    font-size: 8.7pt;
-    line-height: 1.28;
+    font-size: 8.2pt;
+    line-height: 1.24;
   }
 
   .brief > * {
@@ -236,7 +257,7 @@
   }
 
   .brief section {
-    margin-top: 7pt;
+    margin-top: 5pt;
     break-inside: avoid;
   }
 
@@ -248,7 +269,7 @@
     font-size: 7.6pt;
   }
 
-  .rows li,
+  .rows > li,
   .projects li,
   .tools div {
     padding-block: 1.4pt;

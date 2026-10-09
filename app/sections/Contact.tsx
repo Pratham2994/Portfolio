@@ -46,6 +46,13 @@ export function Contact() {
             LinkedIn
           </a>
         </li>
+        {you.resume && (
+          <li>
+            <a href={you.resume} download onClick={() => track('resume_downloaded', { from: 'contact' })} data-resume>
+              Resume (PDF)
+            </a>
+          </li>
+        )}
       </ul>
       <p className={s.small}>
         Pratham Panchal, 2026.
