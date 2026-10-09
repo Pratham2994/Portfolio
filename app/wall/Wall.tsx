@@ -11,6 +11,7 @@ import { hangWall, OUTSIDE, type WallItem } from './layout';
 import { Light } from './Light';
 import { Piece, PIECES } from './Piece';
 import { Poster } from './Poster';
+import { HINTS, initSecrets } from './secrets';
 import { useDepth } from './useDepth';
 import { useScrollTilt } from './useScrollTilt';
 import { useSpotlight } from './useSpotlight';
@@ -75,6 +76,8 @@ export function Wall() {
   useEffect(() => {
     if (wall.current) playEntry(wall.current);
   }, []);
+  const [hint, setHint] = useState(0);
+  useEffect(() => (wall.current ? initSecrets(wall.current, setHint) : undefined), []);
 
   return (
     <section
@@ -101,8 +104,8 @@ export function Wall() {
         ))}
         <Cat grid={grid} />
       </div>
-      <p className={styles.hint} aria-hidden="true">
-        psst. type &quot;meow&quot;
+      <p className={styles.hint} aria-hidden="true" data-hint>
+        {HINTS[hint]}
       </p>
       <button type="button" className={styles.lever} onClick={() => {
           track('lever_pressed');

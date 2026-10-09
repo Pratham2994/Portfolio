@@ -10,7 +10,7 @@ let busy = false;
  * onto its place, and the wall takes a small knock for every hit.
  */
 export function dropWall(wall: HTMLElement): void {
-  if (busy || prefersReducedMotion()) return;
+  if (busy || 'fallen' in wall.dataset || prefersReducedMotion()) return;
   const sheets = gsap.utils.toArray<HTMLElement>('[data-poster], [data-piece]', wall);
   const centre = wall.querySelector('[data-centre]');
   if (!sheets.length) return;

@@ -155,6 +155,211 @@ html[data-project-open] {
   }
 }
 
+/* The race start, built by wall/race.ts: a dark room, a gantry of five lights, and the call. */
+.race {
+  --lit: 0;
+
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  color: var(--bone);
+}
+
+.race-veil {
+  position: absolute;
+  inset: 0;
+  /* The lamps throw red onto the room as they come on. */
+  background:
+    radial-gradient(70vw 60vh at 50% 16vh, rgb(255 30 30 / calc(var(--lit) * 0.045)), transparent 70%),
+    rgb(0 0 0 / 0.66);
+}
+
+.race-gantry {
+  position: relative;
+  display: flex;
+  gap: clamp(0.5rem, 1.1vw, 1rem);
+  margin-top: 8vh;
+  padding: 0.7rem 1rem;
+  border: 1px solid #1d1c1b;
+  border-radius: 0.6rem;
+  background: #0a0a0b;
+  box-shadow: 0 1.5rem 3rem -1rem #000;
+}
+
+/* The two arms it hangs from. */
+.race-gantry::before {
+  content: '';
+  position: absolute;
+  right: 14%;
+  bottom: 100%;
+  left: 14%;
+  height: 8vh;
+  border-inline: 0.4rem solid #0a0a0b;
+}
+
+.race-pod {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.5rem 0.45rem;
+  border-radius: 0.5rem;
+  background: #040404;
+}
+
+.race-pod i {
+  width: clamp(1.5rem, 2.5vw, 2.5rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #1a090a;
+  box-shadow: inset 0 0 0 2px #000;
+}
+
+.race-pod[data-on] i {
+  background: radial-gradient(circle at 40% 35%, #ff9a8a, #ff1b1b 45%, #b00000);
+  box-shadow:
+    0 0 1.2rem 0.3rem rgb(255 30 30 / 0.75),
+    0 0 4rem 1rem rgb(255 30 30 / 0.35);
+}
+
+.race-call {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.race-time {
+  font-family: var(--font-display);
+  font-size: var(--step-6);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
+  text-transform: uppercase;
+  text-shadow: 0 0.2rem 2rem #000;
+}
+
+.race-line {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow: 0 0 1rem #000;
+}
+
+/* A moment of sport across the wall, built by wall/sport.ts. Nothing here takes a click. */
+.sport {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow: hidden;
+  color: var(--bone);
+  pointer-events: none;
+}
+
+.sport-ball {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin: -0.8rem 0 0 -0.8rem;
+  opacity: 0;
+}
+
+.sport-ball i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 0.5rem 0.9rem rgb(0 0 0 / 0.6);
+}
+
+.sport-ball[data-ball='football'] i {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3CclipPath id='c'%3E%3Ccircle cx='16' cy='16' r='15'/%3E%3C/clipPath%3E%3Ccircle cx='16' cy='16' r='15' fill='%23f5f1ea'/%3E%3Cg clip-path='url(%23c)' fill='%2315161a' stroke='%2315161a'%3E%3Cpath d='M16 10.5l5.2 3.8-2 6.1h-6.4l-2-6.1z'/%3E%3Cpath d='M16 10.5V4M21.2 14.3l6-2M19.2 20.4l3.8 5.2M12.8 20.4L9 25.6M10.8 14.3l-6-2' fill='none'/%3E%3Cpath d='M12 0h8l-4 4zM32 7v9l-4.8-3.7zM28 29l-7 3 2-6.4zM4 29l7 3-2-6.4zM0 7v9l4.8-3.7z'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%2315161a'/%3E%3C/svg%3E") center / cover;
+}
+
+.sport-ball[data-ball='cricket'] i {
+  background: linear-gradient(90deg, transparent 42%, #f1d9b0 43% 46%, transparent 47% 53%, #f1d9b0 54% 57%, transparent 58%), #b3121f;
+}
+
+.sport-ball[data-ball='tennis'] i {
+  background:
+    radial-gradient(circle at -25% 50%, transparent 58%, #fff 59% 65%, transparent 66%),
+    radial-gradient(circle at 125% 50%, transparent 58%, #fff 59% 65%, transparent 66%), #d6ee3b;
+}
+
+.sport-say {
+  position: absolute;
+  bottom: 7vh;
+  left: 50%;
+  padding: 0.55em 0.9em;
+  border: 1px solid var(--line);
+  background: var(--wall-shade);
+  translate: -50% 0;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sport-say:empty {
+  display: none;
+}
+
+.sport-call {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.8rem;
+  /* The room goes dark behind the call, so the word is the only thing to read. */
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.86), rgb(0 0 0 / 0.7) 55%, rgb(0 0 0 / 0.35));
+  opacity: 0;
+  text-align: center;
+}
+
+.sport-call strong {
+  padding-bottom: 0.08em;
+  border-bottom: 0.09em solid;
+  /* The stripe under the call is in the colours of the side. */
+  border-image: linear-gradient(90deg, var(--side-a) 50%, var(--side-b) 50%) 1;
+  font-family: var(--font-display);
+  font-size: var(--step-6);
+  font-weight: 900;
+  line-height: 0.9;
+  text-transform: uppercase;
+  text-shadow: 0 0.2rem 2.5rem #000;
+}
+
+.sport-call span {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow: 0 0 1rem #000;
+}
+
+.sport[data-sport='messi'] {
+  --side-a: #a50044;
+  --side-b: #004d98;
+}
+
+.sport[data-sport='kohli'] {
+  --side-a: #1565d8;
+  --side-b: #ff8a1f;
+}
+
+.sport[data-sport='federer'] {
+  --side-a: #4b2a7b;
+  --side-b: #1f7a43;
+}
+
 /* Before the app starts, the armed page is black, so the boot screen never flashes in. */
 .entry-pending body::before {
   content: '';
