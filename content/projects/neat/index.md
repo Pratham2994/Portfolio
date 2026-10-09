@@ -19,6 +19,28 @@ sectors:
     body: Every change is logged and can be undone. Anything removed goes to the Recycle Bin, never further.
 stack: [Rust, Tauri, SQLite, Windows]
 links: { repo: 'https://github.com/Pratham2994/Neat' }
+flow:
+  nodes:
+    - { id: folder, at: [1, 1], name: Downloads, note: a new file lands, kind: you }
+    - { id: watch, at: [2, 1], name: Watcher, note: in the tray. Waits until the file is whole }
+    - { id: scan, at: [3, 1], name: Scan, note: 'top level only. Skips what is in use' }
+    - { id: signs, at: [4, 1], name: Signals, note: 'source site, hash, name, installed apps' }
+    - { id: detect, at: [5, 1], name: Detect, note: 'groups. A file is in one group only' }
+    - { id: rules, at: [5, 2], name: Rules, note: what you said to always do }
+    - { id: queue, at: [4, 2], name: Review queue, note: 'one decision each, with the reason' }
+    - { id: engine, at: [3, 2], name: Engine, note: moves it or sends it to the Recycle Bin }
+    - { id: log, at: [2, 2], name: Journal, note: SQLite. Every change. Undo reads it, kind: store }
+    - { id: tidy, at: [1, 2], name: Tidy folder, note: nothing left the folder }
+  links:
+    - [folder, watch]
+    - [watch, scan]
+    - [scan, signs]
+    - [signs, detect]
+    - [detect, rules]
+    - [rules, queue]
+    - [queue, engine]
+    - [engine, log]
+    - [log, tidy]
 ---
 Everyone's Downloads folder is the same. Gigabytes of installers you ran once, duplicates everywhere, and the one file you need buried under all of it. You only notice when you have to find something.
 

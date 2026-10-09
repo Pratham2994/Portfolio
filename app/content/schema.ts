@@ -5,9 +5,28 @@ import { z } from 'zod';
 const text = z.string().min(1);
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'must be a hex colour such as #1a2b3c');
 
-const stat = z.object({ value: text, label: text });
+// Strict: a comma in a label with no quotes makes a second key, and that must stop the build.
+const stat = z.strictObject({ value: text, label: text });
 const sector = z.object({ title: text, body: text });
 const media = z.object({ src: text, alt: z.string().min(1), kind: z.enum(['image', 'video']) });
+
+// The picture under a project page. Each part has a place on a grid, [column, row], and
+// the links say what hands on to what, in the order it happens.
+const flow = z.object({
+  nodes: z
+    .array(
+      z.strictObject({
+        id: text,
+        at: z.tuple([z.number().int().min(1).max(5), z.number().int().min(1).max(3)]),
+        name: text.max(16),
+        note: text.max(50),
+        kind: z.enum(['part', 'you', 'store']).default('part'),
+      }),
+    )
+    .min(4)
+    .max(12),
+  links: z.array(z.tuple([text, text])).min(3),
+});
 
 export const artTemplates = ['frames', 'grid', 'bars', 'code', 'device', 'waves', 'type', 'hex'] as const;
 
@@ -28,9 +47,11 @@ const project = z.object({
   links: z.object({ repo: z.url(), live: z.url().optional(), paper: z.url().optional() }),
   role: text.optional(),
   media: z.array(media).default([]),
+  flow: flow.optional(),
 });
 
 export type Size = 'poster' | 'postcard';
+export type Flow = z.infer<typeof flow>;
 export type ArtTemplate = (typeof artTemplates)[number];
 export type Stat = z.infer<typeof stat>;
 export type Sector = z.infer<typeof sector>;

@@ -20,6 +20,28 @@ sectors:
     body: Drag two handles over frames pulled from your own file. Jobs wait in a queue, and a finished result can go straight into the next step.
 stack: [TypeScript, Node, React, ffmpeg]
 links: { repo: 'https://github.com/Pratham2994/Scrub' }
+flow:
+  nodes:
+    - { id: page, at: [1, 1], name: The page, note: you drop a file and pick what to do, kind: you }
+    - { id: guard, at: [2, 1], name: Guard, note: 'this PC only. Host, Origin and a header' }
+    - { id: upload, at: [3, 1], name: Upload, note: a copy goes into a working folder, kind: store }
+    - { id: probe, at: [4, 1], name: ffprobe, note: 'length, size, streams and codecs' }
+    - { id: build, at: [5, 1], name: buildArgs, note: one function makes the command you see }
+    - { id: check, at: [5, 2], name: Validate, note: the request is checked before it runs }
+    - { id: queue, at: [4, 2], name: Queue, note: one encode at a time. It survives a reload }
+    - { id: ffmpeg, at: [3, 2], name: ffmpeg, note: 'started direct, never through a shell' }
+    - { id: live, at: [2, 2], name: Progress, note: sent live to the page as it encodes }
+    - { id: out, at: [1, 2], name: Your file, note: 'saved, or used as the next input' }
+  links:
+    - [page, guard]
+    - [guard, upload]
+    - [upload, probe]
+    - [probe, build]
+    - [build, check]
+    - [check, queue]
+    - [queue, ffmpeg]
+    - [ffmpeg, live]
+    - [live, out]
 ---
 ffmpeg can do anything to a video. The catch is that you have to remember how to ask, and nobody does.
 

@@ -19,6 +19,29 @@ sectors:
     body: You type a question in plain words. The answer streams back with the chart or the map next to it, and you can see which tool it used.
 stack: [Python, FastMCP, PostgreSQL, ChromaDB, Node, React]
 links: { repo: 'https://github.com/VarnikaBajpai4/FloatChat_DebugDynasty_SiH' }
+flow:
+  nodes:
+    - { id: chat, at: [1, 1], name: Chat, note: you ask in plain words, kind: you }
+    - { id: server, at: [2, 1], name: Server, note: Node. Checks the login and saves the message }
+    - { id: core, at: [3, 1], name: Core, note: FastAPI. It runs the whole chain }
+    - { id: gate, at: [4, 1], name: Gatekeeper, note: 'model call 1: go on, ask back, or refuse' }
+    - { id: schema, at: [5, 1], name: Schema, note: 'the tables, read from the MCP server', kind: store }
+    - { id: pick, at: [5, 2], name: Orchestrator, note: 'call 2: which picture answers this' }
+    - { id: sql, at: [4, 2], name: SQL writer, note: 'call 3: a query from the schema only' }
+    - { id: query, at: [3, 2], name: sql_query, note: MCP tool. Postgres. SELECT only, kind: store }
+    - { id: plot, at: [2, 2], name: Plot tool, note: MCP tool. Draws it and gives a link }
+    - { id: sum, at: [1, 2], name: Summary, note: 'call 4: written for who is asking' }
+  links:
+    - [chat, server]
+    - [server, core]
+    - [core, gate]
+    - [gate, schema]
+    - [schema, pick]
+    - [pick, sql]
+    - [sql, query]
+    - [query, plot]
+    - [plot, sum]
+    - [sum, chat]
 ---
 Ocean data is public. Reading it is another matter: odd file formats, a lot of scripting, and you need to know what you are looking for before you start.
 

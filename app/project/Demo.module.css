@@ -531,6 +531,20 @@
   margin-top: 0.6rem;
 }
 
+.frames {
+  display: grid;
+  gap: 0.3em;
+}
+
+/* The frame on top is the one that is running. */
+.frames li:first-child {
+  font-weight: 700;
+}
+
+.frames li + li {
+  color: rgb(233 236 248 / 0.6);
+}
+
 .native {
   font-family: var(--font-display);
   font-size: var(--step-3);
@@ -684,6 +698,13 @@
   from {
     opacity: 0;
   }
+}
+
+/* A refusal is said plainly, in the same small letters as the tool lines. */
+.reply[data-refused] {
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  line-height: 1.5;
 }
 
 .reply {

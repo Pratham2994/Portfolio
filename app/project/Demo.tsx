@@ -31,12 +31,15 @@ function useRun(count: number, pace = 520) {
 
 type Stage = { name: string; detail: string };
 
-/** What goes on underneath, as a row of stages. Each one lights up as the run reaches it. */
-function Stages({ stages, at }: { stages: Stage[]; at: number }) {
+/**
+ * What goes on underneath, as a row of stages. Each one lights up as the run reaches it.
+ * A halted run goes no further: the stages after it stay dark.
+ */
+function Stages({ stages, at, halted = false }: { stages: Stage[]; at: number; halted?: boolean }) {
   return (
     <ol className={s.stages} data-stages data-over={at >= stages.length || undefined}>
       {stages.map((stage, i) => (
-        <li key={stage.name} data-state={i < at ? 'done' : i === at ? 'now' : 'todo'}>
+        <li key={stage.name} data-state={i < at ? 'done' : i === at && !halted ? 'now' : 'todo'}>
           <b>{stage.name}</b>
           <span>{stage.detail}</span>
         </li>
@@ -343,37 +346,47 @@ function Deck() {
   );
 }
 
+// One small program, the same in five languages, line for line: a function, a loop that calls it, a print.
 const CODE: Record<string, string[]> = {
-  Python: ['total = 0', 'for n in [3, 4, 5]:', '    total += n', 'print(total)'],
-  JavaScript: ['let total = 0;', 'for (const n of [3, 4, 5]) {', '  total += n;', '} console.log(total);'],
-  Java: ['int total = 0;', 'for (int n : new int[]{3, 4, 5}) {', '  total += n;', '} System.out.println(total);'],
-  'C++': ['int total = 0;', 'for (int n : {3, 4, 5}) {', '  total += n;', '} std::cout << total;'],
-  Go: ['total := 0', 'for _, n := range []int{3, 4, 5} {', '  total += n', '} fmt.Println(total)'],
+  Python: ['def area(w, h):', '    return w * h', 'total = 0', 'for size in [2, 3, 4]:', '    total += area(size, size)', 'print(total)'],
+  JavaScript: ['function area(w, h) {', '  return w * h; }', 'let total = 0;', 'for (const size of [2, 3, 4]) {', '  total += area(size, size); }', 'console.log(total);'],
+  Java: ['static int area(int w, int h) {', '  return w * h; }', 'int total = 0;', 'for (int size : new int[]{2, 3, 4}) {', '  total += area(size, size); }', 'System.out.println(total);'],
+  'C++': ['int area(int w, int h) {', '  return w * h; }', 'int total = 0;', 'for (int size : {2, 3, 4}) {', '  total += area(size, size); }', 'std::cout << total;'],
+  Go: ['func area(w, h int) int {', '  return w * h }', 'total := 0', 'for _, size := range []int{2, 3, 4} {', '  total += area(size, size) }', 'fmt.Println(total)'],
 };
-// The same run in every language: the line the debugger is on, and what it can see there.
-const RUN = [
-  { line: 0, total: 0, n: '-' },
-  { line: 1, total: 0, n: '3' },
-  { line: 2, total: 3, n: '3' },
-  { line: 1, total: 3, n: '4' },
-  { line: 2, total: 7, n: '4' },
-  { line: 1, total: 7, n: '5' },
-  { line: 2, total: 12, n: '5' },
-  { line: 3, total: 12, n: '-' },
+
+// The same run in every language: the line the debugger is on, how deep it is, and what it can see there.
+type Frame = { line: number; deep: 0 | 1; seen: [name: string, value: string][] };
+const main = (line: number, total: string, size: string): Frame => ({ line, deep: 0, seen: [['total', total], ['size', size]] });
+const inside = (side: string): Frame => ({ line: 1, deep: 1, seen: [['w', side], ['h', side]] });
+const RUN: Frame[] = [
+  main(2, '-', '-'),
+  main(3, '0', '-'),
+  main(4, '0', '2'),
+  inside('2'),
+  main(3, '4', '2'),
+  main(4, '4', '3'),
+  inside('3'),
+  main(3, '13', '3'),
+  main(4, '13', '4'),
+  inside('4'),
+  main(3, '29', '4'),
+  main(5, '29', '4'),
 ];
 
 // The debugger each language really runs on. The page never shows these: that is the point.
 const NATIVE: Record<string, string> = { Python: 'bdb', JavaScript: 'Node Inspector', Java: 'jdb', 'C++': 'gdb', Go: 'Delve' };
-// What each debugger is really told, for the two buttons. The page only ever says the first word.
-const SAYS: Record<string, Record<'step_over' | 'continue', string>> = {
-  Python: { step_over: 'set_next(frame)', continue: 'set_continue()' },
-  JavaScript: { step_over: 'Debugger.stepOver', continue: 'Debugger.resume' },
-  Java: { step_over: 'next', continue: 'cont' },
-  'C++': { step_over: '-exec-next', continue: '-exec-continue' },
-  Go: { step_over: 'next', continue: 'continue' },
+type Press = 'step_over' | 'step_in' | 'step_out' | 'continue';
+// What each debugger is really told for each button. The page only ever says the button's own word.
+const SAYS: Record<string, Record<Press, string>> = {
+  Python: { step_over: 'set_next(frame)', step_in: 'set_step()', step_out: 'set_return(frame)', continue: 'set_continue()' },
+  JavaScript: { step_over: 'Debugger.stepOver', step_in: 'Debugger.stepInto', step_out: 'Debugger.stepOut', continue: 'Debugger.resume' },
+  Java: { step_over: 'next', step_in: 'step', step_out: 'step up', continue: 'cont' },
+  'C++': { step_over: '-exec-next', step_in: '-exec-step', step_out: '-exec-finish', continue: '-exec-continue' },
+  Go: { step_over: 'next', step_in: 'step', step_out: 'stepout', continue: 'continue' },
 };
-// The line the model would mark: the one inside the loop, where the value changes.
-const SUGGESTED = 2;
+// The line the model would mark: the one in the loop that calls the function.
+const SUGGESTED = 4;
 
 /** OmniCompiler: one set of debugger controls. Change the language and nothing else changes. */
 function Omni() {
@@ -381,25 +394,35 @@ function Omni() {
   const [step, setStep] = useState(2);
   const [stops, setStops] = useState<number[]>([]);
   const at = RUN[step];
-  const ended = step === RUN.length - 1;
-  // Continue runs to the next breakpoint, or to the end when there is none.
-  const resume = () => {
-    const next = RUN.findIndex((run, i) => i > step && stops.includes(run.line));
-    setStep(next === -1 ? RUN.length - 1 : next);
-  };
+  const last = RUN.length - 1;
+  const ended = step === last;
   const toggle = (line: number) => setStops(stops.includes(line) ? stops.filter((other) => other !== line) : [...stops, line]);
+
+  // Where each button lands. A step over stays at this depth, a step out goes up one, and
+  // continue runs to the next breakpoint. With nowhere to go, each one runs to the end.
+  const land = (what: Press) => {
+    if (ended) return 0;
+    if (what === 'step_in') return step + 1;
+    const next = RUN.findIndex((frame, i) => {
+      if (i <= step) return false;
+      if (what === 'continue') return stops.includes(frame.line);
+      return what === 'step_over' ? frame.deep <= at.deep : frame.deep < at.deep;
+    });
+    return next === -1 ? last : next;
+  };
+
   // One press, followed down to the debugger and back.
-  const [said, setSaid] = useState<'step_over' | 'continue'>('step_over');
+  const [said, setSaid] = useState<Press>('step_over');
   const { at: hop, run } = useRun(4, 190);
-  const press = (what: 'step_over' | 'continue') => {
+  const press = (what: Press) => {
     setSaid(what);
     run();
-    if (what === 'continue') resume();
-    else setStep((step + 1) % RUN.length);
+    setStep(land(what));
   };
   const trip = [
     { name: 'Page', detail: `{ "type": "${said}" }` },
-    { name: 'Adapter', detail: 'puts it in that debugger\'s words' },
+    // Four languages have a small adapter in the container. For Go the server talks to Delve itself.
+    { name: lang === 'Go' ? 'Server' : 'Adapter', detail: lang === 'Go' ? 'talks to Delve itself' : 'puts it in that debugger\'s words' },
     { name: NATIVE[lang], detail: SAYS[lang][said] },
     { name: 'Back', detail: `{ "event": "${ended ? 'terminated' : 'stopped'}", "line": ${at.line + 1} }` },
   ];
@@ -417,7 +440,13 @@ function Omni() {
         </div>
         <div className={s.tools}>
           <button type="button" className={s.go} onClick={() => press('step_over')}>
-            {ended ? 'Restart' : 'Step'}
+            {ended ? 'Restart' : 'Step over'}
+          </button>
+          <button type="button" disabled={ended} onClick={() => press('step_in')}>
+            Step in
+          </button>
+          <button type="button" disabled={ended || at.deep === 0} onClick={() => press('step_out')}>
+            Step out
           </button>
           <button type="button" disabled={ended} onClick={() => press('continue')}>
             Continue
@@ -445,15 +474,18 @@ function Omni() {
           <div className={s.side}>
             <h3>Variables</h3>
             <dl className={s.watch} data-watch>
-              <div>
-                <dt>total</dt>
-                <dd>{at.total}</dd>
-              </div>
-              <div>
-                <dt>n</dt>
-                <dd>{at.n}</dd>
-              </div>
+              {at.seen.map(([name, value]) => (
+                <div key={name}>
+                  <dt>{name}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
             </dl>
+            <h3>Call stack</h3>
+            <ol className={s.frames} data-stack>
+              {at.deep === 1 && <li>area, line 2</li>}
+              <li>main, line {at.deep === 1 ? 5 : at.line + 1}</li>
+            </ol>
             <h3>Debugger under it</h3>
             <p className={s.native} data-native>
               {NATIVE[lang]}
@@ -464,48 +496,49 @@ function Omni() {
           <Stages stages={trip} at={hop} />
           <p>
             <span>output</span>
-            <code>{ended ? '12' : ' '}</code>
+            <code>{ended ? '29' : ' '}</code>
           </p>
         </div>
       </div>
       <p className={s.small}>
-        Click a line number to set a breakpoint. The ringed one is where the model would put it. Press Step in two languages and watch the
-        row at the bottom: the page says the same thing, and each debugger hears its own.
+        Click a line number to set a breakpoint. The ringed one is where the model would put it. Press Step in on line 5, in two languages, and
+        watch the row at the bottom: the page says the same thing, and each debugger hears its own.
       </p>
     </div>
   );
 }
 
-// Three questions, and what comes back for each: the tool the model calls, a line of answer, and a picture.
-const ASKS = [
+// Four questions, and what really happens to each. Three go the whole way. One is stopped at the gate.
+type Ask = { q: string; picks?: string; plots?: string; sql?: string; rows?: string; a: string; values?: number[] };
+const ASKS: Ask[] = [
   {
     q: 'How warm was the Arabian Sea this year?',
-    tool: 'time_series',
-    call: 'region: Arabian Sea, variable: temperature',
-    sql: "SELECT month, avg(temperature) FROM profiles WHERE region = 'Arabian Sea' AND depth < 10 GROUP BY month",
+    picks: 'timeseries_line',
+    plots: 'generate_time_series',
+    sql: "SELECT date_trunc('month', p.juld_time) AS time, avg(l.temp) AS avg_temp FROM profiles p JOIN levels_core l ON l.profile_id = p.id WHERE l.pres < 10 AND p.latitude BETWEEN 8 AND 25 AND p.longitude BETWEEN 55 AND 75 GROUP BY 1 ORDER BY 1",
     rows: '12 rows',
     a: 'Warmest in May, near 30 °C at the surface. Coolest in January.',
     values: [22, 26, 34, 46, 58, 52, 44, 40, 42, 38, 30, 24],
   },
   {
     q: 'Where is the water saltiest?',
-    tool: 'heatmap',
-    call: 'variable: salinity, depth: surface',
-    sql: 'SELECT lat, lon, avg(salinity) FROM profiles WHERE depth < 10 GROUP BY lat, lon',
+    picks: 'heatmap_grid',
+    plots: 'generate_heatmap',
+    sql: 'SELECT round(p.latitude) AS lat, round(p.longitude) AS lon, avg(l.psal) AS value FROM profiles p JOIN levels_core l ON l.profile_id = p.id WHERE l.pres < 10 GROUP BY 1, 2',
     rows: '50 cells',
     a: 'The north of the Arabian Sea. It gets fresher toward the Bay of Bengal.',
-    values: [],
   },
   {
     q: 'Show me the floats near India.',
-    tool: 'map_points',
-    call: 'box: 5 to 25 N, 55 to 95 E',
-    sql: 'SELECT float_id, lat, lon FROM floats WHERE lat BETWEEN 5 AND 25 AND lon BETWEEN 55 AND 95',
-    rows: '26 floats',
+    picks: 'map_points',
+    plots: 'generate_map_points',
+    sql: 'SELECT p.latitude AS lat, p.longitude AS lon FROM profiles p WHERE p.latitude BETWEEN 5 AND 25 AND p.longitude BETWEEN 55 AND 95',
+    rows: '26 points',
     a: 'Each dot is one float that reported in. Most are west of the coast.',
-    values: [],
   },
-] as const;
+  // Not about the ocean. The first model call says so, and nothing after it runs.
+  { q: 'Best pizza in Pune?', a: 'Your query is irrelevant or off-topic. Please ask a relevant question about ARGO float data.' },
+];
 
 // A fixed scatter of floats, and a fixed salt field, so the pictures are the same on every visit.
 const FLOATS = Array.from({ length: 26 }, (_, i) => ({ x: 18 + ((i * 97) % 150) + (i % 3) * 6, y: 14 + ((i * 53) % 68) }));
@@ -515,20 +548,25 @@ const SALT = Array.from({ length: 50 }, (_, i) => {
   return Math.max(0.12, 1 - column * 0.085 - row * 0.09 + ((i * 7) % 5) * 0.03);
 });
 
-/** FloatChat: ask a question. The model picks a tool, the tool runs, and the answer comes with a picture. */
+/** FloatChat: ask a question and follow it through the real chain: a gate, four model calls, and two tools. */
 function Float() {
   const [asked, setAsked] = useState(0);
   const ask = ASKS[asked];
-  const path = ask.values.map((y, i) => `${i ? 'L' : 'M'}${i * 24 + 18} ${92 - y}`).join(' ');
+  const refused = !ask.picks;
+  const path = (ask.values ?? []).map((y, i) => `${i ? 'L' : 'M'}${i * 24 + 18} ${92 - y}`).join(' ');
   // The answer is built in the order it really happens. Each part shows when its stage ends.
-  const { at, run } = useRun(5, 520);
+  const { at, run } = useRun(6, 520);
   const stages = [
-    { name: 'Ask', detail: 'plain words, no query' },
-    { name: 'Pick', detail: `the model chooses ${ask.tool}` },
-    { name: 'Query', detail: 'the tool writes the SQL' },
-    { name: 'Rows', detail: `Postgres gives back ${ask.rows}` },
-    { name: 'Draw', detail: 'a picture, and one line of answer' },
+    { name: 'Gate', detail: refused ? 'call 1: not about the floats. Stop.' : 'call 1: about the floats, and clear. Go on.' },
+    { name: 'Pick', detail: `call 2 chooses ${ask.picks ?? 'a picture'}` },
+    { name: 'SQL', detail: 'call 3 writes it, from the schema only' },
+    { name: 'Query', detail: `sql_query gives back ${ask.rows ?? 'rows'}` },
+    { name: 'Draw', detail: `${ask.plots ?? 'a tool'} makes the picture` },
+    { name: 'Sum', detail: 'call 4 writes the answer for you' },
   ];
+  // A refused question never gets past the gate, so the run stops there.
+  const reach = refused ? Math.min(at, 1) : at;
+  const drawn = !refused && at > 4;
   return (
     <div className={s.float}>
       <div className={s.choices} role="group" aria-label="Question">
@@ -546,36 +584,35 @@ function Float() {
           </button>
         ))}
       </div>
-      <Stages stages={stages} at={at} />
+      <Stages stages={stages} at={reach} halted={refused && at > 0} />
       <div className={s.answer}>
         <div className={s.thread}>
           <p className={s.asked}>{ask.q}</p>
-          {at > 1 && (
+          {!refused && at > 1 && (
             <p className={s.tool} data-tool>
-              <span>the model calls</span>
-              <b>{ask.tool}</b>
-              <code>{ask.call}</code>
+              <span>the orchestrator picks</span>
+              <b>{ask.picks}</b>
             </p>
           )}
-          {at > 2 && (
+          {!refused && at > 2 && (
             <p className={s.tool}>
-              <span>the tool runs this. Only a SELECT is let through.</span>
+              <span>the model writes this. The tool lets only a SELECT through.</span>
               <code>{ask.sql}</code>
             </p>
           )}
-          {at > 4 && (
-            <p className={s.reply} data-answer>
+          {(refused ? at > 0 : at > 5) && (
+            <p className={s.reply} data-answer data-refused={refused || undefined}>
               {ask.a}
             </p>
           )}
         </div>
         <figure className={s.chart}>
-          <svg viewBox="0 0 300 110" role="img" aria-label={`A ${ask.tool.replace('_', ' ')} picture for the answer`} data-picture={ask.tool} key={asked}>
-            {at > 4 && ask.tool === 'time_series' && (
+          <svg viewBox="0 0 300 110" role="img" aria-label="The picture that comes with the answer" data-picture={ask.picks ?? 'none'} key={asked}>
+            {drawn && ask.picks === 'timeseries_line' && (
               <>
                 <path d="M18 92 H282" className={s.axis} />
                 <path d={path} className={s.line} pathLength={1} />
-                {ask.values.map((y, i) => (
+                {(ask.values ?? []).map((y, i) => (
                   <circle key={i} cx={i * 24 + 18} cy={92 - y} r="3" className={s.dot} style={{ animationDelay: `${i * 45}ms` }} />
                 ))}
                 {['Jan', 'May', 'Sep', 'Dec'].map((month, i) => (
@@ -585,8 +622,8 @@ function Float() {
                 ))}
               </>
             )}
-            {at > 4 &&
-              ask.tool === 'heatmap' &&
+            {drawn &&
+              ask.picks === 'heatmap_grid' &&
               SALT.map((value, i) => (
                 <rect
                   key={i}
@@ -598,7 +635,7 @@ function Float() {
                   style={{ '--to': value, animationDelay: `${((i % 10) + Math.floor(i / 10)) * 30}ms` } as CSSProperties}
                 />
               ))}
-            {at > 4 && ask.tool === 'map_points' && (
+            {drawn && ask.picks === 'map_points' && (
               <>
                 <rect x="10" y="5" width="280" height="96" className={s.sea} />
                 {[80, 150, 220].map((x) => (
@@ -614,11 +651,22 @@ function Float() {
             )}
           </svg>
           <figcaption>
-            {at <= 4 ? 'Waiting for the rows' : ask.tool === 'time_series' ? 'Surface temperature, by month' : ask.tool === 'heatmap' ? 'Salinity. Brighter is saltier.' : 'Float positions'}
+            {refused
+              ? 'No picture. Nothing ran.'
+              : !drawn
+                ? 'Waiting for the rows'
+                : ask.picks === 'timeseries_line'
+                  ? 'Surface temperature, by month'
+                  : ask.picks === 'heatmap_grid'
+                    ? 'Salinity. Brighter is saltier.'
+                    : 'Float positions'}
           </figcaption>
         </figure>
       </div>
-      <p className={s.small}>Sample answers and sample queries, to show the shape of it. The real one runs the tools on the live float data.</p>
+      <p className={s.small}>
+        Sample answers and sample queries, on the real tables. The refusal is the real one, word for word. The real app runs all of this on the
+        live float data.
+      </p>
     </div>
   );
 }

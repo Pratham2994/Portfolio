@@ -385,3 +385,9 @@
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   }
 }
+
+/* The picture of what runs underneath. It sits apart from the demo, with room around it. */
+.under {
+  display: grid;
+  gap: var(--space-4);
+}

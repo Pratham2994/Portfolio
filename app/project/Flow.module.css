@@ -1,0 +1,134 @@
+/* The picture under a project: boxes for its real parts, and a light that goes from one to the next. */
+.flow {
+  container-type: inline-size;
+}
+
+.flow svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* A narrow screen gets the drawing on its side, so the letters stay a size that can be read. */
+.flow .tall {
+  display: none;
+  max-width: 24rem;
+  margin-inline: auto;
+}
+
+@container (max-width: 54rem) {
+  .flow .wide {
+    display: none;
+  }
+
+  .flow .tall {
+    display: block;
+  }
+}
+
+.link {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1.5;
+}
+
+.head {
+  fill: var(--rule);
+}
+
+.pulse {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 12 200;
+  stroke-dashoffset: 12;
+  opacity: 0;
+}
+
+.node rect {
+  fill: color-mix(in srgb, var(--fg) 7%, var(--bg));
+  stroke: var(--rule);
+  stroke-width: 1.5;
+}
+
+.node text {
+  text-anchor: middle;
+  font-family: var(--font-mono);
+}
+
+.name {
+  fill: var(--fg);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.note {
+  fill: var(--muted);
+  font-size: 9.5px;
+}
+
+/* Where it starts: the person, or the thing that comes in. */
+.node[data-kind='you'] rect {
+  fill: var(--fg);
+  stroke: var(--fg);
+}
+
+.node[data-kind='you'] text {
+  fill: var(--bg);
+}
+
+/*
+ * One round takes a beat for each link, and a rest at the end. Each light waits for its turn,
+ * and each box lights as the light reaches it.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .pulse {
+    animation: flow-pulse calc(var(--n) * 0.75s + 1s) linear infinite;
+    animation-delay: calc(var(--i) * 0.75s);
+  }
+
+  .node rect {
+    animation: flow-hit calc(var(--n) * 0.75s + 1s) linear infinite;
+    animation-delay: calc(var(--i) * 0.75s - 0.1s);
+  }
+}
+
+@keyframes flow-pulse {
+  0% {
+    stroke-dashoffset: 12;
+    opacity: 0;
+  }
+
+  1% {
+    opacity: 1;
+  }
+
+  12% {
+    stroke-dashoffset: -100;
+    opacity: 1;
+  }
+
+  13%,
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}
+
+@keyframes flow-hit {
+  0%,
+  9% {
+    stroke: var(--accent);
+    stroke-width: 2.5;
+  }
+
+  16%,
+  100% {
+    stroke: var(--rule);
+    stroke-width: 1.5;
+  }
+}

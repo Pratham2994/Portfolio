@@ -33,10 +33,10 @@ test('Scrub works out the bitrate from the size limit and the clip length', asyn
 test('OmniCompiler keeps the debugger state when the language changes', async ({ page }) => {
   await open(page, '/work/omnicompiler');
   const demo = page.locator('[data-demo="omnicompiler"]');
-  await demo.getByRole('button', { name: 'Step' }).click();
+  await demo.getByRole('button', { name: 'Step over' }).click();
   const before = await demo.locator('[data-watch]').innerText();
   await demo.getByRole('button', { name: 'Go', exact: true }).click();
-  await expect(demo.locator('ol li code').first()).toHaveText('total := 0');
+  await expect(demo.locator('ol li code').nth(2)).toHaveText('total := 0');
   await expect(demo.locator('[data-native]')).toHaveText('Delve');
   expect(await demo.locator('[data-watch]').innerText()).toBe(before);
 });
@@ -109,24 +109,41 @@ test('the deck opens an app from its home page and goes back', async ({ page }) 
 test('OmniCompiler runs to a breakpoint, with the same controls in every language', async ({ page }) => {
   await open(page, '/work/omnicompiler');
   const demo = page.locator('[data-demo="omnicompiler"]');
-  await demo.getByRole('button', { name: 'Breakpoint on line 4' }).click();
+  await demo.getByRole('button', { name: 'Breakpoint on line 6' }).click();
   await demo.getByRole('button', { name: 'Continue' }).click();
   await expect(demo.locator('ol li[data-here] code')).toHaveText('print(total)');
-  await expect(demo.locator('[data-watch]')).toContainText('12');
+  await expect(demo.locator('[data-watch]')).toContainText('29');
   await demo.getByRole('button', { name: 'Java', exact: true }).click();
   await expect(demo.locator('[data-native]')).toHaveText('jdb');
-  await expect(demo.locator('[data-watch]')).toContainText('12');
+  await expect(demo.locator('[data-watch]')).toContainText('29');
+});
+
+test('OmniCompiler steps into the function and out of it, and the call stack follows', async ({ page }) => {
+  await open(page, '/work/omnicompiler');
+  const demo = page.locator('[data-demo="omnicompiler"]');
+  // It starts on line 5, the call. A step in goes to the function.
+  await demo.getByRole('button', { name: 'Step in' }).click();
+  await expect(demo.locator('[data-stack] li')).toHaveText(['area, line 2', 'main, line 5']);
+  await expect(demo.locator('[data-watch]')).toContainText('w');
+  await demo.getByRole('button', { name: 'Step out' }).click();
+  await expect(demo.locator('[data-stack] li')).toHaveCount(1);
+  await expect(demo.locator('[data-watch]')).toContainText('4');
 });
 
 test('FloatChat shows the tool the model calls, and a different picture for each question', async ({ page }) => {
   await open(page, '/work/floatchat');
   const demo = page.locator('[data-demo="floatchat"]');
-  await expect(demo.locator('[data-tool] b')).toHaveText('time_series');
+  await expect(demo.locator('[data-tool] b')).toHaveText('timeseries_line');
   await demo.getByRole('button', { name: /saltiest/ }).click();
-  await expect(demo.locator('[data-tool] b')).toHaveText('heatmap');
-  await expect(demo.locator('[data-picture="heatmap"] rect')).toHaveCount(50);
+  await expect(demo.locator('[data-tool] b')).toHaveText('heatmap_grid');
+  await expect(demo.locator('[data-picture="heatmap_grid"] rect')).toHaveCount(50, { timeout: 8000 });
   await demo.getByRole('button', { name: /floats near India/ }).click();
-  await expect(demo.locator('[data-picture="map_points"] circle')).toHaveCount(26);
+  await expect(demo.locator('[data-picture="map_points"] circle')).toHaveCount(26, { timeout: 8000 });
+  // A question that is not about the ocean stops at the gate: no tool, no picture.
+  await demo.getByRole('button', { name: /pizza/ }).click();
+  await expect(demo.locator('[data-answer][data-refused]')).toContainText('irrelevant or off-topic');
+  await expect(demo.locator('[data-tool]')).toHaveCount(0);
+  await expect(demo.locator('[data-stages] li[data-state="done"]')).toHaveCount(1);
 });
 
 test('the way back stays in view when a project page is scrolled', async ({ page }) => {
@@ -146,4 +163,13 @@ test('a run lights its stages one after the other, to the end', async ({ page })
   await expect(demo.locator('[data-stages][data-over]')).toHaveCount(0);
   await expect(demo.locator('[data-stages][data-over]')).toHaveCount(1, { timeout: 8000 });
   await expect(demo.locator('[data-stages] li[data-state="done"]')).toHaveCount(5);
+});
+
+test('each of the first four projects has a picture of what runs underneath', async ({ page }) => {
+  for (const slug of ['scrub', 'neat', 'omnicompiler', 'floatchat']) {
+    await open(page, `/work/${slug}`);
+    const flow = page.locator('[data-flow]');
+    await expect(flow.locator('svg:visible')).toHaveCount(1);
+    expect(await flow.locator('svg:visible g[data-kind]').count()).toBeGreaterThanOrEqual(8);
+  }
 });

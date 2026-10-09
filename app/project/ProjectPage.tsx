@@ -8,6 +8,7 @@ import { Paragraphs } from '~/lib/Paragraphs';
 import { track } from '~/lib/analytics';
 
 import { Demo } from './Demo';
+import { Flow } from './Flow';
 import s from './ProjectPage.module.css';
 import { cancelTransition, closeLive, closeTo, openFrom, takeClosed, takeIntent } from './transition';
 
@@ -162,6 +163,13 @@ export function ProjectPage({ project }: { project: Project }) {
         </section>
 
         <Demo slug={project.slug} />
+
+        {project.flow && (
+          <section className={s.under} data-flow data-in>
+            <h2>Under the hood</h2>
+            <Flow flow={project.flow} title={project.title} />
+          </section>
+        )}
 
         {project.media.length > 0 && (
           <section className={s.media} data-media data-in>
