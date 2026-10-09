@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 
 import { getProject } from '~/content';
-import { pageMeta } from '~/lib/meta';
+import { pageMeta, projectSchema } from '~/lib/meta';
 import { NotOnWall } from '~/project/NotOnWall';
 import { ProjectPage } from '~/project/ProjectPage';
 
@@ -13,6 +13,7 @@ export function meta({ params }: { params: { slug?: string } }) {
     description: `${project.tagline} ${project.sectors[0].body}`,
     path: `/work/${project.slug}`,
     image: project.slug,
+    schema: projectSchema(project),
   });
 }
 
