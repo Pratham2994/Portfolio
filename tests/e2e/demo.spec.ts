@@ -168,10 +168,21 @@ test('a run lights its stages one after the other, to the end', async ({ page })
 });
 
 test('each of the first five projects has a picture of what runs underneath', async ({ page }) => {
-  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat']) {
+  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon']) {
     await open(page, `/work/${slug}`);
     const flow = page.locator('[data-flow]');
     await expect(flow.locator('svg:visible')).toHaveCount(1);
     expect(await flow.locator('svg:visible g[data-kind]').count()).toBeGreaterThanOrEqual(8);
   }
+});
+
+test('iDEA sorts what the customer says, and a new message goes to a new department', async ({ page }) => {
+  await open(page, '/work/idea-hackathon');
+  const demo = page.locator('[data-demo="idea-hackathon"]');
+  await expect(demo.locator('[data-stamp]')).toHaveText('Grievance');
+  await demo.locator('[data-said]').fill('Please reset my password, the login gives an error');
+  await expect(demo.locator('[data-stamp]')).toHaveText('Operations');
+  // A message with none of the words falls back to the first department, as the real code does.
+  await demo.locator('[data-said]').fill('hello');
+  await expect(demo.locator('[data-stamp]')).toHaveText('Loans');
 });

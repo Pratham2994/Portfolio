@@ -791,36 +791,96 @@ function Float() {
   );
 }
 
-const CUSTOMERS = [
-  { said: '"My card was declined twice."', kind: 'Card problem', priority: 'High', desk: 'Desk 2' },
-  { said: '"I want to update my address."', kind: 'Account details', priority: 'Low', desk: 'Desk 5' },
-  { said: '"Money left my account and I did not send it."', kind: 'Possible fraud', priority: 'Urgent', desk: 'Desk 1' },
+// The four departments of the branch, and some of the words that send a message to each.
+// The words are from the project's own lists, which hold misspellings too: speech comes in through Whisper.
+const DESKS: { name: string; short: string; words: string[] }[] = [
+  { name: 'Loan Services', short: 'Loans', words: ['loan', 'mortgage', 'refinance', 'repayment', 'credit', 'interest', 'installment', 'collateral', 'eligibility', 'lone'] },
+  { name: 'Deposit and Account Services', short: 'Accounts', words: ['account', 'deposit', 'savings', 'balance', 'transfer', 'statement', 'withdrawal', 'cheque', 'kyc', 'acct'] },
+  { name: 'Operations and Service Requests', short: 'Operations', words: ['password', 'login', 'log in', 'reset', 'update', 'error', 'mobile app', 'access', 'timeout', 'server'] },
+  { name: 'Customer Grievance and Fraud', short: 'Grievance', words: ['complaint', 'fraud', 'dispute', 'unauthorized', 'unauthorised', 'theft', 'suspicious', 'chargeback', 'compensation', 'dissatisfied'] },
 ];
 
-/** iDEA: one customer walks in, and the desk works out the rest. */
+/** Sorts a message the way the project does: count each department's words in it, and the most wins. */
+function sortMessage(text: string) {
+  const low = text.toLowerCase();
+  const counts = DESKS.map((desk) => {
+    const found = desk.words.filter((word) => low.includes(word));
+    return { desk, found, count: found.reduce((sum, word) => sum + low.split(word).length - 1, 0) };
+  });
+  // The first department wins a tie, and a message with none of the words, as in the real code.
+  return counts.reduce((best, next) => (next.count > best.count ? next : best));
+}
+
+const SAID = [
+  { how: 'Video', text: 'Someone made an unauthorized transfer. This is fraud and I want to file a complaint.' },
+  { how: 'Voice', text: 'I want to know the interest and the eligibility for a home loan.' },
+  { how: 'Typed', text: 'I forgot my password and the mobile app shows an error at login.' },
+];
+// How many live tickets are ahead, for the made-up branch. The real wait is five minutes for each.
+const AHEAD = 3;
+
+/** iDEA: say what is wrong, in any of three ways, and follow it to the right department and a place in the queue. */
 function Idea() {
-  const [who, setWho] = useState(0);
-  const customer = CUSTOMERS[who];
+  const [text, setText] = useState(SAID[0].text);
+  const [how, setHow] = useState(SAID[0].how);
+  const { at, run } = useRun(5, 480);
+  const sorted = sortMessage(text);
   const steps = [
-    ['Face', 'Recognised. No card or form needed.'],
-    ['Voice', customer.said],
-    ['Sorted', customer.kind],
-    ['Queue', `${customer.priority} priority. ${customer.desk}.`],
+    { name: 'Login', value: 'the password, then a face check' },
+    { name: 'Hear', value: how === 'Typed' ? 'typed, so nothing to hear' : `${how === 'Video' ? 'sound pulled out, then ' : ''}Whisper wrote ${text.trim().split(/\s+/).length} words` },
+    { name: 'Sort', value: sorted.count ? `${sorted.count} ${sorted.count === 1 ? 'word' : 'words'} for ${sorted.desk.short}` : 'no department word. It falls back to Loans' },
+    { name: 'Ticket', value: `saved under ${sorted.desk.short}` },
+    { name: 'Queue', value: `place ${AHEAD + 1}. About ${(AHEAD + 1) * 5} minutes` },
   ];
   return (
     <div className={s.idea}>
-      <ol key={who} className={s.flow}>
-        {steps.map(([label, text], i) => (
-          <li key={label} style={{ animationDelay: `${i * 260}ms` }}>
-            <span>{label}</span>
-            <p>{text}</p>
-          </li>
+      <div className={s.choices} role="group" aria-label="A customer">
+        {SAID.map((said) => (
+          <button
+            key={said.how}
+            type="button"
+            aria-pressed={text === said.text}
+            onClick={() => {
+              setText(said.text);
+              setHow(said.how);
+              run();
+            }}
+          >
+            {said.how}
+          </button>
         ))}
-      </ol>
-      <button type="button" className={s.action} onClick={() => setWho((who + 1) % CUSTOMERS.length)}>
-        Next customer
+      </div>
+      <label className={s.said}>
+        <span>What the customer says. Change it and see where it goes.</span>
+        <textarea
+          rows={2}
+          value={text}
+          onChange={(event) => {
+            setText(event.target.value);
+            setHow('Typed');
+          }}
+          data-said
+        />
+      </label>
+      <button type="button" className={s.action} onClick={run}>
+        Raise it
       </button>
-      <p className={s.small}>Three made-up customers, to show the flow.</p>
+      <div className={s.bench}>
+        <Console kind="wave" steps={steps} at={at} />
+        <Report ready={at >= steps.length} wait="Working on it" stamp={sorted.desk.short}>
+          <p className={s.reply} data-desk>
+            {sorted.desk.name}
+          </p>
+          <ul className={s.points}>
+            <li>{sorted.found.length ? `The words that decided it: ${sorted.found.join(', ')}` : 'None of the words were in it, so it took the first department'}</li>
+            <li>
+              Wait for a live turn: place {AHEAD + 1}, about {(AHEAD + 1) * 5} minutes
+            </li>
+            <li>Or book a slot: every half hour, 9 to 6, in the next 7 days</li>
+          </ul>
+        </Report>
+      </div>
+      <p className={s.small}>The sorting here is the real method, with a shorter word list. The queue is made up.</p>
     </div>
   );
 }
@@ -989,7 +1049,7 @@ const DEMOS: Record<string, { title: string; body: () => ReactElement }> = {
   'prats-deck': { title: 'Tap through it', body: Deck },
   omnicompiler: { title: 'Debug it', body: Omni },
   floatchat: { title: 'Ask it', body: Float },
-  'idea-hackathon': { title: 'One customer', body: Idea },
+  'idea-hackathon': { title: 'Raise a query', body: Idea },
   chronicle: { title: 'A day of listening', body: Chronicle },
   algomotion: { title: 'Watch one', body: Algo },
   malshield: { title: 'One scan', body: Mal },
