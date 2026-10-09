@@ -126,6 +126,17 @@
     aspect-ratio: var(--ratio);
   }
 
+  /* The art takes the room above the caption, so no sheet has a hole in the middle. */
+  :global([data-paper]:not([data-paper='a5-wide'])) > .poster {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  :global([data-paper]:not([data-paper='a5-wide'])) > .poster .caption {
+    position: static;
+    padding: 0 7cqw 6cqw;
+  }
+
   /* A small upright sheet has room for the title only, until the screen is big. */
   :global([data-paper='a5-tall']) > .poster .tagline {
     display: none;

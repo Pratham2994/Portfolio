@@ -173,4 +173,22 @@
     width: var(--w);
     aspect-ratio: var(--ratio);
   }
+
+  /* An upright sheet is tall. Its list spreads over the room under the heading, with bigger type. */
+  :global([data-paper='a5-tall']) > .piece .body {
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: stretch;
+  }
+
+  :global([data-paper='a5-tall']) > .piece :is(.fixtures, .lines) {
+    align-content: space-evenly;
+  }
+
+  :global([data-paper='a5-tall']) > .piece .fixtures {
+    font-size: clamp(0.75rem, 13cqw, 2.25rem);
+  }
+
+  :global([data-paper='a5-tall']) > .piece .lines {
+    font-size: clamp(0.6875rem, 6.6cqw, 1.5rem);
+  }
 }

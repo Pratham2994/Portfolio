@@ -325,7 +325,7 @@
   height: 56cqw;
   overflow: hidden;
   font-family: var(--font-mono);
-  font-size: clamp(0.6875rem, 5.6cqw, 1rem);
+  font-size: clamp(0.6875rem, 5.6cqw, 1.75rem);
   line-height: 1.5;
   word-break: break-all;
   opacity: 0.8;
@@ -369,6 +369,59 @@
     height: 178.5%;
     scale: 0.56;
     transform-origin: 0 0;
+  }
+}
+
+/*
+ * An upright sheet on the wide wall is taller than the art was drawn for. So there the art
+ * is not a fixed height: it takes all the room above the caption, however tall that is.
+ */
+@media (min-width: 900px) and (orientation: landscape) {
+  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art {
+    position: relative;
+    inset: auto;
+    display: grid;
+    min-height: 0;
+    padding: 8cqw 8cqw 6cqw;
+  }
+
+  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > :is(.frames, .eq, .sort, .hex) {
+    height: auto;
+    min-height: 0;
+  }
+
+  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > .frames {
+    margin-top: 3cqw;
+  }
+
+  /* Art made of fixed shapes cannot stretch, so it sits in the middle of its room. */
+  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > :is(.grid, .code, .device) {
+    align-self: center;
+    margin-top: 0;
+  }
+
+  /* The bars and the gaps between them grow together. */
+  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > .rank {
+    grid-auto-rows: 1fr;
+    gap: 0;
+    margin-top: 0;
+  }
+
+  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > .rank i {
+    height: 58%;
+    align-self: center;
+  }
+
+  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > .waves svg:nth-child(1) {
+    top: 8%;
+  }
+
+  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > .waves svg:nth-child(2) {
+    top: 36%;
+  }
+
+  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > .waves svg:nth-child(3) {
+    top: 64%;
   }
 }
 
