@@ -65,6 +65,7 @@ const desk = z.object({
     title: text,
     note: text,
     main: text,
+    rank: text.optional(),
     story: z.array(text),
     coop: z.array(text),
     first: text,

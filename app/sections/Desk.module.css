@@ -553,6 +553,15 @@
   font-weight: 600;
 }
 
+/* His rank, under the game it is for. */
+.featured em {
+  display: block;
+  margin-top: 0.3em;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-style: normal;
+}
+
 .first span {
   margin-right: 0.8em;
   color: #3ddc84;
@@ -725,6 +734,7 @@
 
 .face i {
   aspect-ratio: 1;
+  transition: background-color 0.25s linear;
 }
 
 .watch {

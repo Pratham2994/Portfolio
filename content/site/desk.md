@@ -12,6 +12,7 @@ games:
   title: Games
   note: Basic FPS player, I know. The story games started when the new PC arrived.
   main: Valorant
+  rank: Platinum 1 now. Platinum 3 at my peak.
   story:
     - Cyberpunk 2077
     - Spider-Man Remastered

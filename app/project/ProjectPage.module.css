@@ -383,7 +383,7 @@
   max-width: 16ch;
 }
 
-/* On a wide page each side stacks on its own, so the title starts at the top, level with the art. */
+/* On a wide page each side stacks on its own. */
 @media (min-width: 1000px) {
   .top {
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
@@ -396,6 +396,11 @@
     align-content: start;
     gap: clamp(1.25rem, 3.2vh, 2.5rem);
     min-width: 0;
+  }
+
+  /* The words sit in the middle of the height of the art and the numbers, with room above and below. */
+  .lead {
+    align-self: center;
   }
 
   .plate {

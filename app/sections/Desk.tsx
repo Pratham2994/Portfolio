@@ -37,12 +37,13 @@ function Sports() {
 
 /** A game launcher: the one he plays most, the shelf of story games, co-op, and the first install. */
 function Games() {
-  const { main, story, coop, first } = desk.games;
+  const { main, rank, story, coop, first } = desk.games;
   return (
     <div className={s.launcher}>
       <p className={s.featured}>
         <span>Most played</span>
         <strong>{main}</strong>
+        {rank && <em data-rank>{rank}</em>}
       </p>
       <div>
         <h4>Story</h4>
@@ -110,8 +111,11 @@ function Pc() {
 }
 
 const FACE = ['#ffc21a', '#ece8df', '#3ddc84', '#ff3b3b', '#ffc21a', '#2f6bff', '#ff7a1a', '#3ddc84', '#ece8df'];
+const SOLVED = '#ece8df';
+// The order the squares come right: the centre, the cross, then the corners.
+const TURNS = [4, 1, 3, 5, 7, 0, 2, 6, 8];
 
-/** A stopwatch that runs up to his best time, beside one face of the cube. */
+/** A stopwatch that runs up to his best time, beside one face of the cube. The face is solved as the watch stops. */
 function Cube({ running }: { running: boolean }) {
   const best = desk.cube.best;
   const [seconds, setSeconds] = useState(best);
@@ -131,7 +135,8 @@ function Cube({ running }: { running: boolean }) {
     <div className={s.cube}>
       <div className={s.face} aria-hidden="true">
         {FACE.map((colour, i) => (
-          <i key={i} style={{ background: colour }} />
+          // A square turns to the solved colour when the watch has gone far enough for it.
+          <i key={i} style={{ background: seconds / best >= (TURNS.indexOf(i) + 1) / 9 ? SOLVED : colour }} />
         ))}
       </div>
       <p className={s.watch} data-watch>
