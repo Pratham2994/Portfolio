@@ -1,10 +1,49 @@
-import { useEffect, useState, type ReactElement } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactElement } from 'react';
 
 import { track } from '~/lib/analytics';
+import { prefersReducedMotion } from '~/lib/motion';
 
 import s from './Demo.module.css';
 
 /* One small working part per project. Each shows the idea of the project in a few seconds. */
+
+/**
+ * Walks through the stages of a run, one at a time. `at` is the stage that is running now,
+ * and it equals `count` when the run is over. With reduced motion a run is over at once.
+ */
+function useRun(count: number, pace = 520) {
+  const [at, setAt] = useState(count);
+  const timer = useRef(0);
+  useEffect(() => () => clearInterval(timer.current), []);
+  const run = () => {
+    clearInterval(timer.current);
+    if (prefersReducedMotion()) return setAt(count);
+    setAt(0);
+    let now = 0;
+    timer.current = window.setInterval(() => {
+      now += 1;
+      if (now >= count) clearInterval(timer.current);
+      setAt(now);
+    }, pace);
+  };
+  return { at, run, over: at >= count };
+}
+
+type Stage = { name: string; detail: string };
+
+/** What goes on underneath, as a row of stages. Each one lights up as the run reaches it. */
+function Stages({ stages, at }: { stages: Stage[]; at: number }) {
+  return (
+    <ol className={s.stages} data-stages data-over={at >= stages.length || undefined}>
+      {stages.map((stage, i) => (
+        <li key={stage.name} data-state={i < at ? 'done' : i === at ? 'now' : 'todo'}>
+          <b>{stage.name}</b>
+          <span>{stage.detail}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 /** Scrub: pick a size limit and a clip length, and see the bitrate it would encode at. */
 function Scrub() {
@@ -17,11 +56,28 @@ function Scrub() {
   const [seconds, setSeconds] = useState(60);
   const AUDIO = 128;
   const video = Math.max(Math.floor((mb * 8192) / seconds) - AUDIO, 0);
+  const size = ((video + AUDIO) * seconds) / 8192;
+  const { at, run } = useRun(5, 560);
+  const stages = [
+    { name: 'Probe', detail: `ffprobe reads it: ${seconds} s long` },
+    { name: 'Budget', detail: `${mb} MB over ${seconds} s is ${video + AUDIO} kbps in all` },
+    { name: 'Pass 1', detail: 'looks at every frame, writes nothing' },
+    { name: 'Pass 2', detail: `encodes at ${video.toLocaleString('en')} kbps` },
+    { name: 'Check', detail: `${size.toFixed(2)} MB. Under.` },
+  ];
   return (
     <div className={s.scrub}>
       <div className={s.choices} role="group" aria-label="Size limit">
         {limits.map((limit) => (
-          <button key={limit.name} type="button" aria-pressed={mb === limit.mb} onClick={() => setMb(limit.mb)}>
+          <button
+            key={limit.name}
+            type="button"
+            aria-pressed={mb === limit.mb}
+            onClick={() => {
+              setMb(limit.mb);
+              run();
+            }}
+          >
             {limit.name} <span>{limit.mb} MB</span>
           </button>
         ))}
@@ -35,6 +91,17 @@ function Scrub() {
       <p className={s.result} data-result>
         <b>{video.toLocaleString('en')}</b> kbps of video, plus {AUDIO} for sound. Two passes, and it lands under {mb} MB.
       </p>
+      {/* The command is on screen before it runs. It changes as the numbers do. */}
+      <p className={s.command}>
+        <span>the command, before it runs</span>
+        <code data-command>
+          ffmpeg -i clip.mp4 -c:v libx264 -b:v <b>{video}k</b> -pass 2 -c:a aac -b:a {AUDIO}k out.mp4
+        </code>
+      </p>
+      <button type="button" className={s.action} onClick={run}>
+        Run it
+      </button>
+      <Stages stages={stages} at={at} />
     </div>
   );
 }
@@ -98,6 +165,9 @@ const GROUPS: Group[] = [
   },
 ];
 
+// The stage of the scan that finds each group: the hash, the installed apps, then the grouping.
+const FOUND: Record<string, number> = { duplicates: 3, installers: 4, receipts: 5 };
+
 /** Neat: its review queue. One decision per group, a reason for each, and undo on everything. */
 function Neat() {
   const [done, setDone] = useState<string[]>([]);
@@ -112,6 +182,20 @@ function Neat() {
     setDone(done.filter((other) => other !== id));
     if (id === 'receipts') setArrived(0);
   };
+  // The scan that makes the groups. Each group comes into view as its stage ends.
+  const { at, run } = useRun(5, 480);
+  const stages = [
+    { name: 'Scan', detail: '9 files at the top of Downloads' },
+    { name: 'Source', detail: 'the site each one came from' },
+    { name: 'Hash', detail: '3 files are the same inside' },
+    { name: 'Apps', detail: '3 installers match installed apps' },
+    { name: 'Group', detail: '3 decisions, not 9' },
+  ];
+  const scan = () => {
+    setDone([]);
+    setArrived(0);
+    run();
+  };
 
   return (
     <div className={s.neat}>
@@ -120,12 +204,19 @@ function Neat() {
         {left ? `files to look at, in ${open.length} ${open.length === 1 ? 'decision' : 'decisions'}.` : 'files to look at. Downloads is clean.'}
         {freed > 0 && ` ${freed} MB back, all of it still in the Recycle Bin.`}
       </p>
-      <button type="button" className={s.action} disabled={!sure.length} onClick={() => setDone([...done, ...sure])}>
-        Apply the {sure.length || ''} sure ones
-      </button>
+      <Stages stages={stages} at={at} />
+      <div className={s.choices}>
+        <button type="button" className={s.action} disabled={!sure.length || at < 5} onClick={() => setDone([...done, ...sure])}>
+          Apply the {sure.length || ''} sure ones
+        </button>
+        <button type="button" onClick={scan}>
+          Scan again
+        </button>
+      </div>
       <ul className={s.queue}>
         {GROUPS.map((group) =>
-          done.includes(group.id) ? (
+          // A group is not there until the stage that finds it has ended.
+          at < FOUND[group.id] ? null : done.includes(group.id) ? (
             <li key={group.id} className={s.settled} data-group={group.id}>
               <span>{group.done}</span>
               <button type="button" onClick={() => undo(group.id)}>
@@ -273,6 +364,14 @@ const RUN = [
 
 // The debugger each language really runs on. The page never shows these: that is the point.
 const NATIVE: Record<string, string> = { Python: 'bdb', JavaScript: 'Node Inspector', Java: 'jdb', 'C++': 'gdb', Go: 'Delve' };
+// What each debugger is really told, for the two buttons. The page only ever says the first word.
+const SAYS: Record<string, Record<'step_over' | 'continue', string>> = {
+  Python: { step_over: 'set_next(frame)', continue: 'set_continue()' },
+  JavaScript: { step_over: 'Debugger.stepOver', continue: 'Debugger.resume' },
+  Java: { step_over: 'next', continue: 'cont' },
+  'C++': { step_over: '-exec-next', continue: '-exec-continue' },
+  Go: { step_over: 'next', continue: 'continue' },
+};
 // The line the model would mark: the one inside the loop, where the value changes.
 const SUGGESTED = 2;
 
@@ -289,6 +388,21 @@ function Omni() {
     setStep(next === -1 ? RUN.length - 1 : next);
   };
   const toggle = (line: number) => setStops(stops.includes(line) ? stops.filter((other) => other !== line) : [...stops, line]);
+  // One press, followed down to the debugger and back.
+  const [said, setSaid] = useState<'step_over' | 'continue'>('step_over');
+  const { at: hop, run } = useRun(4, 190);
+  const press = (what: 'step_over' | 'continue') => {
+    setSaid(what);
+    run();
+    if (what === 'continue') resume();
+    else setStep((step + 1) % RUN.length);
+  };
+  const trip = [
+    { name: 'Page', detail: `{ "type": "${said}" }` },
+    { name: 'Adapter', detail: 'puts it in that debugger\'s words' },
+    { name: NATIVE[lang], detail: SAYS[lang][said] },
+    { name: 'Back', detail: `{ "event": "${ended ? 'terminated' : 'stopped'}", "line": ${at.line + 1} }` },
+  ];
 
   return (
     <div className={s.omni}>
@@ -302,10 +416,10 @@ function Omni() {
           ))}
         </div>
         <div className={s.tools}>
-          <button type="button" className={s.go} onClick={() => setStep((step + 1) % RUN.length)}>
+          <button type="button" className={s.go} onClick={() => press('step_over')}>
             {ended ? 'Restart' : 'Step'}
           </button>
-          <button type="button" disabled={ended} onClick={resume}>
+          <button type="button" disabled={ended} onClick={() => press('continue')}>
             Continue
           </button>
           <span data-state>{ended ? 'finished' : `paused on line ${at.line + 1}`}</span>
@@ -347,15 +461,16 @@ function Omni() {
           </div>
         </div>
         <div className={s.wire}>
-          <span>to the page</span>
-          <code>{`{ "event": "${ended ? 'terminated' : 'stopped'}", "line": ${at.line + 1} }`}</code>
-          <span>output</span>
-          <code>{ended ? '12' : ' '}</code>
+          <Stages stages={trip} at={hop} />
+          <p>
+            <span>output</span>
+            <code>{ended ? '12' : ' '}</code>
+          </p>
         </div>
       </div>
       <p className={s.small}>
-        Click a line number to set a breakpoint. The ringed one is where the model would put it. Change the language: the debugger under it
-        changes, and the message to the page does not.
+        Click a line number to set a breakpoint. The ringed one is where the model would put it. Press Step in two languages and watch the
+        row at the bottom: the page says the same thing, and each debugger hears its own.
       </p>
     </div>
   );
@@ -367,6 +482,8 @@ const ASKS = [
     q: 'How warm was the Arabian Sea this year?',
     tool: 'time_series',
     call: 'region: Arabian Sea, variable: temperature',
+    sql: "SELECT month, avg(temperature) FROM profiles WHERE region = 'Arabian Sea' AND depth < 10 GROUP BY month",
+    rows: '12 rows',
     a: 'Warmest in May, near 30 °C at the surface. Coolest in January.',
     values: [22, 26, 34, 46, 58, 52, 44, 40, 42, 38, 30, 24],
   },
@@ -374,6 +491,8 @@ const ASKS = [
     q: 'Where is the water saltiest?',
     tool: 'heatmap',
     call: 'variable: salinity, depth: surface',
+    sql: 'SELECT lat, lon, avg(salinity) FROM profiles WHERE depth < 10 GROUP BY lat, lon',
+    rows: '50 cells',
     a: 'The north of the Arabian Sea. It gets fresher toward the Bay of Bengal.',
     values: [],
   },
@@ -381,6 +500,8 @@ const ASKS = [
     q: 'Show me the floats near India.',
     tool: 'map_points',
     call: 'box: 5 to 25 N, 55 to 95 E',
+    sql: 'SELECT float_id, lat, lon FROM floats WHERE lat BETWEEN 5 AND 25 AND lon BETWEEN 55 AND 95',
+    rows: '26 floats',
     a: 'Each dot is one float that reported in. Most are west of the coast.',
     values: [],
   },
@@ -399,35 +520,63 @@ function Float() {
   const [asked, setAsked] = useState(0);
   const ask = ASKS[asked];
   const path = ask.values.map((y, i) => `${i ? 'L' : 'M'}${i * 24 + 18} ${92 - y}`).join(' ');
+  // The answer is built in the order it really happens. Each part shows when its stage ends.
+  const { at, run } = useRun(5, 520);
+  const stages = [
+    { name: 'Ask', detail: 'plain words, no query' },
+    { name: 'Pick', detail: `the model chooses ${ask.tool}` },
+    { name: 'Query', detail: 'the tool writes the SQL' },
+    { name: 'Rows', detail: `Postgres gives back ${ask.rows}` },
+    { name: 'Draw', detail: 'a picture, and one line of answer' },
+  ];
   return (
     <div className={s.float}>
       <div className={s.choices} role="group" aria-label="Question">
         {ASKS.map((item, i) => (
-          <button key={item.q} type="button" aria-pressed={asked === i} onClick={() => setAsked(i)}>
+          <button
+            key={item.q}
+            type="button"
+            aria-pressed={asked === i}
+            onClick={() => {
+              setAsked(i);
+              run();
+            }}
+          >
             {item.q}
           </button>
         ))}
       </div>
+      <Stages stages={stages} at={at} />
       <div className={s.answer}>
         <div className={s.thread}>
           <p className={s.asked}>{ask.q}</p>
-          <p className={s.tool} data-tool>
-            <span>the model calls</span>
-            <b>{ask.tool}</b>
-            <code>{ask.call}</code>
-          </p>
-          <p className={s.reply} data-answer>
-            {ask.a}
-          </p>
+          {at > 1 && (
+            <p className={s.tool} data-tool>
+              <span>the model calls</span>
+              <b>{ask.tool}</b>
+              <code>{ask.call}</code>
+            </p>
+          )}
+          {at > 2 && (
+            <p className={s.tool}>
+              <span>the tool runs this. Only a SELECT is let through.</span>
+              <code>{ask.sql}</code>
+            </p>
+          )}
+          {at > 4 && (
+            <p className={s.reply} data-answer>
+              {ask.a}
+            </p>
+          )}
         </div>
         <figure className={s.chart}>
-          <svg viewBox="0 0 300 110" role="img" aria-label={`A ${ask.tool.replace('_', ' ')} picture for the answer`} data-picture={ask.tool}>
-            {ask.tool === 'time_series' && (
+          <svg viewBox="0 0 300 110" role="img" aria-label={`A ${ask.tool.replace('_', ' ')} picture for the answer`} data-picture={ask.tool} key={asked}>
+            {at > 4 && ask.tool === 'time_series' && (
               <>
                 <path d="M18 92 H282" className={s.axis} />
-                <path d={path} className={s.line} />
+                <path d={path} className={s.line} pathLength={1} />
                 {ask.values.map((y, i) => (
-                  <circle key={i} cx={i * 24 + 18} cy={92 - y} r="3" className={s.dot} />
+                  <circle key={i} cx={i * 24 + 18} cy={92 - y} r="3" className={s.dot} style={{ animationDelay: `${i * 45}ms` }} />
                 ))}
                 {['Jan', 'May', 'Sep', 'Dec'].map((month, i) => (
                   <text key={month} x={[18, 114, 210, 282][i]} y="106" className={s.tick}>
@@ -436,11 +585,20 @@ function Float() {
                 ))}
               </>
             )}
-            {ask.tool === 'heatmap' &&
+            {at > 4 &&
+              ask.tool === 'heatmap' &&
               SALT.map((value, i) => (
-                <rect key={i} x={(i % 10) * 28 + 10} y={Math.floor(i / 10) * 20 + 5} width="26" height="18" className={s.cell} style={{ opacity: value }} />
+                <rect
+                  key={i}
+                  x={(i % 10) * 28 + 10}
+                  y={Math.floor(i / 10) * 20 + 5}
+                  width="26"
+                  height="18"
+                  className={s.cell}
+                  style={{ '--to': value, animationDelay: `${((i % 10) + Math.floor(i / 10)) * 30}ms` } as CSSProperties}
+                />
               ))}
-            {ask.tool === 'map_points' && (
+            {at > 4 && ask.tool === 'map_points' && (
               <>
                 <rect x="10" y="5" width="280" height="96" className={s.sea} />
                 {[80, 150, 220].map((x) => (
@@ -450,15 +608,17 @@ function Float() {
                 {/* The coast, as one rough line. */}
                 <path d="M196 5 L190 30 L204 58 L222 82 L232 101" className={s.coast} />
                 {FLOATS.map((float, i) => (
-                  <circle key={i} cx={float.x} cy={float.y} r="3" className={s.float1} />
+                  <circle key={i} cx={float.x} cy={float.y} r="3" className={s.float1} style={{ animationDelay: `${i * 25}ms` }} />
                 ))}
               </>
             )}
           </svg>
-          <figcaption>{ask.tool === 'time_series' ? 'Surface temperature, by month' : ask.tool === 'heatmap' ? 'Salinity. Brighter is saltier.' : 'Float positions'}</figcaption>
+          <figcaption>
+            {at <= 4 ? 'Waiting for the rows' : ask.tool === 'time_series' ? 'Surface temperature, by month' : ask.tool === 'heatmap' ? 'Salinity. Brighter is saltier.' : 'Float positions'}
+          </figcaption>
         </figure>
       </div>
-      <p className={s.small}>Sample answers, to show the shape of it. The real one runs the tools on the live float data.</p>
+      <p className={s.small}>Sample answers and sample queries, to show the shape of it. The real one runs the tools on the live float data.</p>
     </div>
   );
 }

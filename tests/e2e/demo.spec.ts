@@ -137,3 +137,13 @@ test('the way back stays in view when a project page is scrolled', async ({ page
   await page.locator('[data-close]').click();
   await expect(project).toHaveCount(0);
 });
+
+test('a run lights its stages one after the other, to the end', async ({ page }) => {
+  await open(page, '/work/scrub');
+  const demo = page.locator('[data-demo="scrub"]');
+  await expect(demo.locator('[data-command]')).toContainText('-b:v 1237k');
+  await demo.getByRole('button', { name: 'Run it' }).click();
+  await expect(demo.locator('[data-stages][data-over]')).toHaveCount(0);
+  await expect(demo.locator('[data-stages][data-over]')).toHaveCount(1, { timeout: 8000 });
+  await expect(demo.locator('[data-stages] li[data-state="done"]')).toHaveCount(5);
+});
