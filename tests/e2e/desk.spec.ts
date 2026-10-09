@@ -11,6 +11,8 @@ test('the desk has one button per object, and all card text is in the page', asy
   for (const id of ids) await expect(page.locator(`#desk-${id}`)).toHaveCount(1);
   await expect(page.locator('#desk-games')).toContainText('Counter-Strike 1.6');
   await expect(page.locator('#desk-pc')).toContainText('RTX 5070');
+  await expect(page.locator('#desk-pc')).toContainText('Wallet');
+  await expect(page.locator('#desk-pc dd span')).toHaveCount(7);
   await expect(page.locator('#desk-anime li')).toHaveCount(9);
 });
 

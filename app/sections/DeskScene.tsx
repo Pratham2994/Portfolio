@@ -104,26 +104,34 @@ export function DeskScene({ active, onPick }: Props) {
           <rect className={s.cup} x="670" y="310" width="18" height="44" rx="7" />
         </g>
 
-        {/* the laptop, closed, leaning back on its stand, with the Prats-Deck beside it: right now */}
+        {/* the laptop, open on its stand, with the Prats-Deck beside it: right now */}
         <g {...part('now')}>
-          <path className={s.standLine} d="M772 388 H900 M878 388 L852 318" />
-          <path className={s.laptop} d="M760 380 L792 286 L916 300 L888 380 Z" />
-          <path className={s.laptopEdge} d="M760 380 L888 380 L886 388 L758 388 Z" />
-          <path className={s.laptopLine} d="M800 300 L872 342 M846 304 L816 366" />
-          <rect className={s.stand} x="718" y="382" width="34" height="6" />
-          <rect className={s.stand} x="732" y="370" width="6" height="14" />
-          <rect className={s.deck} x="712" y="334" width="46" height="36" rx="4" />
-          <rect className={s.deckScreen} x="717" y="339" width="36" height="24" rx="1" />
-          <path className={s.deckCat} d="M723 357 h14 v-6 h4 v-4 h2 v12 h-2 v2 h-18 Z" />
+          {/* stand: two legs that lift the laptop off the desk */}
+          <path className={s.standLine} d="M776 388 L790 366 M896 388 L882 366" />
+          {/* screen: silver lid, dark display, a few lines of a terminal */}
+          <rect className={s.laptop} x="766" y="272" width="140" height="88" rx="5" />
+          <rect className={s.display} x="773" y="279" width="126" height="72" rx="1" />
+          <path className={s.term} d="M781 291 h46 M781 302 h70 M781 313 h34 M781 324 h58" />
+          <rect className={s.caret} x="781" y="332" width="8" height="6" />
+          {/* base: the keyboard deck, seen edge-on, with its hinge */}
+          <rect className={s.laptopEdge} x="822" y="358" width="28" height="4" />
+          <path className={s.laptop} d="M756 362 H916 L922 370 H750 Z" />
+          <rect className={s.laptopEdge} x="816" y="364" width="40" height="3" rx="1" />
+          {/* the Prats-Deck: a small screen on its own little stand */}
+          <rect className={s.stand} x="706" y="382" width="34" height="6" />
+          <rect className={s.stand} x="720" y="370" width="6" height="14" />
+          <rect className={s.deck} x="700" y="334" width="46" height="36" rx="4" />
+          <rect className={s.deckScreen} x="705" y="339" width="36" height="24" rx="1" />
+          <path className={s.deckCat} d="M711 357 h14 v-6 h4 v-4 h2 v12 h-2 v2 h-18 Z" />
         </g>
 
         {/* the cube */}
         <g {...part('cube')}>
-          <rect className={s.cubeFace} x="676" y="364" width="24" height="24" />
-          <path className={s.cubeLine} d="M684 364v24M692 364v24M676 372h24M676 380h24" />
-          <rect className={s.cubeA} x="676" y="364" width="8" height="8" />
-          <rect className={s.cubeB} x="692" y="372" width="8" height="8" />
-          <rect className={s.cubeC} x="684" y="380" width="8" height="8" />
+          <rect className={s.cubeFace} x="668" y="366" width="22" height="22" />
+          <path className={s.cubeLine} d="M675.3 366v22M682.6 366v22M668 373.3h22M668 380.6h22" />
+          <rect className={s.cubeA} x="668" y="366" width="7.3" height="7.3" />
+          <rect className={s.cubeB} x="682.6" y="373.3" width="7.4" height="7.3" />
+          <rect className={s.cubeC} x="675.3" y="380.6" width="7.3" height="7.4" />
         </g>
 
         {/* small figures: anime. the helmet and bottle are part of the picture. */}

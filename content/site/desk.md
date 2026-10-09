@@ -47,12 +47,13 @@ pc:
   title: The PC
   note: I have had a computer since I was a kid. This is the one I wanted the whole time.
   specs:
-    - { part: CPU, name: Intel Core Ultra 7 265K }
-    - { part: GPU, name: RTX 5070 12GB }
-    - { part: RAM, name: 32GB DDR5 6000 }
-    - { part: Storage, name: 2TB WD Black NVMe }
-    - { part: Board, name: MSI B860 }
-    - { part: Cooling, name: 360mm liquid cooler }
+    - { part: CPU, name: Intel Core Ultra 7 265K, quip: 20 cores. Most of them watch me type. }
+    - { part: GPU, name: RTX 5070 12GB, quip: The reason for everything else on this list. }
+    - { part: RAM, name: 32GB DDR5 6000, quip: Bought when RAM cost about the same as gold. }
+    - { part: Storage, name: 2TB WD Black NVMe, quip: Half of it is already games. }
+    - { part: Board, name: MSI B860, quip: Nobody has ever asked about the board. }
+    - { part: Cooling, name: 360mm liquid cooler, quip: Mostly so it looks fast when it is idle. }
+    - { part: Wallet, name: Empty, quip: See above. }
 cube:
   title: The cube
   best: 45

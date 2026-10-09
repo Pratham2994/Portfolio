@@ -48,7 +48,7 @@ const desk = z.object({
   }),
   anime: z.object({ title: z.string(), note: z.string(), list: z.array(z.string()) }),
   music: z.object({ title: z.string(), minutes: z.string(), note: z.string() }),
-  pc: z.object({ title: z.string(), note: z.string(), specs: z.array(z.object({ part: z.string(), name: z.string() })) }),
+  pc: z.object({ title: z.string(), note: z.string(), specs: z.array(z.object({ part: z.string(), name: z.string(), quip: z.string().optional() })) }),
   cube: z.object({ title: z.string(), best: z.number(), note: z.string() }),
   now: z.object({ title: z.string(), lines: z.array(z.string()) }),
 });

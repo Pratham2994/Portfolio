@@ -95,7 +95,10 @@ function Pc() {
       {desk.pc.specs.map((spec) => (
         <div key={spec.part}>
           <dt>{spec.part}</dt>
-          <dd>{spec.name}</dd>
+          <dd>
+            {spec.name}
+            {spec.quip && <span>{spec.quip}</span>}
+          </dd>
         </div>
       ))}
     </dl>

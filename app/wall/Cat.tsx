@@ -60,9 +60,12 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
     let path = ledges(wall);
     const cat = { ledge: 0, x: path[0]?.from ?? 0, y: path[0]?.y ?? 0, dir: 1, rest: 0, frame: 0 as CatFrame, tick: 0 };
     let hop: { t: number; fromX: number; fromY: number; toX: number; toY: number; ledge: number } | null = null;
+    // When the wall drops, she has nothing to stand on. See onFallen below.
+    let fall: { phase: 'hang' | 'drop' | 'down' | 'up'; t: number; fromY: number; floor: number; speed: number } | null = null;
+    let tumble = 0;
 
     const place = () => {
-      el.style.transform = `translate3d(${cat.x.toFixed(1)}px, ${cat.y.toFixed(1)}px, ${path[cat.ledge]?.z ?? 0}px) scaleX(${cat.dir})`;
+      el.style.transform = `translate3d(${cat.x.toFixed(1)}px, ${cat.y.toFixed(1)}px, ${path[cat.ledge]?.z ?? 0}px) scaleX(${cat.dir}) rotate(${tumble.toFixed(0)}deg)`;
     };
     const measure = () => {
       path = ledges(wall);
@@ -84,9 +87,24 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
     const entered = new MutationObserver(measure);
     const section = wall.closest('[data-wall]');
     if (section) entered.observe(section, { attributes: true, attributeFilter: ['data-entered'] });
+    // The wall has dropped, or has been hung again.
+    const onFallen = () => {
+      if (!section) return;
+      if ('fallen' in (section as HTMLElement).dataset) {
+        const floor = section.getBoundingClientRect().bottom - wall.getBoundingClientRect().top - HEIGHT - 54;
+        fall = { phase: 'hang', t: 0, fromY: cat.y, floor, speed: 0 };
+        hop = null;
+        cat.rest = 0;
+      } else if (fall) {
+        fall = { ...fall, phase: 'up', t: 0, fromY: cat.y };
+      }
+    };
+    const fallen = new MutationObserver(onFallen);
+    if (section) fallen.observe(section, { attributes: true, attributeFilter: ['data-fallen'] });
     const stopMeasuring = () => {
       resize.disconnect();
       entered.disconnect();
+      fallen.disconnect();
     };
     if (prefersReducedMotion()) return stopMeasuring;
 
@@ -127,6 +145,46 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
       const ledge = path[cat.ledge];
       if (!ledge) return;
       cat.tick += dt;
+      if (fall) {
+        fall.t += dt;
+        if (fall.phase === 'hang') {
+          // The cartoon moment: her legs keep running on nothing.
+          if (cat.tick > 0.05) {
+            cat.tick = 0;
+            cat.frame = cat.frame ? 0 : 1;
+            drawCat(ctx, cat.frame);
+          }
+          if (fall.t > 0.6) fall = { ...fall, phase: 'drop', t: 0 };
+        } else if (fall.phase === 'drop') {
+          fall.speed += 2600 * dt;
+          cat.y += fall.speed * dt;
+          tumble += 540 * dt * cat.dir;
+          if (cat.y >= fall.floor) {
+            // She lands on the pile, on her feet, and sits.
+            cat.y = fall.floor;
+            tumble = 0;
+            fall.phase = 'down';
+            drawCat(ctx, 0, true);
+          }
+        } else if (fall.phase === 'down') {
+          if (cat.tick > 0.4) {
+            cat.tick = 0;
+            cat.frame = cat.frame ? 0 : 1;
+            drawCat(ctx, cat.frame, true);
+          }
+        } else {
+          // One big jump back to where she was, with a flip on the way.
+          const t = Math.min(fall.t / 0.75, 1);
+          cat.y = fall.fromY + (ledge.y - fall.fromY) * t - Math.sin(t * Math.PI) * 110;
+          tumble = -360 * t * cat.dir;
+          if (t === 1) {
+            cat.y = ledge.y;
+            tumble = 0;
+            fall = null;
+          }
+        }
+        return;
+      }
       if (zoomies > 0) {
         zoomies -= dt;
         if (zoomies <= 0) delete el.dataset.zoomies;

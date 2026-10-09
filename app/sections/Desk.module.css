@@ -188,6 +188,23 @@
   fill: #f5f1ea;
 }
 
+.display {
+  fill: #05060a;
+}
+
+.term {
+  fill: none;
+  stroke: #3ddc84;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+.caret {
+  fill: #3ddc84;
+  animation: caret 0.9s steps(1) infinite;
+}
+
 .laptopLine {
   fill: none;
   stroke: #aeb1b9;
@@ -645,6 +662,15 @@
 .specs dd {
   margin: 0;
   font-weight: 600;
+}
+
+/* A dry remark under the part name. */
+.specs dd span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 400;
+  color: var(--dim);
 }
 
 .card[data-card='pc'] .note {
