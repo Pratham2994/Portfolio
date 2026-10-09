@@ -1,11 +1,13 @@
 import fm from 'front-matter';
 import { z } from 'zod';
 
+// Text that is there. An empty field is a mistake, so the build stops on it.
+const text = z.string().min(1);
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'must be a hex colour such as #1a2b3c');
 
-const stat = z.object({ value: z.string(), label: z.string() });
-const sector = z.object({ title: z.string(), body: z.string() });
-const media = z.object({ src: z.string(), alt: z.string().min(1), kind: z.enum(['image', 'video']) });
+const stat = z.object({ value: text, label: text });
+const sector = z.object({ title: text, body: text });
+const media = z.object({ src: text, alt: z.string().min(1), kind: z.enum(['image', 'video']) });
 
 export const artTemplates = ['frames', 'grid', 'bars', 'code', 'device', 'waves', 'type', 'hex'] as const;
 
@@ -16,15 +18,15 @@ const project = z.object({
   hidden: z.boolean().default(false),
   // One project may be the hero: the single A3 poster on the wall.
   hero: z.boolean().default(false),
-  status: z.string(),
-  tagline: z.string(),
+  status: text,
+  tagline: text,
   palette: z.object({ bg: hex, fg: hex, accent: hex }),
-  art: z.object({ template: z.enum(artTemplates), motif: z.string().optional() }),
+  art: z.object({ template: z.enum(artTemplates), motif: text.optional() }),
   stats: z.tuple([stat, stat, stat]),
   sectors: z.tuple([sector, sector, sector]),
-  stack: z.array(z.string()),
+  stack: z.array(text),
   links: z.object({ repo: z.url(), live: z.url().optional(), paper: z.url().optional() }),
-  role: z.string().optional(),
+  role: text.optional(),
   media: z.array(media).default([]),
 });
 
@@ -37,37 +39,37 @@ export type Project = z.infer<typeof project> & { slug: string; body: string };
 
 // The desk: one card per object in the drawing.
 const desk = z.object({
-  sports: z.object({ title: z.string(), note: z.string(), rows: z.array(z.object({ sport: z.string(), side: z.string() })) }),
+  sports: z.object({ title: text, note: text, rows: z.array(z.object({ sport: text, side: text })) }),
   games: z.object({
-    title: z.string(),
-    note: z.string(),
-    main: z.string(),
-    story: z.array(z.string()),
-    coop: z.array(z.string()),
-    first: z.string(),
+    title: text,
+    note: text,
+    main: text,
+    story: z.array(text),
+    coop: z.array(text),
+    first: text,
   }),
-  anime: z.object({ title: z.string(), note: z.string(), list: z.array(z.string()) }),
-  music: z.object({ title: z.string(), minutes: z.string(), note: z.string() }),
-  pc: z.object({ title: z.string(), note: z.string(), specs: z.array(z.object({ part: z.string(), name: z.string(), quip: z.string().optional() })) }),
-  cube: z.object({ title: z.string(), best: z.number(), note: z.string() }),
-  now: z.object({ title: z.string(), lines: z.array(z.string()) }),
+  anime: z.object({ title: text, note: text, list: z.array(text) }),
+  music: z.object({ title: text, minutes: text, note: text }),
+  pc: z.object({ title: text, note: text, specs: z.array(z.object({ part: text, name: text, quip: text.optional() })) }),
+  cube: z.object({ title: text, best: z.number(), note: text }),
+  now: z.object({ title: text, lines: z.array(text) }),
 });
-const timelineItem = z.object({ org: z.string(), role: z.string(), when: z.string() });
-const you = z.object({ portraitAlt: z.string().min(1), quiet: z.string(), email: z.email(), github: z.url(), linkedin: z.url() });
+const timelineItem = z.object({ org: text, role: text, when: text });
+const you = z.object({ portraitAlt: z.string().min(1), quiet: text, email: z.email(), github: z.url(), linkedin: z.url() });
 
 // Small personal pieces on the wall that are not projects.
 const pieces = z.object({
   pass: z.object({
-    from: z.string(),
-    fromCity: z.string(),
-    to: z.string(),
-    toCity: z.string(),
-    name: z.string(),
-    seat: z.string(),
-    note: z.string(),
+    from: text,
+    fromCity: text,
+    to: text,
+    toCity: text,
+    name: text,
+    seat: text,
+    note: text,
   }),
-  ticket: z.object({ title: z.string(), fixtures: z.array(z.object({ sport: z.string(), side: z.string() })) }),
-  now: z.object({ title: z.string(), lines: z.array(z.string()) }),
+  ticket: z.object({ title: text, fixtures: z.array(z.object({ sport: text, side: text })) }),
+  now: z.object({ title: text, lines: z.array(text) }),
 });
 
 export type Pieces = z.infer<typeof pieces>;
