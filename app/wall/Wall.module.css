@@ -283,8 +283,10 @@
   display: none;
   align-items: baseline;
   gap: 1em;
+  /* It stops short of the button in the other corner. */
+  max-width: calc(100% - 2 * var(--gutter) - 13rem);
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   letter-spacing: 0.06em;
   color: var(--dim);
 }
@@ -314,29 +316,9 @@
 }
 
 .list {
-  position: absolute;
-  bottom: calc(100% + 0.8em);
-  left: 0;
-  display: grid;
-  gap: 0.9em;
-  width: max-content;
-  padding: 1em 1.1em;
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  background: var(--wall-shade);
-  box-shadow: 0 1rem 2.5rem -0.8rem #000;
-}
-
-.list ul {
-  display: grid;
-  grid-template-columns: auto auto;
-  gap: 0.45em 2.2em;
-}
-
-.list li {
   display: flex;
-  align-items: baseline;
-  gap: 0.8em;
+  flex-wrap: wrap;
+  gap: 0.2em 1.3em;
 }
 
 .list li button {
@@ -356,16 +338,10 @@
   color: var(--signal);
 }
 
-/* A found one gets a tick. The space for it is always there, so the words line up. */
-.list li::before {
-  content: '';
-  width: 0.9em;
-  margin-right: -0.3em;
+/* A found one gets a tick. */
+.list li[data-found] button::before {
+  content: '\2713\00a0';
   color: var(--signal);
-}
-
-.list li[data-found]::before {
-  content: '\2713';
 }
 
 @media (min-width: 900px) and (orientation: landscape) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {

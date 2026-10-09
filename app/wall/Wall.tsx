@@ -111,36 +111,28 @@ export function Wall() {
         ))}
         <Cat grid={grid} />
       </div>
-      <div className={styles.secrets} data-secrets>
-        {listOpen && (
-          <div className={styles.list} id="secret-list">
-            <p>Type one on the wall. Or click it.</p>
-            <ul>
-              {SECRETS.map((secret) => (
-                <li key={secret.name} data-found={found.includes(secret.name) || undefined}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setListOpen(false);
-                      secrets.current?.run(secret.name);
-                    }}
-                  >
-                    {secret.word}
-                  </button>
-                  <span>{secret.about}</span>
-                </li>
-              ))}
-            </ul>
-            <p>Also: click the cat, press the button, open the console.</p>
-          </div>
-        )}
-        <p className={styles.hint} aria-hidden="true" data-hint>
-          {hint}
-        </p>
+      {/* A footer, not a div: the grid stays the only div directly in the wall. */}
+      <footer className={styles.secrets} data-secrets>
         <button type="button" className={styles.cheat} aria-expanded={listOpen} aria-controls="secret-list" onClick={() => setListOpen((open) => !open)} data-cheat>
           secrets {found.length}/{SECRETS.length}
         </button>
-      </div>
+        {/* One line along the bottom of the wall, so the list covers nothing. */}
+        {listOpen ? (
+          <ul className={styles.list} id="secret-list" aria-label="Words to type on the wall, or to click">
+            {SECRETS.map((secret) => (
+              <li key={secret.name} data-found={found.includes(secret.name) || undefined}>
+                <button type="button" title={secret.about} onClick={() => secrets.current?.run(secret.name)}>
+                  {secret.word}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.hint} aria-hidden="true" data-hint>
+            {hint}
+          </p>
+        )}
+      </footer>
       <button type="button" className={styles.lever} onClick={() => {
           track('lever_pressed');
           if (wall.current) dropWall(wall.current);

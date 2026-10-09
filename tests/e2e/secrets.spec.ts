@@ -57,7 +57,6 @@ test('the list names every secret, and a click on one starts it', async ({ page 
   await page.locator('[data-cheat]').click();
   await expect(page.locator('#secret-list li')).toHaveCount(11);
   await page.getByRole('button', { name: 'kohli' }).click();
-  await expect(page.locator('#secret-list')).toHaveCount(0);
   await expect(page.locator('.sport[data-sport="kohli"]')).toHaveCount(1);
   await expect(page.locator('[data-cheat]')).toContainText('1/11');
 });
