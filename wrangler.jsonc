@@ -1,0 +1,10 @@
+{
+  // Cloudflare Workers, static assets only: the built site is served as files, with no server code.
+  "name": "portfolio",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./build/client",
+    // Unknown addresses get 404.html with a real 404 status. The app then shows its own page.
+    "not_found_handling": "404-page"
+  }
+}

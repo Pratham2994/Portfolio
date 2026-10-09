@@ -52,4 +52,4 @@ The first `test:e2e` run needs `npx playwright install chromium`.
 
 ## Deploy
 
-Static files. Build command `npm run build`, output folder `build/client`.
+Cloudflare Workers, static assets. Build command `npm run build`, deploy command `npx wrangler deploy`. The settings are in `wrangler.jsonc`.
