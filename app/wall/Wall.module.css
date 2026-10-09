@@ -172,15 +172,16 @@
 /*
  * The piece under the pointer keeps its light and the rest step back. useSpotlight keeps
  * data-dim set while the pointer crosses the gaps, so the wall does not flash.
- * A sheet lights up fast and fades back slowly, which leaves a short trail behind the pointer.
+ * A sheet lights up at once. How fast it fades back follows the speed of the pointer.
  */
 @media (hover: hover) and (pointer: fine) {
   .grid :is([data-poster], [data-piece]) {
-    transition-duration: var(--dur-base), var(--dur-base), 0.5s, var(--dur-base);
+    /* --dim comes from useSpotlight: shorter when the pointer moves fast. */
+    transition-duration: var(--dur-base), var(--dur-base), var(--dim, 0.2s), var(--dur-base);
   }
 
   .grid :is([data-poster], [data-piece]):hover {
-    transition-duration: var(--dur-base), var(--dur-base), 0.08s, var(--dur-base);
+    transition-duration: var(--dur-base), var(--dur-base), 0.05s, var(--dur-base);
   }
 
   .grid[data-dim] :is([data-poster], [data-piece]):not(:hover) {

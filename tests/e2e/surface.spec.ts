@@ -75,6 +75,26 @@ test('the wall dims at once under the pointer and stays dim across the gaps', as
   await expect(grid).not.toHaveAttribute('data-dim', '');
 });
 
+test('the fade is shorter when the pointer moves fast', async ({ page }, info) => {
+  test.skip(!['laptop-short', 'laptop', 'desktop', 'wide'].includes(info.project.name), 'needs a mouse on the wide wall');
+  await open(page, '/');
+  const grid = page.locator('[data-wall] > div');
+  const dim = () => grid.evaluate((el) => parseFloat(getComputedStyle(el).getPropertyValue('--dim')) || 0);
+  const box = (await grid.boundingBox())!;
+  const y = box.y + box.height * 0.2;
+  // Slow: a few pixels per step, with a pause between steps.
+  for (let i = 0; i < 12; i++) {
+    await page.mouse.move(box.x + 100 + i * 3, y);
+    await page.waitForTimeout(40);
+  }
+  const slow = await dim();
+  // Fast: long jumps with no pause.
+  for (let i = 0; i < 12; i++) await page.mouse.move(box.x + 100 + i * 70, y);
+  const fast = await dim();
+  expect(slow).toBeGreaterThan(180);
+  expect(fast).toBeLessThan(slow - 40);
+});
+
 test.describe('with reduced motion', () => {
   test.use({ reducedMotion: 'reduce' });
 
