@@ -9,11 +9,20 @@ import s from './brief.module.css';
 export function meta() {
   return pageMeta({
     title: 'Pratham Panchal - the one-page version',
-    description: 'Software engineer in Pune, India. Work, education, ten projects and how to reach me, on one plain page.',
+    description: 'Software engineer in Pune, India. Experience, education, projects and contact details on one page.',
     path: '/brief',
     image: 'home',
   });
 }
+
+// The wall names its tool groups in its own voice. This page uses the plain names.
+const PLAIN: Record<string, string> = {
+  'Servers and data': 'Backend and data',
+  Models: 'Machine learning',
+  'Close to the metal': 'Systems and hardware',
+  'On screen': 'Frontend',
+  'Every day': 'Tooling',
+};
 
 // The college row is education. Everything else in the list is work.
 const isStudy = (role: string) => /B\.Tech|degree/i.test(role);
@@ -45,7 +54,7 @@ export default function Brief() {
 
       <header className={s.head}>
         <h1>Pratham Panchal</h1>
-        <p className={s.role}>Software Engineer. Pune, India.</p>
+        <p className={s.role}>Software Engineer at Barclays. Pune, India.</p>
         <ul className={s.reach}>
           <li>
             <a href={`mailto:${you.email}`}>{you.email}</a>
@@ -64,13 +73,13 @@ export default function Brief() {
           </li>
         </ul>
         <p className={s.lede}>
-          I write software for a living. At home I build small tools, mostly because something I was using almost did
-          the job. This is the short version. The full site has demos you can press, and a cat.
+          Outside work I design and build developer tools, data systems and small hardware projects. Each project
+          below links to a page with a working demo and to its source code.
         </p>
       </header>
 
       <section>
-        <h2>Work</h2>
+        <h2>Experience</h2>
         <ul className={s.rows}>
           {work.map((item) => (
             <li key={item.org + item.when}>
@@ -104,7 +113,7 @@ export default function Brief() {
               <b>
                 <Link to={`/work/${project.slug}`}>{project.title}</Link>
               </b>
-              <span>{project.tagline}</span>
+              <span>{project.summary ?? project.tagline}</span>
               <small>
                 {project.stack.join(', ')}
                 <a href={project.links.repo} className={s.code}>
@@ -117,7 +126,7 @@ export default function Brief() {
       </section>
 
       <section>
-        <h2>Tools</h2>
+        <h2>Skills</h2>
         <dl className={s.tools}>
           <div>
             <dt>Languages</dt>
@@ -125,7 +134,7 @@ export default function Brief() {
           </div>
           {you.stack.groups.map((group) => (
             <div key={group.name}>
-              <dt>{group.name}</dt>
+              <dt>{PLAIN[group.name] ?? group.name}</dt>
               <dd>{group.items.join(', ')}</dd>
             </div>
           ))}

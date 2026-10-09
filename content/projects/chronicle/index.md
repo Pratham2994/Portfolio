@@ -4,6 +4,7 @@ size: postcard
 order: 9
 status: Side project
 tagline: Your whole Spotify history, not one year of it.
+summary: "An analysis of a full Spotify listening history with DuckDB and FastAPI, run on the user's own machine."
 palette: { bg: '#ffc21a', fg: '#191200', accent: '#a50d25' }
 art: { template: bars, motif: eq }
 stats:

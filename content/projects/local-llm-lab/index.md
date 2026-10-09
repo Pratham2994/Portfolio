@@ -4,6 +4,7 @@ size: poster
 order: 8
 status: Verdict written
 tagline: Which local model is actually worth running?
+summary: "A test harness for local language models on one 12 GB GPU. 4,101 runs, measured as correct answers per hour."
 palette: { bg: '#14161c', fg: '#ece8df', accent: '#3ddc84' }
 art: { template: bars, motif: rank }
 stats:

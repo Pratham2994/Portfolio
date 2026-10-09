@@ -39,6 +39,8 @@ const project = z.object({
   hero: z.boolean().default(false),
   status: text,
   tagline: text,
+  // One formal sentence, for the one-page version.
+  summary: text.optional(),
   palette: z.object({ bg: hex, fg: hex, accent: hex }),
   art: z.object({ template: z.enum(artTemplates), motif: text.optional() }),
   stats: z.tuple([stat, stat, stat]),

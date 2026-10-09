@@ -4,6 +4,7 @@ size: poster
 order: 5
 status: Smart India Hackathon 2025
 tagline: Ask the ocean a question. Get a map back.
+summary: "A natural-language interface to Argo ocean float data. A chain of model calls writes SQL through MCP tools and returns charts and maps. Smart India Hackathon 2025."
 palette: { bg: '#06243a', fg: '#cfeeff', accent: '#ffc21a' }
 art: { template: waves }
 stats:

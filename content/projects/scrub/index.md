@@ -5,6 +5,7 @@ order: 1
 hero: true
 status: Runs on your own PC
 tagline: ffmpeg, minus the terminal.
+summary: "A front end for ffmpeg that runs locally in the browser. 24 operations, including fitting a video to a target file size with two-pass encoding."
 palette: { bg: '#ece8df', fg: '#14161c', accent: '#ff5a1f' }
 art: { template: frames }
 stats:

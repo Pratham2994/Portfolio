@@ -1,15 +1,28 @@
 /* The one-page version. No wall, no motion: black ink on bone paper, and it prints on one sheet. */
 .brief {
+  --paper: #e2ddd0;
   --ink: #14161c;
-  --soft: #55585f;
-  --rule: #cfc9bb;
+  --soft: #4d5057;
+  --rule: #c2bbab;
   min-height: 100svh;
   padding: var(--space-5) var(--gutter) var(--space-7);
-  background: var(--bone);
+  background: var(--paper);
   color: var(--ink);
   font-family: var(--font-text);
   font-size: var(--step-0);
   line-height: 1.5;
+}
+
+/* The same page for a reader whose system is set to dark. Paper is always light. */
+@media (prefers-color-scheme: dark) {
+  @media screen {
+    .brief {
+      --paper: #141312;
+      --ink: #e6e1d6;
+      --soft: #a8a297;
+      --rule: #34312d;
+    }
+  }
 }
 
 .brief > * {
@@ -58,7 +71,7 @@
 
 .bar button:hover {
   background: var(--ink);
-  color: var(--bone);
+  color: var(--paper);
 }
 
 .head h1 {
@@ -180,7 +193,7 @@
 
 @page {
   size: A4;
-  margin: 11mm 13mm;
+  margin: 9mm 12mm;
 }
 
 @media print {
@@ -188,8 +201,8 @@
     min-height: 0;
     padding: 0;
     background: none;
-    font-size: 9.4pt;
-    line-height: 1.32;
+    font-size: 8.7pt;
+    line-height: 1.28;
   }
 
   .brief > * {
@@ -210,7 +223,7 @@
   }
 
   .head h1 {
-    font-size: 30pt;
+    font-size: 26pt;
   }
 
   .role {
@@ -223,7 +236,7 @@
   }
 
   .brief section {
-    margin-top: 9pt;
+    margin-top: 7pt;
     break-inside: avoid;
   }
 
@@ -238,7 +251,16 @@
   .rows li,
   .projects li,
   .tools div {
-    padding-block: 2pt;
+    padding-block: 1.4pt;
+  }
+
+  .brief h2 {
+    padding-bottom: 2pt;
+  }
+
+  .projects li,
+  .tools div {
+    grid-template-columns: 8rem minmax(0, 1fr);
   }
 
   .brief a {

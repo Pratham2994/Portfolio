@@ -4,6 +4,7 @@ size: poster
 order: 3
 status: On my desk right now
 tagline: A tiny touch screen that runs my desk.
+summary: "A touch-screen control deck on a Raspberry Pi Pico 2 W, with C++ firmware and a Python companion on the PC."
 palette: { bg: '#ff7a1a', fg: '#1f0d00', accent: '#fff4e6' }
 art: { template: device }
 stats:

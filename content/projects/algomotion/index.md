@@ -4,6 +4,7 @@ size: postcard
 order: 10
 status: Side project
 tagline: Sorting and pathfinding, one step at a time.
+summary: "A visualiser for 11 sorting and 6 pathfinding algorithms that records each run and plays it back, forwards and backwards."
 palette: { bg: '#171a24', fg: '#ece8df', accent: '#2f6bff' }
 art: { template: bars, motif: sort }
 stats:

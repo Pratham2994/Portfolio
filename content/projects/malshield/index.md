@@ -4,6 +4,7 @@ size: poster
 order: 7
 status: Hackathon build
 tagline: Drop in a file. Find out if it bites.
+summary: "Static malware analysis for programs and documents with LightGBM, YARA and macro extraction, and a report that names the likely family."
 palette: { bg: '#2a1552', fg: '#e7dcff', accent: '#3ddc84' }
 art: { template: hex }
 stats:
