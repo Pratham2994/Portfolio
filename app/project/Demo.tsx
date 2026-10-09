@@ -177,23 +177,23 @@ function Neat() {
 }
 
 // The home page of the deck, in the order of its icons: five across, three down.
-// A name with a picture opens that picture. The rest say what they are.
-const DECK: [name: string, about: string, picture?: string][] = [
+// Each one opens a picture of that app, taken in the simulator.
+const DECK: [name: string, about: string, picture: string][] = [
   ['Chindi', 'A pet cat. She gets hungry, sleepy and bored, and she wants attention.', 'chindi'],
-  ['Galaxy', 'Glowing dots that follow the stylus. Only for fun.'],
+  ['Galaxy', 'Glowing dots that follow the stylus. Only for fun.', 'galaxy'],
   ['Macros', 'Buttons that control the PC. The deck is a USB keyboard, so the PC needs no software.', 'macros-song'],
   ['Monitor', 'How hard the PC works: processor, memory, graphics card, heat and network.', 'monitor'],
-  ['Clock', 'A clock set from the internet, with three days of weather.'],
-  ['Wi-Fi', 'The networks near you, how strong each one is, and the best channel for your router.'],
-  ['Scope', 'An oscilloscope. It draws the signal on one of the pins.'],
-  ['Guide', 'It explains each app, on the device itself.'],
-  ['Paint', 'Paint with light. Lines that cross get brighter.'],
-  ['Bricks', 'Hit the ball, break the bricks. Three lives.'],
-  ['Life', 'The Game of Life. Draw on it to add living dots.'],
+  ['Clock', 'A clock set from the internet, with three days of weather.', 'clock'],
+  ['Wi-Fi', 'The networks near you, how strong each one is, and the best channel for your router.', 'wifi'],
+  ['Scope', 'An oscilloscope. It draws the signal on one of the pins.', 'scope'],
+  ['Guide', 'It explains each app, on the device itself.', 'guide'],
+  ['Paint', 'Paint with light. Lines that cross get brighter.', 'paint'],
+  ['Bricks', 'Hit the ball, break the bricks. Three lives.', 'bricks'],
+  ['Life', 'The Game of Life. Draw on it to add living dots.', 'life'],
   ['Snake', 'The classic. Tap beside its head to turn it.', 'snake'],
   ['2048', 'Slide the tiles. Two of the same number join.', '2048'],
   ['Trackpad', 'The screen is a mouse pad. The deck is a USB mouse too.', 'trackpad'],
-  ['Settings', 'Brightness, touch calibration, and the tear-free switch.'],
+  ['Settings', 'Brightness, touch calibration, and the tear-free switch.', 'settings'],
 ];
 
 /** Prats-Deck: its real home page. Tap an app to open it, and the arrow to go back. */
@@ -210,15 +210,8 @@ function Deck() {
   return (
     <div className={s.deck}>
       <div className={s.device}>
-        <div className={s.screen} data-screen={picture ?? 'none'}>
-          {picture ? (
-            <img src={`/deck/${picture}.webp`} width={640} height={480} alt={app ? `The ${app[0]} app on the deck` : 'The home page of the deck, with 15 app icons'} />
-          ) : (
-            <p className={s.blank}>
-              <b>{app![0]}</b>
-              No picture of this one yet.
-            </p>
-          )}
+        <div className={s.screen} data-screen={picture}>
+          <img src={`/deck/${picture}.webp`} width={640} height={480} alt={app ? `The ${app[0]} app on the deck` : 'The home page of the deck, with 15 app icons'} />
           {app ? (
             <button type="button" className={s.back} onClick={home} aria-label="Back to the home page" />
           ) : (

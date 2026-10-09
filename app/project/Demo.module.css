@@ -274,23 +274,6 @@
   outline-offset: -3px;
 }
 
-.blank {
-  display: grid;
-  place-content: center;
-  gap: 0.4em;
-  height: 100%;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  text-align: center;
-}
-
-.blank b {
-  font-family: var(--font-display);
-  font-size: var(--step-4);
-  font-weight: 900;
-  line-height: 1;
-}
-
 .about {
   display: grid;
   justify-items: start;
