@@ -106,7 +106,13 @@ const pieces = z.object({
     note: text,
   }),
   ticket: z.object({ title: text, fixtures: z.array(z.object({ sport: text, side: text })) }),
-  now: z.object({ title: text, lines: z.array(text), more: text.optional() }),
+  now: z.object({
+    title: text,
+    lines: z.array(text),
+    more: text.optional(),
+    // Older pages of the calendar, newest first.
+    before: z.array(z.object({ when: text, lines: z.array(text) })).optional(),
+  }),
 });
 
 export type Pieces = z.infer<typeof pieces>;

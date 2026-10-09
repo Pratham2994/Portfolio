@@ -22,4 +22,15 @@ now:
     - Agent harnesses
     - Breaking both
   more: Then fixing both
+  before:
+    - when: September
+      lines:
+        - Scrub
+        - Neat
+        - The LLM lab
+    - when: June
+      lines:
+        - Last exam
+        - Chronicle
+        - First job next
 ---

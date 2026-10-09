@@ -399,3 +399,31 @@
     display: flex;
   }
 }
+
+/*
+ * Half time. As the wall leaves the top of the screen its lights go down, so the desk under
+ * it is the lit thing in the room. A browser that cannot tie this to the scroll leaves the
+ * wall as it is.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .wall::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      animation: lights-down linear both;
+      animation-timeline: view();
+      animation-range: exit 5% exit 75%;
+    }
+  }
+}
+
+@keyframes lights-down {
+  to {
+    opacity: 0.78;
+  }
+}

@@ -831,3 +831,30 @@
     transform-origin: 50% 0;
   }
 }
+
+/* The lamp over the desk comes on as the desk arrives. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .desk {
+      position: relative;
+    }
+
+    .desk::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto;
+      height: min(70vh, 40rem);
+      background: radial-gradient(ellipse 60% 100% at 50% 0%, rgb(255 214 150 / 0.11), transparent 70%);
+      pointer-events: none;
+      animation: lamp-on linear both;
+      animation-timeline: view();
+      animation-range: entry 10% entry 90%;
+    }
+  }
+}
+
+@keyframes lamp-on {
+  from {
+    opacity: 0;
+  }
+}

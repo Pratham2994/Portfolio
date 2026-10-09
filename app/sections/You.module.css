@@ -369,3 +369,16 @@
     order: 0;
   }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .portrait:not([data-seen]) .print img {
+    filter: brightness(2.6) contrast(0.25) blur(3px);
+    opacity: 0.1;
+  }
+
+  .portrait[data-seen] .print img {
+    transition:
+      filter 2.8s cubic-bezier(0.3, 0, 0.2, 1) 0.35s,
+      opacity 1.6s linear 0.35s;
+  }
+}
