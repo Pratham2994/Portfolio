@@ -31,7 +31,6 @@ export function initAnalytics(): void {
       api_host: '/relay',
       ui_host: ANALYTICS.dashboard,
       persistence: 'memory',
-      respect_dnt: true,
       person_profiles: 'identified_only',
       // The app changes pages without a reload, so page views follow the address.
       capture_pageview: 'history_change',
