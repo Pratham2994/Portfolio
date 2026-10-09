@@ -110,43 +110,44 @@ export function ProjectPage({ project }: { project: Project }) {
           <span className={s.status}>{project.status}</span>
         </header>
 
-        <div className={s.hero}>
-          <div className={s.heroText}>
-            {/* On a phone the bar has no room for the status, so it sits here. */}
-            <span className={s.statusBelow}>{project.status}</span>
-            <h1
-              id="project-title"
-              className={s.title}
-              style={{ '--chars': longestWord(project.title) } as CSSProperties}
-              tabIndex={-1}
-              ref={title}
-              data-in
-            >
-              {project.title}
-            </h1>
-            <p className={s.tagline} data-in>
-              {project.tagline}
-            </p>
+        {/* Two columns on a wide page: the words on the left, the art and the numbers on the right. */}
+        <div className={s.top}>
+          <div className={s.lead}>
+            <div className={s.heroText}>
+              {/* On a phone the bar has no room for the status, so it sits here. */}
+              <span className={s.statusBelow}>{project.status}</span>
+              <h1
+                id="project-title"
+                className={s.title}
+                style={{ '--chars': longestWord(project.title) } as CSSProperties}
+                tabIndex={-1}
+                ref={title}
+                data-in
+              >
+                {project.title}
+              </h1>
+              <p className={s.tagline} data-in>
+                {project.tagline}
+              </p>
+            </div>
+            <div className={s.why} data-in>
+              <Paragraphs text={project.body} />
+            </div>
           </div>
-          {/* The poster's own art, drawn large in swapped colours. */}
-          <div className={s.plate} data-in>
-            <Art art={project.art} />
+          <div className={s.aside}>
+            {/* The poster's own art, drawn large in swapped colours. */}
+            <div className={s.plate} data-in>
+              <Art art={project.art} />
+            </div>
+            <dl className={s.stats} data-in>
+              {project.stats.map((stat) => (
+                <div key={stat.label}>
+                  <dt>{stat.label}</dt>
+                  <dd>{stat.value}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
-        </div>
-
-        <div className={s.brief}>
-          <div className={s.why} data-in>
-            <Paragraphs text={project.body} />
-          </div>
-
-          <dl className={s.stats} data-in>
-            {project.stats.map((stat) => (
-              <div key={stat.label}>
-                <dt>{stat.label}</dt>
-                <dd>{stat.value}</dd>
-              </div>
-            ))}
-          </dl>
         </div>
 
         <section className={s.sectors} data-in>

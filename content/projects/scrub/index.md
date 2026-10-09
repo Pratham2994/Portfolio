@@ -45,8 +45,6 @@ flow:
 ---
 ffmpeg can do anything to a video. The catch is that you have to remember how to ask, and nobody does.
 
-Scrub is the window I wanted in front of it. Drop a file in, pick what you want, and see the frames while you do it. Trim, merge, crossfade, convert, compress, make a GIF.
+Scrub is the window I wanted in front of it. Drop a file in, pick what you want, and see the frames while you do it. It all runs on your own machine, so nothing is uploaded.
 
-It all runs on your own machine. Nothing is uploaded anywhere, so you can use it on things you would not paste into some website.
-
-The fun part was under the window. A box where you can edit a command, on a server your browser can reach, is a nice way to get hacked. So Scrub only listens to your own machine, and it checks that a request really came from its own page. And the tests do not fake ffmpeg. They run it, then open the output file to see if it is right.
+The fun part was under the window. A command box you can edit, on a server your browser can reach, is a nice way to get hacked. So Scrub only listens to your own machine. And the tests run real ffmpeg, not a fake.

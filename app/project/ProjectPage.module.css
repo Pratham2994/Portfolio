@@ -315,12 +315,28 @@
 }
 
 /* Title on one side, the poster's art as a large plate on the other. */
-.hero,
-.brief {
+/* The top of the page. On a phone it is one column: title, art, words, numbers. */
+.top {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: clamp(1.25rem, 3.2vh, 2.5rem) var(--space-7);
-  align-items: end;
+}
+
+.lead,
+.aside {
+  display: contents;
+}
+
+.plate {
+  order: 1;
+}
+
+.why {
+  order: 2;
+}
+
+.stats {
+  order: 3;
 }
 
 .heroText {
@@ -346,15 +362,11 @@
   box-shadow: 0 1.6rem 2.4rem -1.2rem rgb(0 0 0 / 0.55);
 }
 
-.brief {
-  align-items: start;
-}
-
-.brief .stats {
+.aside .stats {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.brief .stats > div {
+.aside .stats > div {
   flex-direction: row-reverse;
   justify-content: space-between;
   align-items: baseline;
@@ -362,27 +374,33 @@
   padding: var(--space-3) 0;
 }
 
-.brief .stats > div + div {
+.aside .stats > div + div {
   border-top: 1px solid var(--rule);
 }
 
-.brief .stats dt {
+.aside .stats dt {
   text-align: right;
   max-width: 16ch;
 }
 
+/* On a wide page each side stacks on its own, so the title starts at the top, level with the art. */
 @media (min-width: 1000px) {
-  .hero {
+  .top {
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .lead,
+  .aside {
+    display: grid;
+    align-content: start;
+    gap: clamp(1.25rem, 3.2vh, 2.5rem);
+    min-width: 0;
   }
 
   .plate {
     justify-self: end;
     max-width: none;
-  }
-
-  .brief {
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   }
 }
 
