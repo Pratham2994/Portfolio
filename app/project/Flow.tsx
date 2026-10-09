@@ -4,20 +4,22 @@ import type { Flow as FlowData } from '~/content/schema';
 
 import s from './Flow.module.css';
 
-// One cell of the grid, and the box inside it, in drawing units.
-const CELL = { w: 190, h: 104 };
-const BOX = { w: 160, h: 68 };
-const NOTE = 26; // letters in one line of a note
+// One cell of the grid, and the box inside it, in drawing units. `note` is the letters in one
+// line of a note, and `most` is how many lines a box holds.
+const WIDE = { cell: { w: 190, h: 104 }, box: { w: 160, h: 68 }, note: 26, most: 2 };
+// On a phone the drawing is two boxes across. Narrow, tall boxes make it fewer units wide, so
+// the same letters come out bigger on the screen.
+const TALL = { cell: { w: 150, h: 120 }, box: { w: 136, h: 88 }, note: 21, most: 3 };
 
-/** Breaks a note into two short lines at most. */
-function lines(note: string): string[] {
+/** Breaks a note into a few short lines. What does not fit goes on the last one. */
+function lines(note: string, width: number, most: number): string[] {
   const out: string[] = [];
   for (const word of note.split(' ')) {
     const last = out[out.length - 1];
-    if (last !== undefined && `${last} ${word}`.length <= NOTE) out[out.length - 1] = `${last} ${word}`;
+    if (last !== undefined && `${last} ${word}`.length <= width) out[out.length - 1] = `${last} ${word}`;
     else out.push(word);
   }
-  return out.length > 2 ? [out[0], out.slice(1).join(' ')] : out;
+  return out.length > most ? [...out.slice(0, most - 1), out.slice(most - 1).join(' ')] : out;
 }
 
 /**
@@ -25,6 +27,7 @@ function lines(note: string): string[] {
  * chain that runs left to right runs top to bottom.
  */
 function Drawing({ flow, tall, label }: { flow: FlowData; tall: boolean; label: string }) {
+  const { cell: CELL, box: BOX, note: NOTE, most } = tall ? TALL : WIDE;
   const place = (at: [number, number]) => {
     const [column, row] = tall ? [at[1], at[0]] : at;
     return { x: (column - 0.5) * CELL.w, y: (row - 0.5) * CELL.h };
@@ -72,11 +75,11 @@ function Drawing({ flow, tall, label }: { flow: FlowData; tall: boolean; label: 
         return (
           <g key={node.id} className={s.node} data-kind={node.kind} style={{ '--i': beat(node.id) } as CSSProperties}>
             <rect x={x - BOX.w / 2} y={y - BOX.h / 2} width={BOX.w} height={BOX.h} rx={node.kind === 'store' ? 16 : 3} />
-            <text x={x} y={y - 12} className={s.name}>
+            <text x={x} y={y - BOX.h / 2 + 22} className={s.name}>
               {node.name}
             </text>
-            {lines(node.note).map((line, i) => (
-              <text key={line} x={x} y={y + 6 + i * 13} className={s.note}>
+            {lines(node.note, NOTE, most).map((line, i) => (
+              <text key={line} x={x} y={y - BOX.h / 2 + 40 + i * 13} className={s.note}>
                 {line}
               </text>
             ))}

@@ -13,7 +13,7 @@
 /* A narrow screen gets the drawing on its side, so the letters stay a size that can be read. */
 .flow .tall {
   display: none;
-  max-width: 24rem;
+  max-width: 26rem;
   margin-inline: auto;
 }
 
