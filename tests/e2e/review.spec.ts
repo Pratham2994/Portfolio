@@ -160,3 +160,33 @@ test('a link inside the page scrolls there, keeps the address, and lets the whee
   await page.waitForTimeout(600);
   expect(await page.evaluate(() => window.scrollY)).toBeLessThan(40);
 });
+
+test('middle-click autoscroll takes the page over, and the smooth scroller does not pull it back', async ({ page }, info) => {
+  test.skip(['phone', 'tablet'].includes(info.project.name), 'smooth scrolling runs with a mouse only');
+  await open(page, '/');
+  // Start a glide down the page, as a click on the centre piece does.
+  await page.locator('[data-centre]').click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(150);
+  // Press the wheel button: the browser now scrolls the page by itself.
+  // On empty wall, not on a link: a wheel click on a link opens it in a new tab instead.
+  await page.mouse.move(8, 8);
+  await page.mouse.down({ button: 'middle' });
+  await page.mouse.up({ button: 'middle' });
+  await expect(page.locator('html[data-autoscroll]')).toHaveCount(1);
+  // The browser drives the page to the top. Nothing may drag it back down.
+  for (let i = 0; i < 8; i++) {
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(60);
+  }
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => window.scrollY)).toBeLessThan(5);
+  // A click ends autoscroll (the browser may keep that click to itself), and the next
+  // mouse move the page sees wakes the smooth scroller.
+  await page.mouse.down();
+  await page.mouse.up();
+  await page.mouse.move(520, 360);
+  await page.mouse.move(540, 380);
+  await expect(page.locator('html[data-autoscroll]')).toHaveCount(0);
+  await page.mouse.wheel(0, 600);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(200);
+});
