@@ -382,3 +382,24 @@
       opacity 1.6s linear 0.35s;
   }
 }
+
+/* Sends you back up to the wall, with a thread to each project in this language. */
+.pull {
+  justify-self: start;
+  width: fit-content;
+  margin-top: var(--space-2);
+  padding: 0.45em 0.8em;
+  border: 1px solid #c8281e;
+  border-radius: 2px;
+  color: var(--bone);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pull:hover,
+.pull:focus-visible {
+  background: #c8281e;
+}
+

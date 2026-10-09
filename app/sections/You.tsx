@@ -80,6 +80,14 @@ export function You() {
               </span>
             ))}
           </p>
+          <button
+            type="button"
+            className={s.pull}
+            onClick={() => window.dispatchEvent(new CustomEvent("wall:thread", { detail: language.name }))}
+            data-pull
+          >
+            Show {language.name} on the wall
+          </button>
           <dl className={s.tools}>
             {you.stack.groups.map((group) => (
               <div key={group.name}>

@@ -13,6 +13,7 @@ import { Light } from './Light';
 import { Piece, PIECES } from './Piece';
 import { Poster } from './Poster';
 import { HINTS, initSecrets, SECRETS, type Secrets } from './secrets';
+import { Threads } from './Threads';
 import { useDepth } from './useDepth';
 import { useScrollTilt } from './useScrollTilt';
 import { useSpotlight } from './useSpotlight';
@@ -98,6 +99,9 @@ export function Wall() {
       aria-label="Projects"
     >
       <Light />
+      <div className={styles.top}>
+        <Threads wall={wall} />
+      </div>
       <div className={styles.grid} style={{ '--rows': PLAN.rows } as CSSProperties} ref={grid}>
         <Centre className={styles.centre} />
         {projects.map((project, i) => (

@@ -427,3 +427,23 @@
     opacity: 0.78;
   }
 }
+
+/* The row of language tags sits over the grid, and is as wide as the grid is. */
+.top {
+  display: contents;
+}
+
+/* While a thread is out, the posters on it stay lit and come forward. Everything else steps back. */
+.wall[data-threading] :global([data-poster]:not([data-threaded])),
+.wall[data-threading] :global([data-piece]),
+.wall[data-threading] :global([data-centre]) {
+  filter: brightness(0.38) saturate(0.6);
+}
+
+.wall :global([data-poster]),
+.wall :global([data-piece]),
+.wall :global([data-centre]) {
+  transition-property: rotate, scale, filter, box-shadow;
+}
+
+
