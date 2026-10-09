@@ -48,10 +48,10 @@ function Stages({ stages, at, halted = false }: { stages: Stage[]; at: number; h
   );
 }
 
-type Kind = 'film' | 'folder' | 'device' | 'wave' | 'file';
+type Kind = 'film' | 'folder' | 'device' | 'wave' | 'file' | 'model';
 
 // What is printed at the head of the slip, for each kind of job.
-const JOBS: Record<Kind, string> = { film: 'Encode job', folder: 'Folder scan', device: 'One tap', wave: 'One question', file: 'One file' };
+const JOBS: Record<Kind, string> = { film: 'Encode job', folder: 'Folder scan', device: 'One tap', wave: 'One question', file: 'One file', model: 'One model' };
 
 type Step = { name: string; value: string };
 
@@ -1076,21 +1076,33 @@ function Mal() {
   );
 }
 
-// From my own report: 4,101 runs on an RTX 5070.
+// From my own report: 4,101 runs on an RTX 5070. Each model did 33 checked tasks, 5 times each.
 const MODELS = [
-  { name: 'Gemma 4 12B coder', pass: 79, perHour: 1588 },
-  { name: 'Gemma 4 12B', pass: 87, perHour: 1519 },
-  { name: 'Gemma 4 E4B', pass: 70, perHour: 1357 },
-  { name: 'Gemma 4 26B', pass: 96, perHour: 1054 },
-  { name: 'GPT-OSS 20B', pass: 81, perHour: 792 },
+  { name: 'Gemma 4 12B coder', pass: 79, right: 131, perHour: 1588 },
+  { name: 'Gemma 4 12B', pass: 87, right: 143, perHour: 1519 },
+  { name: 'Gemma 4 E4B', pass: 70, right: 115, perHour: 1357 },
+  { name: 'Gemma 4 26B', pass: 96, right: 154, perHour: 1054 },
+  { name: 'GPT-OSS 20B', pass: 81, right: 134, perHour: 792 },
 ];
+const place = (n: number) => ['1st', '2nd', '3rd', '4th', '5th'][n];
 
-/** Local LLM lab: the same five models, ranked by two different numbers. */
+/** Local LLM lab: the same five models, ranked by two different numbers. Pick one to see its run. */
 function Lab() {
   const [byHour, setByHour] = useState(false);
+  const [picked, setPicked] = useState('Gemma 4 26B');
+  const { at, run } = useRun(5, 460);
   const key = byHour ? 'perHour' : 'pass';
   const top = Math.max(...MODELS.map((m) => m[key]));
   const ranked = [...MODELS].sort((a, b) => b[key] - a[key]);
+  const model = MODELS.find((m) => m.name === picked)!;
+  const rank = (by: 'pass' | 'perHour') => [...MODELS].sort((a, b) => b[by] - a[by]).indexOf(model);
+  const steps = [
+    { name: 'Load', value: 'llama-server starts with this model' },
+    { name: 'Ask', value: '33 tasks, 5 times each' },
+    { name: 'Check', value: 'tests run, SQL rows compared' },
+    { name: 'Count', value: `${model.right} of 165 right` },
+    { name: 'Rate', value: `${model.perHour.toLocaleString('en')} right answers an hour` },
+  ];
   return (
     <div className={s.lab}>
       <div className={s.choices} role="group" aria-label="Rank by">
@@ -1102,15 +1114,37 @@ function Lab() {
         </button>
       </div>
       <ol className={s.ranks}>
-        {ranked.map((model) => (
-          <li key={model.name}>
-            <span>{model.name}</span>
-            <i style={{ transform: `scaleX(${model[key] / top})` }} />
-            <b>{byHour ? model.perHour.toLocaleString('en') : `${model.pass}%`}</b>
+        {ranked.map((item) => (
+          <li key={item.name}>
+            <button
+              type="button"
+              aria-pressed={picked === item.name}
+              onClick={() => {
+                setPicked(item.name);
+                run();
+              }}
+            >
+              {item.name}
+            </button>
+            <i style={{ transform: `scaleX(${item[key] / top})` }} />
+            <b>{byHour ? item.perHour.toLocaleString('en') : `${item.pass}%`}</b>
           </li>
         ))}
       </ol>
-      <p className={s.small}>Real results. The biggest model wins the first list and comes fourth in the second.</p>
+      <div className={s.bench}>
+        <Console kind="model" steps={steps} at={at} />
+        <Report ready={at >= steps.length} wait="Running the tasks" stamp={`${model.pass}%`}>
+          <p className={s.reply} data-model>
+            {model.name}
+          </p>
+          <Meter share={model.right / 165} label={`${model.right} of 165 runs right`} />
+          <ul className={s.points}>
+            <li>{place(rank('pass'))} of 5 on tasks passed</li>
+            <li>{place(rank('perHour'))} of 5 on right answers per hour</li>
+          </ul>
+        </Report>
+      </div>
+      <p className={s.small}>Real results. The biggest model wins the first list and comes fourth in the second. Pick a model to see its run.</p>
     </div>
   );
 }

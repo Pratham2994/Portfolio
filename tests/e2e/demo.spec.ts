@@ -57,6 +57,11 @@ test('the lab ranks the same models differently by the two numbers', async ({ pa
   await expect(demo.locator('ol li').first()).toContainText('Gemma 4 26B');
   await demo.getByRole('button', { name: /per hour/ }).click();
   await expect(demo.locator('ol li').first()).toContainText('Gemma 4 12B coder');
+  // A model's own run: the count, and where it stands on both lists.
+  await demo.getByRole('button', { name: 'Gemma 4 26B' }).click();
+  await expect(demo.locator('[data-stamp]')).toHaveText('96%', { timeout: 8000 });
+  await expect(demo.locator('[data-report]')).toContainText('154 of 165');
+  await expect(demo.locator('[data-report]')).toContainText('4th of 5 on right answers per hour');
 });
 
 test('MalShield plays one scan to a verdict', async ({ page }) => {
@@ -170,7 +175,7 @@ test('a run lights its stages one after the other, to the end', async ({ page })
 });
 
 test('each of the first five projects has a picture of what runs underneath', async ({ page }) => {
-  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield']) {
+  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab']) {
     await open(page, `/work/${slug}`);
     const flow = page.locator('[data-flow]');
     await expect(flow.locator('svg:visible')).toHaveCount(1);

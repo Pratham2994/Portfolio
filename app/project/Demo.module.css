@@ -1135,6 +1135,14 @@
   font-size: var(--step--1);
 }
 
+/* The name is the way in: press it to see that model's run. */
+.ranks li button {
+  width: 100%;
+  padding: 0.35em 0.6em;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .ranks i {
   height: 1.1rem;
   background: var(--ink);
@@ -1156,7 +1164,7 @@
     grid-template-columns: minmax(0, 1fr) 4.5rem;
   }
 
-  .ranks span {
+  .ranks li button {
     grid-column: 1 / -1;
   }
 }
