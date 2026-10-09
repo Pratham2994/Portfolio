@@ -10,18 +10,20 @@ const make = (hero: number, large: number, small: number): WallItem[] => {
 const cellOf = (piece: { col: number; row: number }) => `${piece.col},${piece.row}`;
 
 describe('hangWall', () => {
-  it('hangs the launch wall like the real one: an A3 hero, seven A4, five A5', () => {
+  it('hangs the launch wall like the real one: an A3 hero, nine A4, three A5', () => {
     const { rows, hung } = hangWall(make(1, 7, 5));
     expect(rows).toBe(3);
     expect(hung).toHaveLength(13);
     expect(hung.filter((p) => p.paper === 'a3')).toEqual([expect.objectContaining({ key: 'hero0', col: 1, row: 2 })]);
-    expect(hung.filter((p) => p.paper === 'a4')).toHaveLength(7);
-    expect(hung.filter((p) => p.paper.startsWith('a5'))).toHaveLength(5);
+    expect(hung.filter((p) => p.paper === 'a4')).toHaveLength(9);
+    expect(hung.filter((p) => p.paper.startsWith('a5'))).toHaveLength(3);
   });
 
   it('puts small pieces in the four corners and one outside the block', () => {
-    const small = hangWall(make(1, 7, 5)).hung.filter((p) => p.paper.startsWith('a5'));
+    const small = hangWall(make(1, 7, 5)).hung.filter((p) => p.key.startsWith('small'));
     expect(small.map(cellOf).sort()).toEqual(['1,1', '1,3', '5,1', '5,3', `${OUTSIDE},2`].sort());
+    // The two in the top row are full sheets, so that row has no holes.
+    expect(small.filter((p) => p.row === 1).every((p) => p.paper === 'a4')).toBe(true);
   });
 
   it('never hangs a piece over the centre, and shares a cell only below the hero', () => {

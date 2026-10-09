@@ -21,8 +21,9 @@ const a4 = (col: number, row: number): Slot => ({ col, row, paper: 'a4', x: 'cen
 const HERO: Slot = { col: 1, row: 2, paper: 'a3', x: 'end', y: 'start' };
 const LARGE: Slot[] = [a4(2, 1), a4(3, 1), a4(4, 1), a4(5, 2), a4(2, 3), a4(3, 3), a4(4, 3)];
 const SMALL: Slot[] = [
-  { col: 1, row: 1, paper: 'a5-wide', x: 'center', y: 'end' },
-  { col: 5, row: 1, paper: 'a5-tall', x: 'start', y: 'end' },
+  // The two ends of the top row. A small piece here is a full sheet, so the row has no holes.
+  a4(1, 1),
+  a4(5, 1),
   { col: 5, row: 3, paper: 'a5-tall', x: 'start', y: 'start' },
   // Under the hero. The wall CSS pushes it down to one gap below the bottom edge of the hero.
   { col: 1, row: 3, paper: 'a5-wide', x: 'end', y: 'start' },

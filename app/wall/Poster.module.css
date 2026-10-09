@@ -152,6 +152,12 @@
     line-clamp: 2;
   }
 
+  /* A postcard on a full sheet has the room of any other poster. */
+  :global([data-paper='a4']) > .poster[data-size='postcard'] .tagline {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
   :global([data-paper='a4']) > .poster[data-size='postcard'] .title,
   :global([data-paper='a3']) > .poster .title {
     font-size: clamp(1.05rem, 14cqw, 4.5rem);
