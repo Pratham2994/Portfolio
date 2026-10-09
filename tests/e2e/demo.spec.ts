@@ -95,7 +95,12 @@ test('the deck opens an app from its home page and goes back', async ({ page }) 
   expect(await screen.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(640);
   await demo.getByRole('button', { name: 'Back to the home page' }).click();
   await expect(screen).toHaveAttribute('data-screen', 'home');
-  // An app with no picture still says what it is.
-  await demo.getByRole('button', { name: 'Open Galaxy' }).click();
-  await expect(demo.locator('h3')).toHaveText('Galaxy');
+  // Every app has its own picture.
+  for (const [name, picture] of [['Galaxy', 'galaxy'], ['Wi-Fi', 'wifi'], ['Settings', 'settings']]) {
+    await demo.getByRole('button', { name: `Open ${name}` }).click();
+    await expect(screen).toHaveAttribute('data-screen', picture);
+    await expect(demo.locator('h3')).toHaveText(name);
+    await expect.poll(() => screen.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(640);
+    await demo.getByRole('button', { name: 'Back to the home page' }).click();
+  }
 });

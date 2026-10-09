@@ -8,7 +8,8 @@ test('sections below the wall appear after arriving from an unknown address', as
   await open(page, '/nothing/here');
   await page.getByRole('link', { name: /back to the wall/i }).click();
   await expect(page.locator('[data-poster]')).toHaveCount(10);
-  await page.locator('#you').scrollIntoViewIfNeeded();
+  // The section is taller than a phone screen, so go to its first part, not to its middle.
+  await page.locator('#you [data-reveal]').first().scrollIntoViewIfNeeded();
   await expect(page.locator('#you [data-reveal]').first()).toHaveAttribute('data-seen', '');
   await expect(page.locator('#you [data-reveal]').first()).toHaveCSS('opacity', '1');
 });

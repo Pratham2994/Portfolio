@@ -132,4 +132,92 @@
   .portrait {
     grid-row: span 2;
   }
+
+  .stack {
+    grid-column: 1 / -1;
+  }
+}
+
+/* What I build with: each language with the projects that prove it, then the rest in plain lines. */
+.stack {
+  container-type: inline-size;
+}
+
+.stack h3 {
+  margin-bottom: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.languages li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.1rem var(--space-4);
+  align-items: baseline;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+}
+
+.languages strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--step-2);
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+/* The ones I reach for first carry the signal colour. */
+.languages li[data-first] strong {
+  color: var(--signal);
+}
+
+.languages li > span {
+  color: var(--dim);
+}
+
+.languages a {
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 0.25em;
+}
+
+.languages a:hover,
+.languages a:focus-visible {
+  color: var(--bone);
+  text-decoration-color: var(--signal);
+}
+
+.tools {
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+
+.tools div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.1rem var(--space-4);
+  align-items: baseline;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.tools dd {
+  margin: 0;
+}
+
+.tools dt {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--dim);
+}
+
+@container (min-width: 28rem) {
+  .languages li,
+  .tools div {
+    grid-template-columns: 9.5rem minmax(0, 1fr);
+  }
 }

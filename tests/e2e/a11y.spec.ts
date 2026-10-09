@@ -51,7 +51,8 @@ test('Tab reaches every poster, desk button and contact control with a visible f
   await expect(page.locator('[data-wall][data-entered]')).toHaveCount(1);
   const seen = new Set<string>();
   const noRing = new Set<string>();
-  for (let i = 0; i < 40; i++) {
+  // Enough presses to pass the wall, the desk, the links in the stack list, and the contact controls.
+  for (let i = 0; i < 75; i++) {
     await page.keyboard.press('Tab');
     const state = await page.evaluate(() => {
       const el = document.activeElement as HTMLElement | null;

@@ -1,9 +1,18 @@
 
 import portrait from '~/assets/portrait.webp';
-import { timeline, you } from '~/content';
+import { Link } from 'react-router';
+
+import { projects, timeline, you } from '~/content';
+import { track } from '~/lib/analytics';
 import { Paragraphs } from '~/lib/Paragraphs';
 
 import s from './You.module.css';
+
+// A language that names a project not on the wall is a mistake in the content, so the build stops.
+const TITLES = new Map(projects.map((project) => [project.slug, project.title]));
+for (const language of you.stack.languages) {
+  for (const slug of language.used) if (!TITLES.has(slug)) throw new Error(`site/you: ${language.name} names an unknown project, "${slug}"`);
+}
 
 export function You() {
   return (
@@ -31,6 +40,36 @@ export function You() {
           ))}
         </ol>
         <p className={s.quiet}>{you.quiet}</p>
+      </div>
+
+      <div className={s.stack} data-reveal data-stack>
+        <h3>What I build with</h3>
+        <ul className={s.languages}>
+          {you.stack.languages.map((language) => (
+            <li key={language.name} data-first={language.first || undefined}>
+              <strong>{language.name}</strong>
+              <span>
+                {language.used.map((slug, i) => (
+                  <span key={slug}>
+                    {i > 0 && ', '}
+                    <Link to={`/work/${slug}`} preventScrollReset onClick={() => track('stack_project', { language: language.name, project: slug })}>
+                      {TITLES.get(slug)}
+                    </Link>
+                  </span>
+                ))}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <dl className={s.tools}>
+          {you.stack.groups.map((group) => (
+            <div key={group.name}>
+              <dt>{group.name}</dt>
+              <dd>{group.items.join(', ')}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className={s.quiet}>{you.stack.note}</p>
       </div>
     </section>
   );
