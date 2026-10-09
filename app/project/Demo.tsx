@@ -50,44 +50,27 @@ function Stages({ stages, at, halted = false }: { stages: Stage[]; at: number; h
 
 type Kind = 'film' | 'folder' | 'device' | 'wave';
 
-// The thing on the bench, as a small line drawing.
-const GLYPHS: Record<Kind, ReactElement> = {
-  film: (
-    <>
-      <rect x="6" y="10" width="36" height="28" rx="2" />
-      <path d="M6 17h36M6 31h36M13 10v7M21 10v7M29 10v7M37 10v7M13 31v7M21 31v7M29 31v7M37 31v7" />
-    </>
-  ),
-  folder: <path d="M5 14h14l4 5h20v20H5z M5 24h38" />,
-  device: (
-    <>
-      <rect x="5" y="9" width="38" height="30" rx="4" />
-      <rect x="10" y="14" width="28" height="20" rx="1" />
-    </>
-  ),
-  wave: <path d="M4 18c5-7 9-7 13 0s9 7 13 0 9-7 14 0M4 30c5-7 9-7 13 0s9 7 13 0 9-7 14 0" />,
-};
+// What is printed at the head of the slip, for each kind of job.
+const JOBS: Record<Kind, string> = { film: 'Encode job', folder: 'Folder scan', device: 'One tap', wave: 'One question' };
 
 type Step = { name: string; value: string };
 
 /**
- * The dark half of the bench: the thing being worked on, with a line that scans it, and the
- * steps. A step's result is written in as the step ends. A halted run goes no further.
+ * The long half of the slip. It prints one line for each step as the step ends, the way a
+ * till prints a receipt: the name, a row of dots, and what came out. A halted run prints no more.
  */
 function Console({ kind, steps, at, halted = false }: { kind: Kind; steps: Step[]; at: number; halted?: boolean }) {
   const running = at < steps.length && !halted;
   return (
-    <div className={s.console} data-running={running || undefined}>
-      <div className={s.subject} aria-hidden="true">
-        <svg viewBox="0 0 48 48">{GLYPHS[kind]}</svg>
-        <i />
-      </div>
+    <div className={s.printed} data-running={running || undefined}>
+      <span className={s.label}>{JOBS[kind]}</span>
       <ol className={s.steps} data-stages data-over={at >= steps.length || undefined}>
         {steps.map((step, i) => {
           const state = i < at ? 'done' : i === at && !halted ? 'now' : 'todo';
           return (
             <li key={step.name} data-state={state}>
               <b>{step.name}</b>
+              <i aria-hidden="true" />
               <span>{state === 'done' ? step.value : ''}</span>
             </li>
           );
@@ -97,14 +80,14 @@ function Console({ kind, steps, at, halted = false }: { kind: Kind; steps: Step[
   );
 }
 
-/** The paper half: nothing until the run is over, then a stamp and what backs it. */
+/** The stub at the end of the slip, past the tear line. It stays blank until the run is over. */
 function Report({ ready, wait, stamp, tone = 'good', children }: { ready: boolean; wait: string; stamp: string; tone?: 'good' | 'bad'; children: ReactNode }) {
   return (
-    <div className={s.report} data-report data-ready={ready || undefined}>
-      <span className={s.label}>Report</span>
+    <div className={s.stub} data-report data-ready={ready || undefined}>
+      <span className={s.label}>Result</span>
       {ready ? (
         <>
-          <strong className={s.stamp} data-tone={tone} data-stamp>
+          <strong className={s.verdict} data-tone={tone} data-stamp>
             {stamp}
           </strong>
           {children}

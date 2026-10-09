@@ -75,134 +75,145 @@
 }
 
 /*
- * The bench: on the left a dark console works on the thing, step by step. On the right a
- * sheet of paper waits, and takes the stamp when the run is over.
+ * The slip. Each run prints on a strip of paper, like the ticket and the boarding pass on the
+ * wall: a line for each step on the long half, and the result on the stub past the tear line.
+ * It is always paper and ink, whatever colour the page is.
  */
 .bench {
+  --ink: #14161c;
+  --paper: #ece8df;
+  --accent: #a8320f;
+  --soft: #dcd7cc;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
-  gap: var(--space-3);
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr);
+  border-radius: 3px;
+  background: var(--paper) url('/textures/paper.webp');
+  color: var(--ink);
+  box-shadow: 0 0.9rem 1.6rem -0.9rem rgb(0 0 0 / 0.6);
 }
 
-.console {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--space-4);
-  align-items: center;
-  padding: var(--space-4);
-  border-radius: 4px;
-  background: #0c0d12;
-  color: #e9ecf8;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-}
-
-/* The thing on the bench. While the run goes, a line of light passes down it. */
-.subject {
-  position: relative;
-  width: clamp(3.2rem, 9cqw, 5rem);
-  overflow: hidden;
-}
-
-.subject svg {
-  display: block;
-  width: 100%;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linejoin: round;
-}
-
-.subject i {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 3px;
-  background: var(--accent);
-  box-shadow: 0 0 0.8rem 0.2rem var(--accent);
-  opacity: 0;
-}
-
-.steps {
-  display: grid;
-  gap: 0.5em;
-}
-
-.steps li {
-  display: grid;
-  grid-template-columns: 1em 5.2em minmax(0, 1fr);
-  gap: 0.7em;
-  align-items: baseline;
-  transition: opacity 0.25s var(--ease-out);
-}
-
-/* A mark in front of each step: a dot while it waits, an arrow while it runs, a tick when it is done. */
-.steps li::before {
-  content: '\00b7';
-  color: var(--accent);
-  text-align: center;
-}
-
-.steps li[data-state='now']::before {
-  content: '\203a';
-}
-
-.steps li[data-state='done']::before {
-  content: '\2713';
-}
-
-.steps li[data-state='todo'] {
-  opacity: 0.38;
-}
-
-.steps span {
-  color: var(--accent);
-  overflow-wrap: anywhere;
-}
-
-.report {
-  position: relative;
+.printed,
+.stub {
   display: grid;
   align-content: start;
   gap: var(--space-3);
-  min-height: 11rem;
   padding: var(--space-4);
-  border-radius: 4px;
-  background: var(--soft);
 }
 
 .label {
   font-family: var(--font-mono);
   font-size: 0.75rem;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  opacity: 0.7;
 }
 
-.waiting {
-  align-self: center;
+.steps {
+  display: grid;
+  gap: 0.45em;
   font-family: var(--font-mono);
   font-size: var(--step--1);
 }
 
-/* The verdict, as a rubber stamp: two lines round it, a little crooked. */
-.stamp {
-  justify-self: start;
-  padding: 0.12em 0.5em 0.06em;
-  border: 3px double currentColor;
-  border-radius: 4px;
-  color: var(--accent);
-  font-family: var(--font-display);
-  font-size: var(--step-3);
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  line-height: 1.1;
-  text-transform: uppercase;
-  rotate: -3deg;
+/* One printed line: the step, a row of dots, and what came out of it. */
+.steps li {
+  display: grid;
+  grid-template-columns: auto minmax(1.5rem, 1fr) auto;
+  gap: 0.6em;
+  align-items: baseline;
 }
 
-.stamp[data-tone='bad'] {
-  color: #ff5a4d;
+.steps b {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.steps i {
+  border-bottom: 2px dotted color-mix(in srgb, var(--ink) 45%, transparent);
+  translate: 0 -0.25em;
+}
+
+.steps span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+/* A line that has not printed yet is only a faint mark of where it will go. */
+.steps li[data-state='todo'] {
+  opacity: 0.3;
+}
+
+.steps li[data-state='todo'] i,
+.steps li[data-state='now'] i {
+  border-bottom-color: transparent;
+}
+
+/* The tear line, with a notch cut out of the paper at each end of it. */
+.stub {
+  position: relative;
+  min-height: 9rem;
+  border-top: 2px dashed color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+.stub::before,
+.stub::after {
+  content: '';
+  position: absolute;
+  top: -0.6rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: var(--page-bg);
+}
+
+.stub::before {
+  left: -0.6rem;
+}
+
+.stub::after {
+  right: -0.6rem;
+}
+
+@media (min-width: 760px) {
+  .bench {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  }
+
+  .stub {
+    border-top: 0;
+    border-left: 2px dashed color-mix(in srgb, var(--ink) 40%, transparent);
+  }
+
+  .stub::before,
+  .stub::after {
+    left: -0.6rem;
+    right: auto;
+  }
+
+  .stub::after {
+    top: auto;
+    bottom: -0.6rem;
+  }
+}
+
+.waiting {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  opacity: 0.7;
+}
+
+/* The result, in the heavy letters of the wall. */
+.verdict {
+  font-family: var(--font-display);
+  font-size: var(--step-4);
+  font-weight: 900;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.verdict[data-tone='bad'] {
+  color: var(--accent);
 }
 
 .meter {
@@ -235,26 +246,23 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .console[data-running] .subject i {
-    opacity: 1;
-    animation: scan 1.1s ease-in-out infinite alternate;
-  }
-
+  /* The line that is printing now has the print head at its end. */
   .steps li[data-state='now'] b::after {
-    content: '_';
-    animation: caret 0.45s steps(1) infinite;
+    content: '\00a0\2588';
+    animation: caret 0.4s steps(1) infinite;
   }
 
+  /* A finished line comes out from left to right, in steps, as type does. */
   .steps li[data-state='done'] span {
-    animation: part-in 0.3s var(--ease-out) backwards;
+    animation: print 0.3s steps(14) backwards;
   }
 
-  .stamp {
-    animation: stamp-down 0.28s var(--ease-out) backwards;
+  .stub[data-ready] > :not(.label) {
+    animation: part-in 0.4s var(--ease-out) backwards;
   }
 
-  .report[data-ready] > :not(.label, .stamp) {
-    animation: part-in 0.4s var(--ease-out) 0.15s backwards;
+  .stub[data-ready] > .verdict {
+    animation: print 0.35s steps(8) backwards;
   }
 
   .meter i {
@@ -262,27 +270,19 @@
   }
 }
 
-@keyframes scan {
+@keyframes print {
   from {
-    top: 0;
+    clip-path: inset(0 100% 0 0);
   }
 
   to {
-    top: calc(100% - 3px);
+    clip-path: inset(0);
   }
 }
 
 @keyframes caret {
   50% {
     opacity: 0;
-  }
-}
-
-@keyframes stamp-down {
-  from {
-    opacity: 0;
-    scale: 1.9;
-    rotate: -9deg;
   }
 }
 
