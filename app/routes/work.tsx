@@ -7,9 +7,9 @@ import { ProjectPage } from '~/project/ProjectPage';
 
 export function meta({ params }: { params: { slug?: string } }) {
   const project = params.slug ? getProject(params.slug) : undefined;
-  if (!project) return [{ title: 'Not on the wall — Pratham Panchal' }, { name: 'robots', content: 'noindex' }];
+  if (!project) return [{ title: 'Not on the wall - Pratham Panchal' }, { name: 'robots', content: 'noindex' }];
   return pageMeta({
-    title: `${project.title} — Pratham Panchal`,
+    title: `${project.title} - Pratham Panchal`,
     description: `${project.tagline} ${project.sectors[0].body}`,
     path: `/work/${project.slug}`,
     image: project.slug,

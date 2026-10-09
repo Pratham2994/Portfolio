@@ -117,3 +117,23 @@ test('OmniCompiler runs to a breakpoint, with the same controls in every languag
   await expect(demo.locator('[data-native]')).toHaveText('jdb');
   await expect(demo.locator('[data-watch]')).toContainText('12');
 });
+
+test('FloatChat shows the tool the model calls, and a different picture for each question', async ({ page }) => {
+  await open(page, '/work/floatchat');
+  const demo = page.locator('[data-demo="floatchat"]');
+  await expect(demo.locator('[data-tool] b')).toHaveText('time_series');
+  await demo.getByRole('button', { name: /saltiest/ }).click();
+  await expect(demo.locator('[data-tool] b')).toHaveText('heatmap');
+  await expect(demo.locator('[data-picture="heatmap"] rect')).toHaveCount(50);
+  await demo.getByRole('button', { name: /floats near India/ }).click();
+  await expect(demo.locator('[data-picture="map_points"] circle')).toHaveCount(26);
+});
+
+test('the way back stays in view when a project page is scrolled', async ({ page }) => {
+  await open(page, '/work/scrub');
+  const project = page.locator('[data-project]');
+  await project.evaluate((el) => el.scrollTo(0, el.scrollHeight));
+  await expect(page.locator('[data-close]')).toBeInViewport();
+  await page.locator('[data-close]').click();
+  await expect(project).toHaveCount(0);
+});

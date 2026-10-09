@@ -294,22 +294,98 @@
 }
 
 /* OmniCompiler */
-.debugger {
+.ide {
+  /* A dark window on any page colour, so its own buttons are always light on dark. */
+  --ink: #e9ecf8;
+  --paper: #0d0e13;
+  --line: rgb(233 236 248 / 0.14);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  box-shadow: 0 1.4rem 2.6rem -1.4rem rgb(0 0 0 / 0.7);
+}
+
+/* The languages, as the tabs of the window. */
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  background: #07080b;
+}
+
+.ide .tabs button {
+  flex: none;
+  padding: 0.75em 1.1em;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  color: rgb(233 236 248 / 0.6);
+  text-transform: none;
+}
+
+.ide .tabs button[aria-pressed='true'] {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.ide .tools button {
+  padding: 0.4em 0.8em;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.ide .tools .go {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #0d0e13;
+  font-weight: 700;
+}
+
+.tools span {
+  margin-left: auto;
+  color: rgb(233 236 248 / 0.6);
+}
+
+.panes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-  gap: var(--space-4);
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container (min-width: 40rem) {
+  .panes {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
+
+  .side {
+    border-top: 0;
+    border-left: 1px solid var(--line);
+  }
+}
+
+.omni {
+  container-type: inline-size;
 }
 
 .code {
   display: grid;
-  padding: 0.5rem 0;
-  border-radius: 2px;
-  background: #0b0b0d;
-  color: #f3f5ff;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  line-height: 1.9;
+  align-content: start;
+  padding: 0.7rem 0;
+  line-height: 2;
   overflow-x: auto;
 }
 
@@ -323,7 +399,7 @@
 
 /* The line the debugger is on. */
 .code li[data-here] {
-  background: rgb(255 255 255 / 0.14);
+  background: rgb(233 236 248 / 0.1);
 }
 
 .code li[data-here] code::before {
@@ -332,55 +408,79 @@
 }
 
 /* The line number is the breakpoint switch, as in an editor. */
-.code .gutter {
+.ide .code .gutter {
   flex: none;
-  width: 2.4em;
+  width: 2.6em;
   padding: 0;
   border: 0;
   border-radius: 50%;
-  color: rgb(243 245 255 / 0.55);
+  background: none;
+  color: rgb(233 236 248 / 0.5);
   font-size: inherit;
-  line-height: 1.9;
+  line-height: 2;
   text-align: center;
 }
 
-.code .gutter:hover {
-  color: #f3f5ff;
+.ide .code .gutter:hover {
+  color: var(--ink);
 }
 
-.code .gutter[aria-pressed='true'] {
+.ide .code .gutter[aria-pressed='true'] {
   background: var(--accent);
-  color: #0b0b0d;
+  color: #0d0e13;
   font-weight: 700;
-  scale: 0.8;
+  scale: 0.78;
 }
 
-.code .gutter[data-suggested] {
+.ide .code .gutter[data-suggested] {
   box-shadow: inset 0 0 0 1px var(--accent);
-  scale: 0.8;
+  scale: 0.78;
 }
 
-.state {
+.side {
   display: grid;
-  gap: var(--space-3);
+  align-content: start;
+  gap: 0.5rem;
+  padding: 0.9rem;
+  border-top: 1px solid var(--line);
 }
 
-.event {
+.side h3 {
+  color: rgb(233 236 248 / 0.6);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.side h3:not(:first-child) {
+  margin-top: 0.6rem;
+}
+
+.native {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* What goes over the wire, and what the program printed. */
+.wire {
   display: grid;
-  gap: 0.3em;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.4rem 1rem;
+  align-items: baseline;
+  padding: 0.8rem 0.9rem;
+  border-top: 1px solid var(--line);
+  background: #07080b;
 }
 
-.event span {
-  color: var(--muted);
+.wire span {
+  color: rgb(233 236 248 / 0.6);
 }
 
-.event code {
-  padding: 0.5em 0.7em;
-  border-radius: 2px;
-  background: #0b0b0d;
-  color: #f3f5ff;
+.wire code {
+  min-height: 1.4em;
   overflow-wrap: anywhere;
 }
 
@@ -396,6 +496,10 @@
   gap: var(--space-4);
   padding: 0.5em 0;
   border-top: 1px solid var(--rule);
+}
+
+.ide .watch > div {
+  border-top-color: var(--line);
 }
 
 .watch dd {
@@ -414,27 +518,76 @@
 
 .answer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-  gap: var(--space-4);
-  align-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-5);
+  align-items: start;
 }
 
-.answer p {
+/* The conversation: the question on the right, as sent, and what comes back under it. */
+.thread {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.asked {
+  justify-self: end;
+  max-width: 28ch;
+  padding: 0.6em 0.9em;
+  border-radius: 1rem 1rem 0.2rem 1rem;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.tool {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3em 0.7em;
+  padding: 0.6em 0.8em;
+  border: 1px dashed color-mix(in srgb, var(--ink) 45%, transparent);
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+}
+
+.tool b {
+  color: var(--accent);
+}
+
+.tool code {
+  flex-basis: 100%;
+}
+
+.reply {
   font-size: var(--step-2);
   line-height: 1.2;
   text-wrap: balance;
 }
 
-.answer svg {
+.chart {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: 2px;
+  background: var(--soft);
+}
+
+.chart svg {
   width: 100%;
   height: auto;
+}
+
+.chart figcaption {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
 }
 
 .axis {
   fill: none;
   stroke: var(--ink);
   stroke-width: 1;
-  opacity: 0.4;
+  opacity: 0.3;
 }
 
 .line {
@@ -446,6 +599,36 @@
 
 .dot {
   fill: var(--ink);
+}
+
+.tick {
+  fill: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  text-anchor: middle;
+  opacity: 0.8;
+}
+
+.cell {
+  fill: var(--accent);
+}
+
+.sea {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.coast {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.float1 {
+  fill: var(--accent);
 }
 
 /* iDEA */

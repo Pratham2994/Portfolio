@@ -15,7 +15,7 @@ test('poster opens its project and Escape returns to the wall', async ({ page })
 test('direct load shows the page, and close leads home', async ({ page }) => {
   await open(page, '/work/neat');
   await expect(page.locator('#project-title')).toHaveText('Neat');
-  await expect(page).toHaveTitle('Neat — Pratham Panchal');
+  await expect(page).toHaveTitle('Neat - Pratham Panchal');
   await page.locator('[data-close]').click();
   await expect(page).toHaveURL(/\/$/);
 });

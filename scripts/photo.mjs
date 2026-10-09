@@ -1,5 +1,5 @@
 // Crops the portrait to 4:5 and writes app/assets/portrait.webp in greyscale.
-// Usage: node scripts/photo.mjs <input> [--top 0.273]
+// Usage: node scripts/photo.mjs <input> [--top 0.265]
 // HEIC input goes through ffmpeg first. The colour treatment is done in CSS.
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync } from 'node:fs';
@@ -10,14 +10,14 @@ import sharp from 'sharp';
 
 const [input, ...rest] = process.argv.slice(2);
 if (!input) {
-  console.error('Usage: node scripts/photo.mjs <input> [--top 0.273]');
+  console.error('Usage: node scripts/photo.mjs <input> [--top 0.265]');
   process.exit(1);
 }
 
-// Head to mid-chest, eyes in the upper third. Fractions of the source image.
-const top = Number(rest[rest.indexOf('--top') + 1]) || 0.273;
-const CENTRE_X = 0.477;
-const WIDTH = 0.44;
+// Head to the crossed arms, eyes in the upper third. Fractions of the source image.
+const top = Number(rest[rest.indexOf('--top') + 1]) || 0.265;
+const CENTRE_X = 0.49;
+const WIDTH = 0.68;
 
 let source = input;
 let temp;

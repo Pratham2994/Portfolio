@@ -49,7 +49,7 @@ const person = {
 };
 
 export const HOME = {
-  title: `${NAME} — Software Engineer`,
+  title: `${NAME} - Software Engineer`,
   description:
     'Software engineer in Pune, India. I build tools because the one I had almost did the job: Scrub, Neat, OmniCompiler, Prats-Deck and more.',
   schema: [person, { '@type': 'WebSite', '@id': `${SITE}/#site`, name: NAME, url: SITE, author: { '@id': `${SITE}/#me` } }],

@@ -12,12 +12,12 @@ stats:
   - { value: '0', label: lines of SQL you have to write }
 sectors:
   - title: The data
-    body: Thousands of Argo floats drift around the oceans measuring temperature and salt. Their files get cleaned, loaded into Postgres and indexed for search.
+    body: Thousands of Argo floats drift around the oceans and measure temperature and salt. Their files get cleaned and loaded into Postgres, and the notes about them are indexed so they can be searched by meaning.
   - title: The tools
-    body: The model does not answer from memory. It calls tools that run real queries, draw heatmaps, plot points on a map and build time series.
+    body: The model does not answer from memory. It picks one of five tools, and the tool runs a real query. One draws a time series, one compares two of them, one draws a heatmap, one puts points on a map, and one runs SQL.
   - title: The chat
-    body: You type a question in plain words. The answer streams back with a chart or a map next to it, and a panel for predictions.
-stack: [React, Node, Python, PostgreSQL, ChromaDB, MCP]
+    body: You type a question in plain words. The answer streams back with the chart or the map next to it, and you can see which tool it used.
+stack: [Python, FastMCP, PostgreSQL, ChromaDB, Node, React]
 links: { repo: 'https://github.com/VarnikaBajpai4/FloatChat_DebugDynasty_SiH' }
 ---
 Ocean data is public. Reading it is another matter: odd file formats, a lot of scripting, and you need to know what you are looking for before you start.

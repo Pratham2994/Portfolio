@@ -101,6 +101,7 @@ export function ProjectPage({ project }: { project: Project }) {
         <header className={s.bar} data-in>
           <Link to="/" className={s.close} data-close preventScrollReset onClick={onCloseClick}>
             Back to the wall
+            <kbd aria-hidden="true">Esc</kbd>
           </Link>
           <span className={s.count}>
             {pad(position)} / {pad(projects.length)}
@@ -110,6 +111,8 @@ export function ProjectPage({ project }: { project: Project }) {
 
         <div className={s.hero}>
           <div className={s.heroText}>
+            {/* On a phone the bar has no room for the status, so it sits here. */}
+            <span className={s.statusBelow}>{project.status}</span>
             <h1
               id="project-title"
               className={s.title}

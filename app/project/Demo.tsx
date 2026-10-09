@@ -292,98 +292,173 @@ function Omni() {
 
   return (
     <div className={s.omni}>
-      <div className={s.choices} role="group" aria-label="Language">
-        {Object.keys(CODE).map((name) => (
-          <button key={name} type="button" aria-pressed={lang === name} onClick={() => setLang(name)}>
-            {name}
-          </button>
-        ))}
-      </div>
-      <div className={s.debugger}>
-        <ol className={s.code}>
-          {CODE[lang].map((text, i) => (
-            <li key={i} data-here={i === at.line || undefined}>
-              <button
-                type="button"
-                className={s.gutter}
-                aria-pressed={stops.includes(i)}
-                aria-label={`Breakpoint on line ${i + 1}`}
-                data-suggested={(i === SUGGESTED && !stops.includes(i)) || undefined}
-                onClick={() => toggle(i)}
-              >
-                {i + 1}
-              </button>
-              <code>{text}</code>
-            </li>
+      {/* One dark window, laid out as a debugger: tabs, controls, code, state, and the wire under it. */}
+      <div className={s.ide}>
+        <div className={s.tabs} role="group" aria-label="Language">
+          {Object.keys(CODE).map((name) => (
+            <button key={name} type="button" aria-pressed={lang === name} onClick={() => setLang(name)}>
+              {name}
+            </button>
           ))}
-        </ol>
-        <div className={s.state}>
-          <dl className={s.watch} data-watch>
-            <div>
-              <dt>total</dt>
-              <dd>{at.total}</dd>
-            </div>
-            <div>
-              <dt>n</dt>
-              <dd>{at.n}</dd>
-            </div>
-          </dl>
-          <dl className={s.watch}>
-            <div>
-              <dt>debugger under it</dt>
-              <dd data-native>{NATIVE[lang]}</dd>
-            </div>
-          </dl>
-          <p className={s.event}>
-            <span>what the page gets, from all five</span>
-            <code>{`{ "event": "${ended ? 'terminated' : 'stopped'}", "line": ${at.line + 1} }`}</code>
-          </p>
+        </div>
+        <div className={s.tools}>
+          <button type="button" className={s.go} onClick={() => setStep((step + 1) % RUN.length)}>
+            {ended ? 'Restart' : 'Step'}
+          </button>
+          <button type="button" disabled={ended} onClick={resume}>
+            Continue
+          </button>
+          <span data-state>{ended ? 'finished' : `paused on line ${at.line + 1}`}</span>
+        </div>
+        <div className={s.panes}>
+          <ol className={s.code}>
+            {CODE[lang].map((text, i) => (
+              <li key={i} data-here={i === at.line || undefined}>
+                <button
+                  type="button"
+                  className={s.gutter}
+                  aria-pressed={stops.includes(i)}
+                  aria-label={`Breakpoint on line ${i + 1}`}
+                  data-suggested={(i === SUGGESTED && !stops.includes(i)) || undefined}
+                  onClick={() => toggle(i)}
+                >
+                  {i + 1}
+                </button>
+                <code>{text}</code>
+              </li>
+            ))}
+          </ol>
+          <div className={s.side}>
+            <h3>Variables</h3>
+            <dl className={s.watch} data-watch>
+              <div>
+                <dt>total</dt>
+                <dd>{at.total}</dd>
+              </div>
+              <div>
+                <dt>n</dt>
+                <dd>{at.n}</dd>
+              </div>
+            </dl>
+            <h3>Debugger under it</h3>
+            <p className={s.native} data-native>
+              {NATIVE[lang]}
+            </p>
+          </div>
+        </div>
+        <div className={s.wire}>
+          <span>to the page</span>
+          <code>{`{ "event": "${ended ? 'terminated' : 'stopped'}", "line": ${at.line + 1} }`}</code>
+          <span>output</span>
+          <code>{ended ? '12' : ' '}</code>
         </div>
       </div>
-      <div className={s.choices}>
-        <button type="button" className={s.action} onClick={() => setStep((step + 1) % RUN.length)}>
-          {ended ? 'Restart' : 'Step'}
-        </button>
-        <button type="button" disabled={ended} onClick={resume}>
-          Continue
-        </button>
-      </div>
-      <p className={s.small}>Click a line number to set a breakpoint. The ringed one is where the model would put it.</p>
+      <p className={s.small}>
+        Click a line number to set a breakpoint. The ringed one is where the model would put it. Change the language: the debugger under it
+        changes, and the message to the page does not.
+      </p>
     </div>
   );
 }
 
+// Three questions, and what comes back for each: the tool the model calls, a line of answer, and a picture.
 const ASKS = [
-  { q: 'How warm was the Arabian Sea in March?', a: 'About 27.4 °C at the surface, from 212 float profiles.', points: [22, 30, 38, 46, 52, 58, 61, 66] },
-  { q: 'Where is the water saltiest?', a: 'The northern Arabian Sea: about 36.6 on the salinity scale.', points: [58, 60, 55, 62, 64, 61, 66, 63] },
-  { q: 'Show temperature against depth', a: 'It falls fast in the first 200 m, then levels out near 4 °C.', points: [70, 52, 36, 26, 20, 17, 15, 14] },
-];
+  {
+    q: 'How warm was the Arabian Sea this year?',
+    tool: 'time_series',
+    call: 'region: Arabian Sea, variable: temperature',
+    a: 'Warmest in May, near 30 °C at the surface. Coolest in January.',
+    values: [22, 26, 34, 46, 58, 52, 44, 40, 42, 38, 30, 24],
+  },
+  {
+    q: 'Where is the water saltiest?',
+    tool: 'heatmap',
+    call: 'variable: salinity, depth: surface',
+    a: 'The north of the Arabian Sea. It gets fresher toward the Bay of Bengal.',
+    values: [],
+  },
+  {
+    q: 'Show me the floats near India.',
+    tool: 'map_points',
+    call: 'box: 5 to 25 N, 55 to 95 E',
+    a: 'Each dot is one float that reported in. Most are west of the coast.',
+    values: [],
+  },
+] as const;
 
-/** FloatChat: ask one of three questions and get an answer with a chart. */
+// A fixed scatter of floats, and a fixed salt field, so the pictures are the same on every visit.
+const FLOATS = Array.from({ length: 26 }, (_, i) => ({ x: 18 + ((i * 97) % 150) + (i % 3) * 6, y: 14 + ((i * 53) % 68) }));
+const SALT = Array.from({ length: 50 }, (_, i) => {
+  const column = i % 10;
+  const row = Math.floor(i / 10);
+  return Math.max(0.12, 1 - column * 0.085 - row * 0.09 + ((i * 7) % 5) * 0.03);
+});
+
+/** FloatChat: ask a question. The model picks a tool, the tool runs, and the answer comes with a picture. */
 function Float() {
   const [asked, setAsked] = useState(0);
-  const { a, points } = ASKS[asked];
-  const path = points.map((y, i) => `${i ? 'L' : 'M'}${i * 40 + 10} ${90 - y}`).join(' ');
+  const ask = ASKS[asked];
+  const path = ask.values.map((y, i) => `${i ? 'L' : 'M'}${i * 24 + 18} ${92 - y}`).join(' ');
   return (
     <div className={s.float}>
       <div className={s.choices} role="group" aria-label="Question">
-        {ASKS.map((ask, i) => (
-          <button key={ask.q} type="button" aria-pressed={asked === i} onClick={() => setAsked(i)}>
-            {ask.q}
+        {ASKS.map((item, i) => (
+          <button key={item.q} type="button" aria-pressed={asked === i} onClick={() => setAsked(i)}>
+            {item.q}
           </button>
         ))}
       </div>
       <div className={s.answer}>
-        <p data-answer>{a}</p>
-        <svg viewBox="0 0 300 100" aria-hidden="true">
-          <path d="M10 90 H290" className={s.axis} />
-          <path d={path} className={s.line} />
-          {points.map((y, i) => (
-            <circle key={i} cx={i * 40 + 10} cy={90 - y} r="3.5" className={s.dot} />
-          ))}
-        </svg>
+        <div className={s.thread}>
+          <p className={s.asked}>{ask.q}</p>
+          <p className={s.tool} data-tool>
+            <span>the model calls</span>
+            <b>{ask.tool}</b>
+            <code>{ask.call}</code>
+          </p>
+          <p className={s.reply} data-answer>
+            {ask.a}
+          </p>
+        </div>
+        <figure className={s.chart}>
+          <svg viewBox="0 0 300 110" role="img" aria-label={`A ${ask.tool.replace('_', ' ')} picture for the answer`} data-picture={ask.tool}>
+            {ask.tool === 'time_series' && (
+              <>
+                <path d="M18 92 H282" className={s.axis} />
+                <path d={path} className={s.line} />
+                {ask.values.map((y, i) => (
+                  <circle key={i} cx={i * 24 + 18} cy={92 - y} r="3" className={s.dot} />
+                ))}
+                {['Jan', 'May', 'Sep', 'Dec'].map((month, i) => (
+                  <text key={month} x={[18, 114, 210, 282][i]} y="106" className={s.tick}>
+                    {month}
+                  </text>
+                ))}
+              </>
+            )}
+            {ask.tool === 'heatmap' &&
+              SALT.map((value, i) => (
+                <rect key={i} x={(i % 10) * 28 + 10} y={Math.floor(i / 10) * 20 + 5} width="26" height="18" className={s.cell} style={{ opacity: value }} />
+              ))}
+            {ask.tool === 'map_points' && (
+              <>
+                <rect x="10" y="5" width="280" height="96" className={s.sea} />
+                {[80, 150, 220].map((x) => (
+                  <path key={x} d={`M${x} 5 V101`} className={s.axis} />
+                ))}
+                <path d="M10 53 H290" className={s.axis} />
+                {/* The coast, as one rough line. */}
+                <path d="M196 5 L190 30 L204 58 L222 82 L232 101" className={s.coast} />
+                {FLOATS.map((float, i) => (
+                  <circle key={i} cx={float.x} cy={float.y} r="3" className={s.float1} />
+                ))}
+              </>
+            )}
+          </svg>
+          <figcaption>{ask.tool === 'time_series' ? 'Surface temperature, by month' : ask.tool === 'heatmap' ? 'Salinity. Brighter is saltier.' : 'Float positions'}</figcaption>
+        </figure>
       </div>
-      <p className={s.small}>Sample answers, to show the shape of it. The real one asks the live float data.</p>
+      <p className={s.small}>Sample answers, to show the shape of it. The real one runs the tools on the live float data.</p>
     </div>
   );
 }

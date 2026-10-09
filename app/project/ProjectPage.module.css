@@ -31,11 +31,19 @@
   min-width: 0;
 }
 
+/* The way back stays at the top of the page while it scrolls, so nobody has to look for it. */
 .bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3) var(--space-4);
+  /* As wide as the page, so nothing shows beside it when the text passes under. */
+  margin: calc(-1 * var(--space-5)) calc(-1 * var(--gutter)) 0;
+  padding: var(--space-3) var(--gutter);
+  border-bottom: 1px solid var(--rule);
+  background: var(--bg);
   font-family: var(--font-mono);
   font-size: var(--step--1);
   letter-spacing: 0.08em;
@@ -43,6 +51,10 @@
 }
 
 .close {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.8em;
   padding: 0.6em 0.95em;
   border-radius: 2px;
   background: var(--fg);
@@ -51,15 +63,64 @@
   text-decoration: none;
 }
 
+.close::before {
+  content: '\2190';
+}
+
+/* The key that does the same thing, for those with a keyboard. */
+.close kbd {
+  display: none;
+  padding: 0.1em 0.45em;
+  border: 1px solid color-mix(in srgb, var(--bg) 45%, transparent);
+  border-radius: 2px;
+  font: inherit;
+  font-weight: 400;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .close kbd {
+    display: inline;
+  }
+}
+
 .count {
   font-variant-numeric: tabular-nums;
 }
 
 .status {
+  min-width: 0;
   margin-left: auto;
   padding: 0.5em 0.8em;
   border: 1px solid currentColor;
   border-radius: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statusBelow {
+  display: none;
+}
+
+/* On a phone the bar is one short row. The status moves down, above the title. */
+@media (max-width: 600px) {
+  .bar .status {
+    display: none;
+  }
+
+  .statusBelow {
+    display: block;
+    justify-self: start;
+    width: fit-content;
+    margin-bottom: var(--space-3);
+    padding: 0.5em 0.8em;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
 }
 
 .title {

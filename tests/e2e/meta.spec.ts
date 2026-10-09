@@ -95,7 +95,7 @@ test('link previews have a title, a description and a picture for every network'
   const html = await (await request.get('/')).text();
   for (const tag of ['og:title', 'og:description', 'og:image', 'og:locale']) expect(html).toContain(`property="${tag}"`);
   for (const tag of ['twitter:card', 'twitter:title', 'twitter:description', 'twitter:image', 'author']) expect(html).toContain(`name="${tag}"`);
-  expect(html).toMatch(/<title>Pratham Panchal — Software Engineer<\/title>/);
+  expect(html).toMatch(/<title>Pratham Panchal - Software Engineer<\/title>/);
 });
 
 test('analytics goes through this site only, never straight to another domain', async ({ page }) => {
