@@ -119,6 +119,11 @@ export default function Brief() {
                 <a href={project.links.repo} className={s.code}>
                   code
                 </a>
+                {project.links.live && (
+                  <a href={project.links.live} className={s.code}>
+                    live
+                  </a>
+                )}
               </small>
             </li>
           ))}

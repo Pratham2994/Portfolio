@@ -19,7 +19,7 @@ sectors:
   - title: The curve
     body: It counts the work, not the time, on bigger and bigger lists of four kinds, a few tries each. The Big-O line you were told about shows up by itself. You can paste your own code too, and a model estimates its Big-O.
 stack: [JavaScript, React, Vite]
-links: { repo: 'https://github.com/Pratham2994/Algomotion' }
+links: { repo: 'https://github.com/Pratham2994/Algomotion', live: 'https://algomotion-pratham.vercel.app' }
 flow:
   nodes:
     - { id: you, at: [1, 1], name: You, note: 'pick an algorithm, a list and a speed', kind: you }
