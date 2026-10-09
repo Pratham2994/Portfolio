@@ -48,10 +48,10 @@ function Stages({ stages, at, halted = false }: { stages: Stage[]; at: number; h
   );
 }
 
-type Kind = 'film' | 'folder' | 'device' | 'wave' | 'file' | 'model' | 'list';
+type Kind = 'film' | 'folder' | 'device' | 'wave' | 'file' | 'model' | 'maze' | 'clock';
 
 // What is printed at the head of the slip, for each kind of job.
-const JOBS: Record<Kind, string> = { film: 'Encode job', folder: 'Folder scan', device: 'One tap', wave: 'One question', file: 'One file', model: 'One model', list: 'One sort' };
+const JOBS: Record<Kind, string> = { film: 'Encode job', folder: 'Folder scan', device: 'One tap', wave: 'One question', file: 'One file', model: 'One model', maze: 'One search', clock: 'One history' };
 
 type Step = { name: string; value: string; live?: boolean };
 
@@ -885,26 +885,59 @@ function Idea() {
   );
 }
 
-const DAYS = {
-  'Night owl': [9, 7, 6, 3, 1, 0, 0, 1, 2, 2, 3, 3, 4, 3, 3, 4, 4, 5, 6, 7, 8, 9, 10, 10],
-  'Early bird': [0, 0, 0, 0, 1, 4, 8, 10, 9, 6, 5, 4, 4, 3, 4, 4, 5, 5, 4, 3, 2, 1, 0, 0],
-};
+// One made-up listener who lives in Mumbai: how much they play in each half hour of their day.
+const AT_HOME = [8, 7, 6, 5, 3, 2, 1, 1, 0, 0, 0, 0, 0, 1, 2, 3, 4, 4, 3, 3, 2, 2, 2, 3, 3, 4, 4, 3, 3, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 9, 10, 12, 12, 11, 10, 9, 9];
+// Spotify writes every play down in UTC. Mumbai is 11 half hours ahead of it.
+const HOME = 11;
+const STORED = AT_HOME.map((_, i) => AT_HOME[(i + HOME) % 48]);
+const ZONES = [
+  { name: 'UTC', id: 'UTC', ahead: 0 },
+  { name: 'Mumbai', id: 'Asia/Kolkata', ahead: 11 },
+  { name: 'Tokyo', id: 'Asia/Tokyo', ahead: 18 },
+];
+const hourName = (h: number) => (h === 0 ? '12 am' : h === 12 ? '12 pm' : h < 12 ? `${h} am` : `${h - 12} pm`);
 
-/** Chronicle: a day of listening, hour by hour. */
+/** Chronicle: the same plays, read on three clocks. Only one of them is true. */
 function Chronicle() {
-  const [kind, setKind] = useState<keyof typeof DAYS>('Night owl');
+  const [picked, setPicked] = useState(0);
+  const { at, run } = useRun(5, 420);
+  const zone = ZONES[picked];
+  // The project's own step: move each stored play to local time, then count by hour.
+  const hours = Array.from({ length: 24 }, (_, h) => [0, 1].reduce((sum, half) => sum + STORED[(h * 2 + half - zone.ahead + 48) % 48], 0));
+  const most = Math.max(...hours);
+  const peak = hours.indexOf(most);
+  const total = hours.reduce((sum, n) => sum + n, 0);
+  const night = hours.reduce((sum, n, h) => sum + (h >= 23 || h < 5 ? n : 0), 0);
+  const day = hours.reduce((sum, n, h) => sum + (h >= 9 && h < 17 ? n : 0), 0);
+  const off = Math.abs(zone.ahead - HOME) / 2;
+  const steps: Step[] = [
+    { name: 'Load', value: 'the zip from Spotify, into DuckDB' },
+    { name: 'Clock', value: zone.ahead ? `UTC to ${zone.id}, +${Math.floor(zone.ahead / 2)}:${zone.ahead % 2 ? '30' : '00'}` : 'left in UTC, as stored' },
+    { name: 'Count', value: `by weekday and hour. Peak: ${hourName(peak)}` },
+    { name: 'Night', value: `${(night / day).toFixed(2)}x night against day` },
+    { name: 'Chapters', value: 'cut at the dates you gave' },
+  ];
+
   return (
     <div className={s.chronicle}>
-      <div className={s.choices} role="group" aria-label="Listener">
-        {(Object.keys(DAYS) as (keyof typeof DAYS)[]).map((name) => (
-          <button key={name} type="button" aria-pressed={kind === name} onClick={() => setKind(name)}>
-            {name}
+      <div className={s.choices} role="group" aria-label="Clock">
+        {ZONES.map((item, i) => (
+          <button
+            key={item.name}
+            type="button"
+            aria-pressed={picked === i}
+            onClick={() => {
+              setPicked(i);
+              run();
+            }}
+          >
+            {item.name}
           </button>
         ))}
       </div>
       <div className={s.hours} aria-hidden="true">
-        {DAYS[kind].map((plays, hour) => (
-          <i key={hour} style={{ transform: `scaleY(${Math.max(plays / 10, 0.02)})` }} data-night={hour < 6 || hour > 21 || undefined} />
+        {hours.map((plays, hour) => (
+          <i key={hour} style={{ transform: `scaleY(${Math.max(plays / 24, 0.02)})` }} data-night={hour >= 23 || hour < 5 || undefined} />
         ))}
       </div>
       <p className={s.scale}>
@@ -912,187 +945,188 @@ function Chronicle() {
         <span>noon</span>
         <span>midnight</span>
       </p>
-      <p className={s.small}>Two made-up listeners. Yours comes from your own Spotify export.</p>
+      <div className={s.bench}>
+        <Console kind="clock" steps={steps} at={at} />
+        <Report ready={at >= steps.length} wait="Reading the history" stamp={hourName(peak)} tone={off ? 'bad' : 'good'}>
+          <Meter share={night / total} label={`${Math.round((night / total) * 100)}% of plays between 11 pm and 5 am`} />
+          <ul className={s.points}>
+            <li>{off ? `Wrong by ${off} hours. This listener lives in Mumbai` : 'This is where the listener lives. These hours are true'}</li>
+            <li>The same plays each time. Only the clock they are read on changes</li>
+          </ul>
+        </Report>
+      </div>
+      <p className={s.small}>One made-up listener. Spotify stores every play in UTC, so the first thing Chronicle does is move it home.</p>
     </div>
   );
 }
 
-const START = [8, 3, 11, 5, 14, 2, 9, 6, 13, 1, 10, 4, 12, 7];
+const ROWS = 11;
+const COLS = 23;
+const FROM = COLS + 1;
+const TO = (ROWS - 2) * COLS + COLS - 2;
 
-// One thing an algorithm did: looked at two places, swapped them, or wrote a value into one.
-type Move = { kind: 'compare' | 'swap' | 'write'; i: number; j: number; value?: number };
-
-/**
- * The project's own method: the algorithm runs to the end first, at full speed, and writes
- * down every move. The page then plays that list back. These four write the same moves as
- * the ones in the repo.
- */
-const SORTS: Record<string, { bigO: string; note: string; record: (start: number[]) => Move[] }> = {
-  Bubble: {
-    bigO: 'O(n²)',
-    note: 'It checks every pair of neighbours, even when the list is nearly right',
-    record: (start) => {
-      const a = start.slice();
-      const moves: Move[] = [];
-      for (let i = 0; i < a.length - 1; i++) {
-        for (let j = 0; j < a.length - 1 - i; j++) {
-          moves.push({ kind: 'compare', i: j, j: j + 1 });
-          if (a[j] > a[j + 1]) {
-            [a[j], a[j + 1]] = [a[j + 1], a[j]];
-            moves.push({ kind: 'swap', i: j, j: j + 1 });
-          }
-        }
-      }
-      return moves;
-    },
-  },
-  Insertion: {
-    bigO: 'O(n²)',
-    note: 'Very fast when the list is nearly sorted already',
-    record: (start) => {
-      const a = start.slice();
-      const moves: Move[] = [];
-      for (let i = 1; i < a.length; i++) {
-        const key = a[i];
-        let j = i - 1;
-        while (j >= 0) {
-          moves.push({ kind: 'compare', i: j, j: j + 1 });
-          if (a[j] <= key) break;
-          a[j + 1] = a[j];
-          moves.push({ kind: 'write', i: j + 1, j: j + 1, value: a[j] });
-          j--;
-        }
-        a[j + 1] = key;
-        moves.push({ kind: 'write', i: j + 1, j: j + 1, value: key });
-      }
-      return moves;
-    },
-  },
-  Selection: {
-    bigO: 'O(n²)',
-    note: 'The fewest writes: one swap for each place',
-    record: (start) => {
-      const a = start.slice();
-      const moves: Move[] = [];
-      for (let i = 0; i < a.length - 1; i++) {
-        let least = i;
-        for (let j = i + 1; j < a.length; j++) {
-          moves.push({ kind: 'compare', i: least, j });
-          if (a[j] < a[least]) least = j;
-        }
-        if (least !== i) {
-          [a[i], a[least]] = [a[least], a[i]];
-          moves.push({ kind: 'swap', i, j: least });
-        }
-      }
-      return moves;
-    },
-  },
-  Quick: {
-    bigO: 'O(n log n)',
-    note: 'It splits the list round one value, then sorts each side',
-    record: (start) => {
-      const a = start.slice();
-      const moves: Move[] = [];
-      const sort = (lo: number, hi: number) => {
-        if (lo >= hi) return;
-        let i = lo;
-        for (let j = lo; j < hi; j++) {
-          moves.push({ kind: 'compare', i: j, j: hi });
-          if (a[j] <= a[hi]) {
-            if (i !== j) {
-              [a[i], a[j]] = [a[j], a[i]];
-              moves.push({ kind: 'swap', i, j });
-            }
-            i++;
-          }
-        }
-        if (i !== hi) {
-          [a[i], a[hi]] = [a[hi], a[i]];
-          moves.push({ kind: 'swap', i, j: hi });
-        }
-        sort(lo, i - 1);
-        sort(i + 1, hi);
-      };
-      sort(0, a.length - 1);
-      return moves;
-    },
-  },
-};
-
-/** Mixes a list the same way for the same seed, as the project does. */
-function mixed(seed: number) {
-  const list = START.slice();
-  let t = seed;
-  for (let i = list.length - 1; i > 0; i--) {
+/** A maze from a seed: the same seed gives the same maze, as in the project. True is a wall. */
+function maze(seed: number) {
+  const walls = new Array<boolean>(ROWS * COLS).fill(true);
+  let t = seed * 7919 + 13;
+  const random = (n: number) => {
     t = (t * 1664525 + 1013904223) >>> 0;
-    const j = t % (i + 1);
-    [list[i], list[j]] = [list[j], list[i]];
+    return t % n;
+  };
+  const stack = [FROM];
+  walls[FROM] = false;
+  while (stack.length) {
+    const cur = stack[stack.length - 1];
+    const ways = [2 * COLS, 2, -2 * COLS, -2].filter((d) => {
+      const next = cur + d;
+      const col = next % COLS;
+      return next > COLS && next < walls.length - COLS && col > 0 && col < COLS - 1 && Math.abs(col - (cur % COLS)) <= 2 && walls[next];
+    });
+    if (!ways.length) {
+      stack.pop();
+      continue;
+    }
+    const d = ways[random(ways.length)];
+    walls[cur + d / 2] = false;
+    walls[cur + d] = false;
+    stack.push(cur + d);
   }
-  return list;
+  // A few extra openings, so there is more than one way round
+  for (let i = COLS + 1; i < walls.length - COLS - 1; i++) {
+    const col = i % COLS;
+    if (!walls[i] || col === 0 || col === COLS - 1) continue;
+    const across = !walls[i - 1] && !walls[i + 1] && walls[i - COLS] && walls[i + COLS];
+    const down = !walls[i - COLS] && !walls[i + COLS] && walls[i - 1] && walls[i + 1];
+    if ((across || down) && random(100) < 14) walls[i] = false;
+  }
+  return walls;
 }
 
-/** Algomotion: a real sort, recorded first and then played back, one move at a time. */
+type Trace = { kind: 'wait' | 'seen' | 'path'; at: number };
+const SEARCHES: Record<string, string> = {
+  BFS: 'It spreads out evenly, so the first path it finds is the shortest',
+  'A*': 'Like BFS, but it tries the cells nearer the goal first',
+  Greedy: 'It runs straight at the goal. Fast, and not always the shortest',
+  DFS: 'It follows one corridor to its end before it tries another',
+};
+
+/**
+ * The project's own method: the search runs to the end first, at full speed, and writes down
+ * every cell it puts in line and every cell it looks at. The page then plays that list.
+ */
+function search(walls: boolean[], how: string) {
+  const guess = (i: number) => Math.abs(Math.floor(i / COLS) - (ROWS - 2)) + Math.abs((i % COLS) - (COLS - 2));
+  const cost = new Map<number, number>([[FROM, 0]]);
+  const from = new Map<number, number>();
+  const line = [FROM];
+  const seen = new Set<number>();
+  const trace: Trace[] = [];
+  const rank = (i: number) => (how === 'A*' ? cost.get(i)! : 0) + guess(i);
+
+  while (line.length) {
+    let pick = how === 'DFS' ? line.length - 1 : 0;
+    if (how === 'A*' || how === 'Greedy') {
+      for (let k = 1; k < line.length; k++) {
+        if (rank(line[k]) < rank(line[pick]) || (rank(line[k]) === rank(line[pick]) && guess(line[k]) < guess(line[pick]))) pick = k;
+      }
+    }
+    const cur = line.splice(pick, 1)[0];
+    if (seen.has(cur)) continue;
+    seen.add(cur);
+    trace.push({ kind: 'seen', at: cur });
+    if (cur === TO) break;
+    for (const d of [COLS, 1, -COLS, -1]) {
+      const next = cur + d;
+      if (walls[next] || seen.has(next)) continue;
+      const far = cost.get(cur)! + 1;
+      if (how === 'A*' ? far < (cost.get(next) ?? Infinity) : !cost.has(next)) {
+        cost.set(next, far);
+        from.set(next, cur);
+        line.push(next);
+        trace.push({ kind: 'wait', at: next });
+      }
+    }
+  }
+
+  let path = 0;
+  if (seen.has(TO)) {
+    for (let at = TO; at !== FROM; at = from.get(at)!) {
+      trace.push({ kind: 'path', at });
+      path++;
+    }
+    trace.push({ kind: 'path', at: FROM });
+  }
+  return { trace, looked: seen.size, path };
+}
+
+/** Algomotion: a real search on a maze, recorded first, then played. Drag the bar to go back. */
 function Algo() {
-  const [name, setName] = useState('Bubble');
-  const [seed, setSeed] = useState(0);
+  const [how, setHow] = useState('BFS');
+  const [seed, setSeed] = useState(1);
+  // The cells you flipped, kept only for the maze they were flipped on
+  const [flips, setFlips] = useState<{ seed: number; cells: number[] }>({ seed: 1, cells: [] });
   const [played, setPlayed] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const start = seed ? mixed(seed) : START;
-  const sort = SORTS[name];
-  const moves = sort.record(start);
+
+  const walls = maze(seed);
+  if (flips.seed === seed) for (const i of flips.cells) walls[i] = !walls[i];
+  const run = search(walls, how);
+  const best = how === 'BFS' ? run : search(walls, 'BFS');
+  const total = run.trace.length;
+  const open = walls.filter((wall) => !wall).length;
 
   useEffect(() => {
     if (!playing) return;
     const timer = setInterval(() => {
       setPlayed((now) => {
-        if (now + 1 >= moves.length) setPlaying(false);
-        return Math.min(now + 1, moves.length);
+        if (now + 2 >= total) setPlaying(false);
+        return Math.min(now + 2, total);
       });
-    }, 40);
+    }, 30);
     return () => clearInterval(timer);
-  }, [playing, moves.length]);
+  }, [playing, total]);
 
-  // The bars come from the start list and the moves played so far, so they can never drift.
-  const bars = start.slice();
-  let compares = 0;
-  let writes = 0;
-  for (const move of moves.slice(0, played)) {
-    if (move.kind === 'compare') compares++;
-    else if (move.kind === 'swap') {
-      [bars[move.i], bars[move.j]] = [bars[move.j], bars[move.i]];
-      writes++;
-    } else {
-      bars[move.i] = move.value!;
-      writes++;
-    }
+  // The grid comes from the maze and the steps played so far, so it can go back as well as on.
+  const cells = new Map<number, Trace['kind']>();
+  let looked = 0;
+  for (const step of run.trace.slice(0, played)) {
+    cells.set(step.at, step.kind);
+    if (step.kind === 'seen') looked++;
   }
-  const last = played > 0 && played < moves.length ? moves[played - 1] : null;
-  const done = played >= moves.length;
-  const worst = (start.length * (start.length - 1)) / 2;
+  const done = played >= total;
   const reset = (next: () => void) => {
     next();
     setPlayed(0);
     setPlaying(false);
   };
   const steps: Step[] = [
-    { name: 'Record', value: `ran to the end: ${moves.length} moves written down` },
-    { name: 'Play', value: `move ${played} of ${moves.length}`, live: true },
-    { name: 'Count', value: `${compares} compares, ${writes} writes` },
+    { name: 'Record', value: `ran to the end: ${total} steps written down` },
+    { name: 'Play', value: `step ${played} of ${total}`, live: true },
+    { name: 'Count', value: run.path ? `${run.looked} cells looked at, a path of ${run.path}` : `${run.looked} cells looked at, no way out` },
   ];
 
   return (
     <div className={s.algo}>
       <div className={s.choices} role="group" aria-label="Algorithm">
-        {Object.keys(SORTS).map((item) => (
-          <button key={item} type="button" aria-pressed={name === item} onClick={() => reset(() => setName(item))}>
+        {Object.keys(SEARCHES).map((item) => (
+          <button key={item} type="button" aria-pressed={how === item} onClick={() => reset(() => setHow(item))}>
             {item}
           </button>
         ))}
       </div>
-      <div className={s.sortBars} aria-hidden="true">
-        {bars.map((value, i) => (
-          <i key={i} style={{ height: `${(value / 14) * 100}%` }} data-at={(last && (i === last.i || i === last.j)) || undefined} />
+      <div
+        className={s.maze}
+        style={{ '--cols': COLS } as CSSProperties}
+        data-maze
+        onClick={(event) => {
+          const at = Number((event.target as HTMLElement).dataset.at);
+          if (!at || at === FROM || at === TO || at % COLS === 0 || at % COLS === COLS - 1 || at < COLS || at >= walls.length - COLS) return;
+          const before = flips.seed === seed ? flips.cells : [];
+          reset(() => setFlips({ seed, cells: before.includes(at) ? before.filter((i) => i !== at) : [...before, at] }));
+        }}
+      >
+        {walls.map((wall, i) => (
+          <i key={i} data-at={i} data-cell={i === FROM || i === TO ? 'end' : wall ? 'wall' : cells.get(i)} />
         ))}
       </div>
       <div className={s.choices}>
@@ -1101,34 +1135,49 @@ function Algo() {
           className={s.action}
           disabled={playing}
           onClick={() => {
-            // With reduced motion there is no playback: it goes to the last move.
-            if (prefersReducedMotion()) return setPlayed(moves.length);
+            // With reduced motion there is no playback: it goes to the last step.
+            if (prefersReducedMotion()) return setPlayed(total);
             if (done) setPlayed(0);
             setPlaying(true);
           }}
         >
-          Sort
+          Search
         </button>
         <button type="button" onClick={() => reset(() => setSeed(seed + 1))}>
-          Shuffle
+          New maze
         </button>
+        <label className={s.seek}>
+          <span>Drag to go back</span>
+          <input
+            type="range"
+            min={0}
+            max={total}
+            value={played}
+            data-seek
+            onChange={(event) => {
+              setPlaying(false);
+              setPlayed(Number(event.target.value));
+            }}
+          />
+        </label>
       </div>
+      <p className={s.count} data-count>
+        Cells looked at: <b>{looked}</b>
+      </p>
       <div className={s.bench}>
-        <Console kind="list" steps={steps} at={done ? 3 : 1} />
-        <Report ready={done} wait={playing ? 'Playing it back' : 'Press Sort'} stamp={sort.bigO}>
-          <p className={s.count} data-count>
-            Comparisons: <b>{compares}</b>
-          </p>
-          <Meter share={compares / worst} label={`${compares} of ${worst}. ${worst} is the most that 14 bars can need`} />
+        <Console kind="maze" steps={steps} at={done ? 3 : 1} />
+        <Report ready={done} wait={playing ? 'Playing it back' : 'Press Search'} stamp={`${run.looked} cells`}>
+          <Meter share={run.looked / open} label={`${run.looked} of the ${open} open cells`} />
           <ul className={s.points}>
-            <li>
-              {writes} writes to the list
+            <li data-path>
+              {run.path ? `Path: ${run.path} moves${run.path === best.path ? ', the shortest there is' : `. The shortest is ${best.path}`}` : 'There is no way out of this one'}
             </li>
-            <li>{sort.note}</li>
+            {how !== 'BFS' && <li>BFS looks at {best.looked} on this maze</li>}
+            <li>{SEARCHES[how]}</li>
           </ul>
         </Report>
       </div>
-      <p className={s.small}>A real sort. It ran to the end before the first bar moved. What you watch is the recording.</p>
+      <p className={s.small}>A real search. It ran to the end before the first cell lit up. What you watch is the recording. Click a cell to add or remove a wall.</p>
     </div>
   );
 }
@@ -1324,8 +1373,8 @@ const DEMOS: Record<string, { title: string; body: () => ReactElement }> = {
   omnicompiler: { title: 'Debug it', body: Omni },
   floatchat: { title: 'Ask it', body: Float },
   'idea-hackathon': { title: 'Raise a query', body: Idea },
-  chronicle: { title: 'A day of listening', body: Chronicle },
-  algomotion: { title: 'Sort it', body: Algo },
+  chronicle: { title: 'Three clocks', body: Chronicle },
+  algomotion: { title: 'Find the way out', body: Algo },
   malshield: { title: 'Check a file', body: Mal },
   'local-llm-lab': { title: 'Two ways to rank', body: Lab },
 };

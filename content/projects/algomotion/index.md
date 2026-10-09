@@ -12,9 +12,9 @@ stats:
   - { value: '4', label: kinds of list to test them on }
 sectors:
   - title: Recorded, then played
-    body: Each algorithm runs to the end first and writes down every compare and every swap. The page then plays that list back at the speed you pick. So slow motion and a pause cost nothing.
+    body: Each algorithm runs to the end first and writes down every compare, swap and visit. The page then plays that list. So a pause, a step back and a bar you can drag through the whole run all come for free.
   - title: Pathfinding
-    body: Draw walls, build a maze, add weights, allow diagonal moves. Six algorithms look for the way out, and the same seed gives the same maze, so two of them can be compared fairly.
+    body: Draw walls, drag the two ends, add heavy cells, allow diagonal moves. Six algorithms look for the way out. All six have already run on your maze, so a table shows who looked at the least.
   - title: The curve
     body: It counts the work, not the time, on bigger and bigger lists of four kinds, a few tries each. The Big-O line you were told about shows up by itself. You can paste your own code too, and a model estimates its Big-O.
 stack: [JavaScript, React, Vite]
@@ -25,9 +25,9 @@ flow:
     - { id: seed, at: [2, 1], name: Seed, note: the same seed gives the same list or maze }
     - { id: run, at: [3, 1], name: Run it once, note: 'to the end, at full speed, before any drawing' }
     - { id: steps, at: [4, 1], name: Step list, note: 'each compare, swap and visit, written down', kind: store }
-    - { id: player, at: [5, 1], name: Player, note: plays the list back at the speed you set }
+    - { id: player, at: [5, 1], name: Player, note: 'play, pause, step back, drag the bar' }
     - { id: view, at: [5, 2], name: Bars and grid, note: drawn from the step that is playing }
-    - { id: count, at: [4, 2], name: Counters, note: 'compares and writes, as they happen' }
+    - { id: count, at: [4, 2], name: Scoreboard, note: 'every algorithm, counted on the same input' }
     - { id: bench, at: [3, 2], name: Bench, note: 'the same work on bigger lists, a few tries' }
     - { id: curve, at: [2, 2], name: Curve, note: 'the counts, set against the Big-O line' }
     - { id: ai, at: [1, 2], name: Code check, note: paste code. A model estimates its Big-O }

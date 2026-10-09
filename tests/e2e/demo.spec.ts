@@ -41,20 +41,31 @@ test('OmniCompiler keeps the debugger state when the language changes', async ({
   expect(await demo.locator('[data-watch]').innerText()).toBe(before);
 });
 
-test('Algomotion really sorts', async ({ page }) => {
+test('Algomotion really searches, and the recording goes back', async ({ page }) => {
   await open(page, '/work/algomotion');
   const demo = page.locator('[data-demo="algomotion"]');
-  await demo.getByRole('button', { name: 'Sort' }).click();
-  await expect(demo.getByRole('button', { name: 'Sort' })).toBeEnabled({ timeout: 15000 });
-  const heights = await demo.locator('[class*="sortBars"] i').evaluateAll((bars) => bars.map((bar) => parseFloat((bar as HTMLElement).style.height)));
-  expect(heights).toEqual([...heights].sort((a, b) => a - b));
-  await expect(demo.locator('[data-count] b')).toHaveText('91');
-  await expect(demo.locator('[data-stamp]')).toHaveText('O(n²)');
-  // Another algorithm, on the same list, does less work.
-  await demo.getByRole('button', { name: 'Quick' }).click();
-  await demo.getByRole('button', { name: 'Sort' }).click();
-  await expect(demo.locator('[data-stamp]')).toHaveText('O(n log n)', { timeout: 15000 });
-  expect(Number(await demo.locator('[data-count] b').textContent())).toBeLessThan(91);
+  await demo.getByRole('button', { name: 'Search' }).click();
+  await expect(demo.locator('[data-path]')).toContainText('the shortest there is', { timeout: 20000 });
+  const bfs = Number(await demo.locator('[data-count] b').textContent());
+  expect(bfs).toBeGreaterThan(0);
+  // The bar takes the recording back to a step in the middle.
+  await demo.locator('[data-seek]').fill('20');
+  expect(Number(await demo.locator('[data-count] b').textContent())).toBeLessThan(bfs);
+  // Another algorithm, on the same maze, looks at fewer cells.
+  await demo.getByRole('button', { name: 'A*' }).click();
+  await demo.getByRole('button', { name: 'Search' }).click();
+  await expect(demo.locator('[data-path]')).toContainText('the shortest there is', { timeout: 20000 });
+  expect(Number(await demo.locator('[data-count] b').textContent())).toBeLessThanOrEqual(bfs);
+});
+
+test('Chronicle reads the same plays on three clocks', async ({ page }) => {
+  await open(page, '/work/chronicle');
+  const demo = page.locator('[data-demo="chronicle"]');
+  await demo.getByRole('button', { name: 'Mumbai' }).click();
+  await expect(demo.locator('[data-stamp]')).toHaveText('9 pm', { timeout: 8000 });
+  await expect(demo.locator('[data-report]')).toContainText('These hours are true');
+  await demo.getByRole('button', { name: 'UTC' }).click();
+  await expect(demo.locator('[data-report]')).toContainText('Wrong by 5.5 hours', { timeout: 8000 });
 });
 
 test('the lab ranks the same models differently by the two numbers', async ({ page }) => {
@@ -181,7 +192,7 @@ test('a run lights its stages one after the other, to the end', async ({ page })
 });
 
 test('each of the first five projects has a picture of what runs underneath', async ({ page }) => {
-  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'algomotion']) {
+  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'algomotion', 'chronicle']) {
     await open(page, `/work/${slug}`);
     const flow = page.locator('[data-flow]');
     await expect(flow.locator('svg:visible')).toHaveCount(1);

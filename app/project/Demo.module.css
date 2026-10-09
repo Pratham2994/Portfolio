@@ -1045,23 +1045,18 @@
 }
 
 /* Chronicle */
-.hours,
-.sortBars {
+.hours {
   display: flex;
   align-items: flex-end;
   gap: 3px;
   height: 9rem;
 }
 
-.hours i,
-.sortBars i {
+.hours i {
   flex: 1;
   min-height: 2px;
   background: var(--ink);
-}
-
-/* Bars change by scaling, which costs no layout work. */
-.hours i {
+  /* Bars change by scaling, which costs no layout work. */
   height: 100%;
   transform-origin: bottom;
   transition: transform var(--dur-base) var(--ease-out);
@@ -1080,8 +1075,54 @@
 }
 
 /* Algomotion */
-.sortBars i[data-at] {
+.maze {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: 1px;
+  max-width: 44rem;
+  cursor: pointer;
+}
+
+.maze i {
+  aspect-ratio: 1;
+  background: color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+/* A wall is a gap: the page shows through. */
+.maze i[data-cell='wall'] {
+  background: none;
+}
+
+.maze i[data-cell='wait'] {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.maze i[data-cell='seen'] {
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.maze i[data-cell='path'],
+.maze i[data-cell='end'] {
   background: var(--accent);
+}
+
+.maze i[data-cell='end'] {
+  border-radius: 50%;
+}
+
+/* The bar that takes the recording back and forth. */
+.seek {
+  flex: 1 1 12rem;
+  display: grid;
+  gap: 0.2em;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  text-transform: uppercase;
+}
+
+.seek input {
+  width: 100%;
+  accent-color: var(--accent);
 }
 
 .count {
