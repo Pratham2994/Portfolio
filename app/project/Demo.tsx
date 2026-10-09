@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 
-import { drawCat } from '~/wall/cat-sprite';
 import { track } from '~/lib/analytics';
 
 import s from './Demo.module.css';
@@ -177,73 +176,85 @@ function Neat() {
   );
 }
 
-/** Prats-Deck: the small screen, with four of its apps. */
+// The home page of the deck, in the order of its icons: five across, three down.
+// A name with a picture opens that picture. The rest say what they are.
+const DECK: [name: string, about: string, picture?: string][] = [
+  ['Chindi', 'A pet cat. She gets hungry, sleepy and bored, and she wants attention.', 'chindi'],
+  ['Galaxy', 'Glowing dots that follow the stylus. Only for fun.'],
+  ['Macros', 'Buttons that control the PC. The deck is a USB keyboard, so the PC needs no software.', 'macros-song'],
+  ['Monitor', 'How hard the PC works: processor, memory, graphics card, heat and network.', 'monitor'],
+  ['Clock', 'A clock set from the internet, with three days of weather.'],
+  ['Wi-Fi', 'The networks near you, how strong each one is, and the best channel for your router.'],
+  ['Scope', 'An oscilloscope. It draws the signal on one of the pins.'],
+  ['Guide', 'It explains each app, on the device itself.'],
+  ['Paint', 'Paint with light. Lines that cross get brighter.'],
+  ['Bricks', 'Hit the ball, break the bricks. Three lives.'],
+  ['Life', 'The Game of Life. Draw on it to add living dots.'],
+  ['Snake', 'The classic. Tap beside its head to turn it.', 'snake'],
+  ['2048', 'Slide the tiles. Two of the same number join.', '2048'],
+  ['Trackpad', 'The screen is a mouse pad. The deck is a USB mouse too.', 'trackpad'],
+  ['Settings', 'Brightness, touch calibration, and the tear-free switch.'],
+];
+
+/** Prats-Deck: its real home page. Tap an app to open it, and the arrow to go back. */
 function Deck() {
-  const apps = ['Clock', 'Monitor', 'Macros', 'Cat'] as const;
-  const [app, setApp] = useState<(typeof apps)[number]>('Cat');
-  const [now, setNow] = useState('');
-  const canvas = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const read = () => setNow(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
-    const timer = setInterval(read, 10_000);
-    const first = setTimeout(read, 0);
-    return () => {
-      clearInterval(timer);
-      clearTimeout(first);
-    };
-  }, []);
-
-  // The cat dances: two frames, swapped twice a second.
-  useEffect(() => {
-    const ctx = canvas.current?.getContext('2d');
-    if (app !== 'Cat' || !ctx) return;
-    let frame: 0 | 1 = 0;
-    drawCat(ctx, frame);
-    const timer = setInterval(() => {
-      frame = frame ? 0 : 1;
-      drawCat(ctx, frame);
-    }, 260);
-    return () => clearInterval(timer);
-  }, [app]);
+  const [open, setOpen] = useState<number | null>(null);
+  const [cat, setCat] = useState<'chindi' | 'chindi-dancing' | 'chindi-zoomies'>('chindi');
+  const app = open === null ? null : DECK[open];
+  const picture = !app ? 'home' : app[0] === 'Chindi' ? cat : app[2];
+  const home = () => {
+    setOpen(null);
+    setCat('chindi');
+  };
 
   return (
     <div className={s.deck}>
       <div className={s.device}>
-        <div className={s.screen} data-app={app}>
-          {app === 'Clock' && <p className={s.big}>{now}</p>}
-          {app === 'Monitor' && (
-            <ul className={s.meters}>
-              {[
-                ['CPU', 34],
-                ['GPU', 71],
-                ['RAM', 52],
-              ].map(([name, value]) => (
-                <li key={name}>
-                  <span>{name}</span>
-                  <i style={{ width: `${value}%` }} />
-                </li>
-              ))}
-            </ul>
+        <div className={s.screen} data-screen={picture ?? 'none'}>
+          {picture ? (
+            <img src={`/deck/${picture}.webp`} width={640} height={480} alt={app ? `The ${app[0]} app on the deck` : 'The home page of the deck, with 15 app icons'} />
+          ) : (
+            <p className={s.blank}>
+              <b>{app![0]}</b>
+              No picture of this one yet.
+            </p>
           )}
-          {app === 'Macros' && (
-            <ul className={s.macros}>
-              {['Code', 'Mute', 'Shot', 'Build', 'Lock', 'Play'].map((key) => (
-                <li key={key}>{key}</li>
-              ))}
-            </ul>
+          {app ? (
+            <button type="button" className={s.back} onClick={home} aria-label="Back to the home page" />
+          ) : (
+            DECK.map(([name], i) => (
+              <button
+                key={name}
+                type="button"
+                className={s.icon}
+                style={{ left: `${(i % 5) * 20}%`, top: `${22.5 + Math.floor(i / 5) * 25.8}%` }}
+                onClick={() => setOpen(i)}
+                aria-label={`Open ${name}`}
+              />
+            ))
           )}
-          {app === 'Cat' && <canvas ref={canvas} width={16} height={10} className={s.pet} aria-label="A pixel cat, dancing" />}
         </div>
       </div>
-      <div className={s.choices} role="group" aria-label="Apps">
-        {apps.map((name) => (
-          <button key={name} type="button" aria-pressed={app === name} onClick={() => setApp(name)}>
-            {name}
+      <div className={s.about} aria-live="polite">
+        <h3>{app ? app[0] : 'Home'}</h3>
+        <p>{app ? app[1] : 'Fifteen apps on a 2.8 inch screen. Tap one.'}</p>
+        {app?.[0] === 'Chindi' && (
+          <div className={s.choices}>
+            <button type="button" aria-pressed={cat === 'chindi-dancing'} onClick={() => setCat(cat === 'chindi-dancing' ? 'chindi' : 'chindi-dancing')}>
+              Play a song on the PC
+            </button>
+            <button type="button" aria-pressed={cat === 'chindi-zoomies'} onClick={() => setCat(cat === 'chindi-zoomies' ? 'chindi' : 'chindi-zoomies')}>
+              Zoomies
+            </button>
+          </div>
+        )}
+        {app && (
+          <button type="button" onClick={home}>
+            Home
           </button>
-        ))}
+        )}
+        <p className={s.small}>These pictures come from the simulator, which runs the code of the deck on a PC.</p>
       </div>
-      <p className={s.small}>The meter values here are examples. On the real one they come from the PC.</p>
     </div>
   );
 }
@@ -537,7 +548,7 @@ function Lab() {
 const DEMOS: Record<string, { title: string; body: () => ReactElement }> = {
   scrub: { title: 'Fit a size', body: Scrub },
   neat: { title: 'The review queue', body: Neat },
-  'prats-deck': { title: 'On the screen', body: Deck },
+  'prats-deck': { title: 'Tap through it', body: Deck },
   omnicompiler: { title: 'Step through it', body: Omni },
   floatchat: { title: 'Ask it', body: Float },
   'idea-hackathon': { title: 'One customer', body: Idea },

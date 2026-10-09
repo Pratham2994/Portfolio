@@ -81,3 +81,21 @@ test('Neat clears its queue group by group, and a rule files the next one by its
   await demo.locator('[data-group="installers"]').getByRole('button', { name: 'Undo' }).click();
   await expect(count).toHaveText('3');
 });
+
+test('the deck opens an app from its home page and goes back', async ({ page }) => {
+  await open(page, '/work/prats-deck');
+  const demo = page.locator('[data-demo="prats-deck"]');
+  const screen = demo.locator('[data-screen]');
+  await expect(screen).toHaveAttribute('data-screen', 'home');
+  await expect(demo.getByRole('button', { name: /^Open / })).toHaveCount(15);
+  await demo.getByRole('button', { name: 'Open Chindi' }).click();
+  await demo.getByRole('button', { name: /Play a song/ }).click();
+  await expect(screen).toHaveAttribute('data-screen', 'chindi-dancing');
+  await expect(screen.locator('img')).toHaveJSProperty('complete', true);
+  expect(await screen.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(640);
+  await demo.getByRole('button', { name: 'Back to the home page' }).click();
+  await expect(screen).toHaveAttribute('data-screen', 'home');
+  // An app with no picture still says what it is.
+  await demo.getByRole('button', { name: 'Open Galaxy' }).click();
+  await expect(demo.locator('h3')).toHaveText('Galaxy');
+});
