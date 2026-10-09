@@ -414,3 +414,149 @@
   display: grid;
   gap: var(--space-4);
 }
+
+/*
+ * The broadcast caption: the number and the name slide in from the left, hold for a moment,
+ * and slide out. It says nothing the page does not say, so it is hidden from screen readers.
+ */
+.third {
+  position: fixed;
+  left: 0;
+  bottom: clamp(1.5rem, 9vh, 5rem);
+  z-index: 6;
+  display: none;
+  align-items: stretch;
+  max-width: min(88vw, 34rem);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 1;
+  pointer-events: none;
+  box-shadow: 0 0.8rem 1.6rem -0.6rem rgb(0 0 0 / 0.7);
+}
+
+.third b {
+  display: grid;
+  place-items: center;
+  padding: 0.35em 0.5em;
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 900;
+  font-size: var(--step-4);
+  font-variant-numeric: tabular-nums;
+}
+
+.third span {
+  display: grid;
+  align-content: center;
+  gap: 0.25em;
+  min-width: 0;
+  padding: 0.5em 1.1em 0.5em 0.8em;
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.third strong {
+  font-weight: 900;
+  font-size: var(--step-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.third i {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .third {
+    display: flex;
+    animation: third 3.1s cubic-bezier(0.16, 1, 0.3, 1) 0.75s both;
+  }
+
+  /* The name is wiped in a beat after the number, as on television. */
+  .third span {
+    animation: third-name 3.1s cubic-bezier(0.16, 1, 0.3, 1) 0.75s both;
+  }
+}
+
+@keyframes third {
+  0% {
+    translate: -105% 0;
+  }
+
+  14%,
+  82% {
+    translate: 0 0;
+  }
+
+  100% {
+    translate: -105% 0;
+  }
+}
+
+@keyframes third-name {
+  0%,
+  8% {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  24%,
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* VAR: the decision on the paper has not come. A small screen, and a light that waits. */
+[data-var] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+}
+
+[data-var] b {
+  padding: 0.1em 0.45em;
+  background: var(--fg);
+  color: var(--bg);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+[data-var]::after {
+  content: '';
+  flex: none;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-var]::after {
+    animation: var-wait 1.1s steps(2, jump-none) infinite;
+  }
+
+  [data-var] b {
+    animation: var-screen 2.6s linear infinite;
+  }
+}
+
+@keyframes var-wait {
+  50% {
+    opacity: 0.15;
+  }
+}
+
+/* A line runs down the little screen, like the picture on a monitor at the side of the pitch. */
+@keyframes var-screen {
+  from {
+    background: linear-gradient(var(--fg), var(--fg)) 0 0 / 100% 100%, var(--fg);
+    box-shadow: inset 0 -1.4em 0 -1.25em var(--accent);
+  }
+
+  to {
+    box-shadow: inset 0 1.4em 0 -1.25em var(--accent);
+  }
+}

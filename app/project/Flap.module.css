@@ -1,0 +1,45 @@
+/* Each character is one card of a split-flap board: a dark seam across the middle, and a quick fall as it changes. */
+.flap {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.04em;
+}
+
+.flap > span[aria-hidden] {
+  position: relative;
+  display: inline-block;
+  min-width: 0.52em;
+  padding-inline: 0.04em;
+  text-align: center;
+  background: color-mix(in srgb, var(--fg) 9%, transparent);
+  border-radius: 0.06em;
+}
+
+.flap > span[aria-hidden]::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 0.035em;
+  background: var(--bg);
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .flap > span[data-moving] {
+    animation: fall 55ms linear infinite;
+    transform-origin: 50% 0;
+  }
+}
+
+@keyframes fall {
+  from {
+    transform: perspective(4em) rotateX(-55deg);
+    filter: brightness(0.7);
+  }
+
+  to {
+    transform: none;
+    filter: none;
+  }
+}

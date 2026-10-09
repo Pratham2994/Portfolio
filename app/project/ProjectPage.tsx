@@ -8,6 +8,7 @@ import { Paragraphs } from '~/lib/Paragraphs';
 import { track } from '~/lib/analytics';
 
 import { Demo } from './Demo';
+import { Flap } from './Flap';
 import { Flow } from './Flow';
 import s from './ProjectPage.module.css';
 import { cancelTransition, closeLive, closeTo, openFrom, takeClosed, takeIntent } from './transition';
@@ -79,6 +80,9 @@ export function ProjectPage({ project }: { project: Project }) {
     close();
   };
 
+  // "Under review" is a decision that has not come yet, so the page shows it the way a match does.
+  const underReview = /under review/i.test(project.status);
+
   const style = {
     '--bg': project.palette.bg,
     '--fg': project.palette.fg,
@@ -98,6 +102,14 @@ export function ProjectPage({ project }: { project: Project }) {
       aria-modal="true"
       aria-labelledby="project-title"
     >
+      {/* Keyed by the project, so it plays again when the next or the previous one opens. */}
+      <div className={s.third} key={project.slug} aria-hidden="true" data-third>
+        <b>{pad(position)}</b>
+        <span>
+          <strong>{project.title}</strong>
+          <i>{project.status}</i>
+        </span>
+      </div>
       <div className={s.inner}>
         <header className={s.bar} data-in>
           <Link to="/" className={s.close} data-close preventScrollReset onClick={onCloseClick}>
@@ -107,7 +119,10 @@ export function ProjectPage({ project }: { project: Project }) {
           <span className={s.count}>
             {pad(position)} / {pad(projects.length)}
           </span>
-          <span className={s.status}>{project.status}</span>
+          <span className={s.status} data-var={underReview || undefined}>
+            {underReview && <b aria-hidden="true">VAR</b>}
+            {project.status}
+          </span>
         </header>
 
         {/* Two columns on a wide page: the words on the left, the art and the numbers on the right. */}
@@ -115,7 +130,10 @@ export function ProjectPage({ project }: { project: Project }) {
           <div className={s.lead}>
             <div className={s.heroText}>
               {/* On a phone the bar has no room for the status, so it sits here. */}
-              <span className={s.statusBelow}>{project.status}</span>
+              <span className={s.statusBelow} data-var={underReview || undefined}>
+                {underReview && <b aria-hidden="true">VAR</b>}
+                {project.status}
+              </span>
               <h1
                 id="project-title"
                 className={s.title}
@@ -143,7 +161,9 @@ export function ProjectPage({ project }: { project: Project }) {
               {project.stats.map((stat) => (
                 <div key={stat.label}>
                   <dt>{stat.label}</dt>
-                  <dd>{stat.value}</dd>
+                  <dd>
+                    <Flap text={stat.value} />
+                  </dd>
                 </div>
               ))}
             </dl>

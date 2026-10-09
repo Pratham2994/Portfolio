@@ -78,7 +78,14 @@ const desk = z.object({
   cube: z.object({ title: text, best: z.number(), note: text }),
   now: z.object({ title: text, lines: z.array(text) }),
 });
-const timelineItem = z.object({ org: text, role: text, when: text, points: z.array(text).optional() });
+const timelineItem = z.object({
+  org: text,
+  role: text,
+  when: text,
+  points: z.array(text).optional(),
+  move: z.enum(['signed', 'loan', 'academy']).optional(),
+  fee: text.optional(),
+});
 // What I build with. A language names the projects it is used in, so each one comes with its proof.
 const stack = z.object({
   note: text,

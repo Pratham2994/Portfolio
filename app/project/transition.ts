@@ -24,6 +24,9 @@ const insetFor = (rect: DOMRect) =>
 
 const FULL = 'inset(0px 0px 0px 0px)';
 const RECEDE = { scale: 0.92, opacity: 0.25 };
+// A sheet lifted off the wall by its bottom edge, and how long that takes before the page opens.
+const PEEL = { transformPerspective: 700, rotateX: 26, scale: 1.07, transformOrigin: '50% 0%', zIndex: 4, boxShadow: '0 2.4rem 2.6rem -1rem rgb(0 0 0 / 0.95)' };
+const PEELED = 0.2;
 
 // The wall scales around the middle of the screen, wherever the page is scrolled.
 const origin = () => `50% ${window.scrollY + window.innerHeight / 2}px`;
@@ -60,17 +63,28 @@ export function openFrom(poster: HTMLElement | null, page: HTMLElement): Promise
   return new Promise((resolve) => {
     const items = page.querySelectorAll('[data-in]');
     start(() => {
-      gsap.set(page, { clearProps: 'clipPath,opacity' });
+      gsap.set(page, { clearProps: 'clipPath,opacity,transform,transformOrigin' });
       gsap.set(main, { clearProps: 'scale,opacity,transform,transformOrigin' });
       gsap.set(items, { clearProps: 'opacity,transform' });
+      gsap.set(poster, { clearProps: 'transform,transformOrigin,boxShadow,zIndex' });
       resolve();
     })
       .set(page, { clipPath: insetFor(poster.getBoundingClientRect()), opacity: 0 })
       .set(items, { opacity: 0, y: 48 })
-      .to(page, { opacity: 1, duration: 0.14, ease: 'none' }, 0)
-      .to(page, { clipPath: FULL, duration: 0.8, ease: 'expo.inOut' }, 0.08)
-      .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.8, ease: 'expo.inOut' }, 0.08)
-      .to(items, { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out', stagger: 0.05 }, 0.55);
+      // The sheet comes off the wall first: its bottom edge lifts toward you, held by the pin at the top.
+      .to(poster, { ...PEEL, duration: 0.24, ease: 'power2.out' }, 0)
+      .to(page, { opacity: 1, duration: 0.14, ease: 'none' }, PEELED)
+      // Then it unfolds: the page opens from the sheet, tipped back at first, and lies flat.
+      .fromTo(
+        page,
+        { transformPerspective: 1400, rotateX: -9, transformOrigin: '50% 0%' },
+        { rotateX: 0, duration: 0.8, ease: 'expo.out' },
+        PEELED + 0.08,
+      )
+      .to(page, { clipPath: FULL, duration: 0.8, ease: 'expo.inOut' }, PEELED + 0.08)
+      .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.8, ease: 'expo.inOut' }, PEELED + 0.08)
+      .set(poster, { clearProps: 'transform,transformOrigin,boxShadow,zIndex' }, PEELED + 0.5)
+      .to(items, { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out', stagger: 0.05 }, PEELED + 0.55);
   });
 }
 

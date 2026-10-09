@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import portrait from "~/assets/portrait.webp";
 import { useState } from "react";
 import { Link } from "react-router";
@@ -19,6 +20,8 @@ for (const language of you.stack.languages) {
         `site/you: ${language.name} names an unknown project, "${slug}"`,
       );
 }
+
+const MOVES = { signed: 'Signed', loan: 'Loan', academy: 'Academy' } as const;
 
 export function You() {
   // One language is open at a time, and shows where it was used.
@@ -98,13 +101,26 @@ export function You() {
         </div>
 
         <div className={s.history} data-reveal>
-          <h3>So far</h3>
+          <h3>Transfer history</h3>
+          {/* A career, told the way football tells a player's moves. Each row slides in on its turn. */}
           <ol>
-            {timeline.map((item) => (
-              <li key={`${item.org}-${item.when}`}>
+            {timeline.map((item, i) => (
+              <li key={`${item.org}-${item.when}`} data-move={item.move} style={{ '--i': i } as CSSProperties}>
                 <span className={s.when}>{item.when}</span>
                 <strong>{item.org}</strong>
                 <span>{item.role}</span>
+                {item.move && (
+                  <span className={s.move}>
+                    <b>{MOVES[item.move]}</b>
+                    {item.fee && <i>{item.fee}</i>}
+                  </span>
+                )}
+                {/* The newest permanent move gets the stamp every transfer story ends on. */}
+                {item.move === 'signed' && i === 0 && (
+                  <span className={s.stamp} aria-hidden="true">
+                    Here we go
+                  </span>
+                )}
               </li>
             ))}
           </ol>

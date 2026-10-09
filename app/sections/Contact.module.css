@@ -1,5 +1,6 @@
 .contact {
   display: grid;
+  justify-items: center;
   gap: var(--space-4);
   max-width: 84rem;
   margin-inline: auto;
@@ -7,55 +8,222 @@
   border-top: 1px solid var(--line);
 }
 
-.contact h2 {
+/* A flyer on a notice board: one sheet, one pin, and the address cut into strips to take. */
+.flyer {
+  --ink: #14161c;
+  --paper: #ece8df;
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  width: min(100%, 38rem);
+  padding: var(--space-6) var(--space-5) 0;
+  border-radius: 2px;
+  background: var(--paper) url('/textures/paper.webp');
+  background-blend-mode: multiply;
+  color: var(--ink);
+  rotate: -1.2deg;
+  transform-origin: 50% 0.9rem;
+  box-shadow: 0 1.4rem 2rem -1rem rgb(0 0 0 / 0.9);
+}
+
+.pin {
+  position: absolute;
+  top: 0.55rem;
+  left: 50%;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow:
+    0 0.15rem 0.2rem rgb(0 0 0 / 0.5),
+    inset -0.1rem -0.12rem 0.15rem rgb(0 0 0 / 0.3);
+  translate: -50% 0;
+}
+
+.kicker,
+.said {
   font-family: var(--font-mono);
   font-size: var(--step--1);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--dim);
+}
+
+.flyer h2 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-6);
+  line-height: 0.82;
+  text-transform: uppercase;
+}
+
+.pitch {
+  max-width: 28rem;
+  font-size: var(--step-1);
+  line-height: 1.35;
 }
 
 .email {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3) var(--space-4);
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: clamp(1.5rem, 5.6vw, 5rem);
-  line-height: 1;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(0.9375rem, 3.6vw, 1.375rem);
   overflow-wrap: anywhere;
 }
 
 .email span {
-  min-width: 0;
   user-select: all;
-}
-
-.email button {
-  min-width: 5.5em;
-  padding: 0.7em 1em;
-  border: 1px solid var(--bone);
-  border-radius: 2px;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .links {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3) var(--space-5);
+  gap: var(--space-2) var(--space-5);
   font-size: var(--step-1);
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.links a {
+  text-decoration-color: #a8320f;
+  text-underline-offset: 0.2em;
+}
+
+.flyer :focus-visible {
+  outline-color: var(--ink);
+}
+
+.said {
+  margin-top: var(--space-3);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: #4d5057;
+}
+
+/* The strips hang off the bottom of the sheet. A dashed line shows where each one is cut. */
+.strips {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin-inline: calc(var(--space-5) * -1);
+  border-top: 2px dashed var(--ink);
+}
+
+.strips li {
+  display: grid;
+  border-left: 1px dashed var(--ink);
+}
+
+.strips li:first-child {
+  border-left: 0;
+}
+
+.strips button {
+  display: grid;
+  place-items: center;
+  height: 15.5rem;
+  padding: 0.6rem 0;
+  color: inherit;
+  transform-origin: 50% 0;
+  cursor: grab;
+}
+
+.strips button span {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+}
+
+/* A strip that was taken leaves a gap with the wall behind it. */
+.strips li[data-gone] {
+  background: var(--wall);
+  box-shadow: inset 0 0.5rem 0.5rem -0.4rem rgb(0 0 0 / 0.9);
+}
+
+.strips li[data-gone] button {
+  visibility: hidden;
+  cursor: default;
 }
 
 .small {
-  margin-top: var(--space-5);
+  margin-top: var(--space-6);
   font-family: var(--font-mono);
   font-size: var(--step--1);
   color: var(--dim);
+  text-align: center;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* A strip under the pointer lifts a little, the way you test one before you pull. */
+  .strips button:hover {
+    rotate: 2.5deg;
+    translate: 0 0.15rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .strips button {
+    transition:
+      rotate var(--dur-fast) var(--ease-out),
+      translate var(--dur-fast) var(--ease-out);
+  }
+
+  /* Torn off: it twists, drops and is gone. Only then does its place go dark. */
+  .strips li[data-gone] button {
+    visibility: visible;
+    animation: tear 620ms cubic-bezier(0.5, 0, 0.9, 0.4) forwards;
+    pointer-events: none;
+  }
+
+  .strips li[data-gone] {
+    animation: gap 620ms steps(1, end) backwards;
+  }
+
+  /* The sheet swings once on its pin when it comes into view. */
+  .flyer[data-seen] {
+    animation: swing 1.6s cubic-bezier(0.3, 0, 0.3, 1) both;
+  }
+}
+
+@keyframes tear {
+  30% {
+    rotate: -7deg;
+    translate: 0 0.5rem;
+    opacity: 1;
+  }
+
+  100% {
+    rotate: 16deg;
+    translate: 1.5rem 16rem;
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes gap {
+  from {
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+@keyframes swing {
+  0% {
+    rotate: 5deg;
+  }
+
+  30% {
+    rotate: -4deg;
+  }
+
+  55% {
+    rotate: 1.2deg;
+  }
+
+  78% {
+    rotate: -2deg;
+  }
+
+  100% {
+    rotate: -1.2deg;
+  }
 }
