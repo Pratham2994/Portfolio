@@ -39,7 +39,8 @@ test('the portrait has a text alternative', async ({ page }) => {
 test('contact shows the address as text and links out', async ({ page }) => {
   await page.goto('/');
   const contact = page.locator('#contact');
-  await expect(contact.getByText('prathampanchal02994@gmail.com')).toBeVisible();
+  // The address is also on each strip of the flyer. The first one is the line of text.
+  await expect(contact.getByText('prathampanchal02994@gmail.com').first()).toBeVisible();
   await expect(contact.getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', 'https://github.com/Pratham2994');
   await expect(contact.getByRole('link', { name: 'LinkedIn' })).toHaveAttribute('href', /linkedin\.com\/in\//);
   await expect(contact.locator('form')).toHaveCount(0);
