@@ -1,10 +1,12 @@
+import { track } from '~/lib/analytics';
+
 import styles from './Centre.module.css';
 
 const PANELS = ['AL', 'MO', 'ST'];
 
 export function Centre({ className }: { className?: string }) {
   return (
-    <a href="#you" className={`${styles.centre} ${className ?? ''}`} data-centre>
+    <a href="#you" className={`${styles.centre} ${className ?? ''}`} data-centre onClick={() => track('centre_clicked')}>
       <p className={styles.word}>
         <span className="sr-only">ALMOST</span>
         {PANELS.map((pair) => (

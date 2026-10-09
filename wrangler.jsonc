@@ -1,10 +1,15 @@
 {
-  // Cloudflare Workers, static assets only: the built site is served as files, with no server code.
+  // Cloudflare Workers. The built site is served as static files. The small Worker in
+  // worker/index.js only handles /relay/*, which passes analytics through this domain.
   "name": "portfolio",
   "compatibility_date": "2026-10-01",
+  "main": "worker/index.js",
   "assets": {
     "directory": "./build/client",
+    "binding": "ASSETS",
     // Unknown addresses get 404.html with a real 404 status. The app then shows its own page.
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    // Everything is served as a file with no Worker run, except the analytics path.
+    "run_worker_first": ["/relay/*"]
   }
 }

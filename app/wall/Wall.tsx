@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
 import { projects } from '~/content';
+import { track } from '~/lib/analytics';
 
 import { Cat } from './Cat';
 import { Centre } from './Centre';
@@ -103,7 +104,10 @@ export function Wall() {
       <p className={styles.hint} aria-hidden="true">
         psst. type &quot;meow&quot;
       </p>
-      <button type="button" className={styles.lever} onClick={() => wall.current && dropWall(wall.current)} data-lever>
+      <button type="button" className={styles.lever} onClick={() => {
+          track('lever_pressed');
+          if (wall.current) dropWall(wall.current);
+        }} data-lever>
         Do not press
       </button>
     </section>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 
 import { drawCat } from '~/wall/cat-sprite';
+import { track } from '~/lib/analytics';
 
 import s from './Demo.module.css';
 
@@ -457,12 +458,20 @@ const DEMOS: Record<string, { title: string; body: () => ReactElement }> = {
   'local-llm-lab': { title: 'Two ways to rank', body: Lab },
 };
 
+const touched = new Set<string>();
+function used(slug: string) {
+  if (touched.has(slug)) return;
+  touched.add(slug);
+  track('demo_used', { project: slug });
+}
+
 export function Demo({ slug }: { slug: string }) {
   const demo = DEMOS[slug];
   if (!demo) return null;
   const Body = demo.body;
   return (
-    <section className={s.demo} data-demo={slug} data-in>
+    // One event per visit to the page, the first time the visitor touches the demo.
+    <section className={s.demo} data-demo={slug} data-in onClickCapture={() => used(slug)}>
       <h2>{demo.title}</h2>
       <Body />
     </section>

@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 
 import { pieces } from '~/content';
+import { track } from '~/lib/analytics';
 
 import s from './Piece.module.css';
 import { useLean } from './useLean';
@@ -67,6 +68,7 @@ export function Piece({ id, index }: { id: PieceId; index: number }) {
       className={`${s.piece} ${s[id]}`}
       style={{ '--tilt': `${tilt(index)}deg` } as CSSProperties}
       data-piece={id}
+      onClick={() => track('piece_clicked', { piece: id })}
     >
       <span className={s.body}>
         <Body />

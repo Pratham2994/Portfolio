@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 
 import { you } from '~/content';
+import { track } from '~/lib/analytics';
+import { ANALYTICS } from '~/lib/analytics.config';
 
 import s from './Contact.module.css';
 
@@ -12,6 +14,7 @@ export function Contact() {
     try {
       await navigator.clipboard.writeText(you.email);
       setLabel('Copied');
+      track('email_copied');
     } catch {
       // Some browsers refuse the clipboard. Select the address so one key press copies it.
       const range = document.createRange();
@@ -44,7 +47,11 @@ export function Contact() {
           </a>
         </li>
       </ul>
-      <p className={s.small}>Pratham Panchal, 2026.</p>
+      <p className={s.small}>
+        Pratham Panchal, 2026.
+        {/* Said only when it is true: with no key, nothing is counted. */}
+        {ANALYTICS.key && ' This site counts visits and clicks, so I can see what people look at. No cookies.'}
+      </p>
     </footer>
   );
 }

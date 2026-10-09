@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+import { open } from './helpers';
+
 const SITE = 'https://prathampanchal.dev';
 const paths = [
   '/',
@@ -94,4 +96,17 @@ test('link previews have a title, a description and a picture for every network'
   for (const tag of ['og:title', 'og:description', 'og:image', 'og:locale']) expect(html).toContain(`property="${tag}"`);
   for (const tag of ['twitter:card', 'twitter:title', 'twitter:description', 'twitter:image', 'author']) expect(html).toContain(`name="${tag}"`);
   expect(html).toMatch(/<title>Pratham Panchal — Software Engineer<\/title>/);
+});
+
+test('with no analytics key, nothing is loaded and nothing is sent', async ({ page }) => {
+  const sent: string[] = [];
+  page.on('request', (request) => {
+    const url = request.url();
+    if (url.includes('/relay/') || url.includes('posthog')) sent.push(url);
+  });
+  await open(page, '/');
+  await page.locator('[data-poster="scrub"]').click();
+  await expect(page.locator('#project-title')).toBeVisible();
+  await page.waitForTimeout(2200);
+  expect(sent).toEqual([]);
 });

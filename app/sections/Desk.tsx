@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { desk } from '~/content';
 import type { DeskId } from '~/content/schema';
 import { prefersReducedMotion } from '~/lib/motion';
+import { track } from '~/lib/analytics';
 
 import s from './Desk.module.css';
 import { DeskScene } from './DeskScene';
@@ -155,6 +156,10 @@ function Now() {
 export function Desk() {
   const [active, setActive] = useState<DeskId>('sports');
   const [light, setLight] = useState(0);
+  const pick = (id: DeskId) => {
+    setActive(id);
+    track('desk_card', { card: id });
+  };
   const room = ROOMS[light];
 
   const cards: Record<DeskId, { note?: string; body: ReactNode }> = {
@@ -172,19 +177,23 @@ export function Desk() {
       <header className={s.head} data-reveal>
         <h2 id="desk-title">The desk</h2>
         <p>Under the wall. Pick something up.</p>
-        <button type="button" className={s.switch} onClick={() => setLight((light + 1) % ROOMS.length)} data-switch>
+        <button type="button" className={s.switch} onClick={() => {
+            const next = (light + 1) % ROOMS.length;
+            setLight(next);
+            track('room_light', { colour: ROOMS[next] });
+          }} data-switch>
           Room light <span>{room}</span>
         </button>
       </header>
 
       <div className={s.stage} data-reveal>
-        <DeskScene active={active} onPick={setActive} />
+        <DeskScene active={active} onPick={pick} />
       </div>
 
       <div className={s.side} data-reveal>
         <div className={s.tabs} role="group" aria-label="Things on the desk">
           {ORDER.map((id) => (
-            <button key={id} type="button" aria-expanded={active === id} aria-controls={`desk-${id}`} onClick={() => setActive(id)}>
+            <button key={id} type="button" aria-expanded={active === id} aria-controls={`desk-${id}`} onClick={() => pick(id)}>
               {desk[id].title}
             </button>
           ))}

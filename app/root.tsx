@@ -6,6 +6,7 @@ import displayFont from '@fontsource-variable/big-shoulders-display/files/big-sh
 import '@fontsource-variable/hanken-grotesk';
 import textFont from '@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2?url';
 import '@fontsource-variable/jetbrains-mono';
+import { initAnalytics } from './lib/analytics';
 import { initScroll } from './lib/scroll';
 import { pendingScript } from './wall/entry';
 import './styles/tokens.css';
@@ -41,6 +42,7 @@ export default function Root() {
   // Marks the page as interactive, for tests and for styles that need scripts.
   useEffect(() => {
     const stopScroll = initScroll();
+    initAnalytics();
     document.documentElement.dataset.ready = '';
     return stopScroll;
   }, []);

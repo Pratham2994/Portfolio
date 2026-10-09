@@ -5,6 +5,7 @@ import { neighbours, projects } from '~/content';
 import type { Project } from '~/content/schema';
 import { Art } from '~/wall/art';
 import { Paragraphs } from '~/lib/Paragraphs';
+import { track } from '~/lib/analytics';
 
 import { Demo } from './Demo';
 import s from './ProjectPage.module.css';
@@ -187,7 +188,7 @@ export function ProjectPage({ project }: { project: Project }) {
             </p>
           )}
           <p className={s.links}>
-            <a href={project.links.repo} target="_blank" rel="noreferrer">
+            <a href={project.links.repo} target="_blank" rel="noreferrer" onClick={() => track('repo_clicked', { project: project.slug })}>
               Code on GitHub
             </a>
             {project.links.live && (

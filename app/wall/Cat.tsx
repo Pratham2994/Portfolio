@@ -1,6 +1,7 @@
 import { useEffect, useRef, type RefObject } from 'react';
 
 import { prefersReducedMotion } from '~/lib/motion';
+import { track } from '~/lib/analytics';
 
 import { CAT_HEIGHT, CAT_SCALE, CAT_WIDTH, drawCat, type CatFrame } from './cat-sprite';
 import styles from './Wall.module.css';
@@ -133,6 +134,7 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
     const onKey = (event: KeyboardEvent) => {
       typed = (typed + event.key.toLowerCase()).slice(-4);
       if (typed !== 'meow') return;
+      track('meow');
       zoomies = 5;
       cat.rest = 0;
       el.dataset.zoomies = '';
