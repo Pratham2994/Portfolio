@@ -48,10 +48,10 @@ function Stages({ stages, at, halted = false }: { stages: Stage[]; at: number; h
   );
 }
 
-type Kind = 'film' | 'folder' | 'device' | 'wave';
+type Kind = 'film' | 'folder' | 'device' | 'wave' | 'file';
 
 // What is printed at the head of the slip, for each kind of job.
-const JOBS: Record<Kind, string> = { film: 'Encode job', folder: 'Folder scan', device: 'One tap', wave: 'One question' };
+const JOBS: Record<Kind, string> = { film: 'Encode job', folder: 'Folder scan', device: 'One tap', wave: 'One question', file: 'One file' };
 
 type Step = { name: string; value: string };
 
@@ -965,41 +965,113 @@ function Algo() {
   );
 }
 
-const SCAN = [
-  'reading file structure',
-  'matching known patterns ...... 2 hits',
-  'model verdict ................ 0.91 suspicious',
-  'starting sealed container',
-  'running the file',
-  'it tried to write to the startup folder',
-  'it tried to reach an unknown address',
-  'container destroyed',
+// Three made-up files, and what each step of the real pipeline would say about them.
+// A program and a document go down different roads after the type is known.
+type Sample = {
+  file: string;
+  steps: Step[];
+  bad: boolean;
+  share: number;
+  points: string[];
+  families?: [name: string, share: number][];
+};
+const SAMPLES: Sample[] = [
+  {
+    file: 'photo_viewer.exe',
+    bad: true,
+    share: 0.97,
+    steps: [
+      { name: 'Unpack', value: 'not an archive' },
+      { name: 'Identify', value: 'starts with MZ: a Windows program' },
+      { name: 'Model', value: 'LightGBM on its structure: 0.97' },
+      { name: 'Read', value: '212 imports, 5 sections, 1 packed' },
+      { name: 'YARA', value: '2 of 74 rules matched' },
+      { name: 'Family', value: 'Gemini read the report' },
+    ],
+    points: ['One section has entropy 7.4, so it is packed', 'It imports VirtualAlloc and WriteProcessMemory', 'It reads the browser profile folders'],
+    families: [
+      ['Info Stealers', 0.46],
+      ['Trojan Family', 0.31],
+      ['Backdoor and C2', 0.14],
+    ],
+  },
+  {
+    file: 'salary_slip.xlsm',
+    bad: true,
+    share: 0.88,
+    steps: [
+      { name: 'Unpack', value: 'not an archive' },
+      { name: 'Identify', value: 'a zip with a workbook in it: a spreadsheet' },
+      { name: 'Macros', value: '1 VBA macro pulled out' },
+      { name: 'Words', value: 'AutoOpen, Shell, powershell' },
+      { name: 'YARA', value: 'no rule matched' },
+      { name: 'Verdict', value: 'Gemini read the findings: 0.88' },
+    ],
+    points: ['The macro runs by itself when the file opens', 'It starts PowerShell with a hidden window', 'It builds a web address out of pieces'],
+  },
+  {
+    file: 'notes.zip',
+    bad: false,
+    share: 0.03,
+    steps: [
+      { name: 'Unpack', value: 'a zip in a zip. One file inside: notes.pdf' },
+      { name: 'Identify', value: 'a PDF, by its first bytes' },
+      { name: 'Keys', value: 'no /JavaScript, no /OpenAction' },
+      { name: 'Words', value: 'nothing embedded' },
+      { name: 'YARA', value: 'no rule matched' },
+      { name: 'Verdict', value: 'Gemini read the findings: 0.03' },
+    ],
+    points: ['No script in it, and nothing that runs on open', 'No file hidden inside it', 'No rule matched'],
+  },
 ];
 
-/** MalShield: a sample scan, line by line. */
+/** MalShield: pick a made-up file and follow it down the real pipeline to a verdict. */
 function Mal() {
-  const [shown, setShown] = useState(0);
-  useEffect(() => {
-    if (shown === 0 || shown >= SCAN.length) return;
-    const timer = setTimeout(() => setShown(shown + 1), 320);
-    return () => clearTimeout(timer);
-  }, [shown]);
+  const [picked, setPicked] = useState(0);
+  const sample = SAMPLES[picked];
+  const { at, run } = useRun(6, 500);
   return (
     <div className={s.mal}>
-      <button type="button" className={s.action} onClick={() => setShown(1)}>
-        {shown >= SCAN.length ? 'Scan again' : 'Scan a sample file'}
-      </button>
-      <ol className={s.log} aria-live="polite">
-        {SCAN.slice(0, shown).map((line) => (
-          <li key={line}>{line}</li>
+      <div className={s.choices} role="group" aria-label="A file">
+        {SAMPLES.map((item, i) => (
+          <button
+            key={item.file}
+            type="button"
+            aria-pressed={picked === i}
+            onClick={() => {
+              setPicked(i);
+              run();
+            }}
+          >
+            {item.file}
+          </button>
         ))}
-      </ol>
-      {shown >= SCAN.length && (
-        <p className={s.verdict} data-verdict>
-          Verdict: do not open this.
-        </p>
-      )}
-      <p className={s.small}>A scripted example of one report. No file is run in your browser.</p>
+      </div>
+      <div className={s.bench}>
+        <Console kind="file" steps={sample.steps} at={at} />
+        <Report ready={at >= sample.steps.length} wait="Checking it" stamp={sample.bad ? 'Do not open' : 'Clean'} tone={sample.bad ? 'bad' : 'good'}>
+          <Meter share={sample.share} label={`${Math.round(sample.share * 100)}% likely to be malware`} />
+          <ul className={s.points} data-verdict>
+            {sample.points.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
+          {sample.families && (
+            <dl className={s.families}>
+              {sample.families.map(([name, share]) => (
+                <div key={name}>
+                  <dt>{name}</dt>
+                  <dd>
+                    <i style={{ '--share': share } as CSSProperties} />
+                    {Math.round(share * 100)}%
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </Report>
+      </div>
+      <p className={s.small}>Three made-up files and made-up results, to show the road each one takes. No file is checked or run in your browser.</p>
     </div>
   );
 }
@@ -1052,7 +1124,7 @@ const DEMOS: Record<string, { title: string; body: () => ReactElement }> = {
   'idea-hackathon': { title: 'Raise a query', body: Idea },
   chronicle: { title: 'A day of listening', body: Chronicle },
   algomotion: { title: 'Watch one', body: Algo },
-  malshield: { title: 'One scan', body: Mal },
+  malshield: { title: 'Check a file', body: Mal },
   'local-llm-lab': { title: 'Two ways to rank', body: Lab },
 };
 

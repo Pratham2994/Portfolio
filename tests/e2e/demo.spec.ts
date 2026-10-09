@@ -62,8 +62,10 @@ test('the lab ranks the same models differently by the two numbers', async ({ pa
 test('MalShield plays one scan to a verdict', async ({ page }) => {
   await open(page, '/work/malshield');
   const demo = page.locator('[data-demo="malshield"]');
-  await demo.getByRole('button', { name: /Scan a sample/ }).click();
-  await expect(demo.locator('[data-verdict]')).toBeVisible({ timeout: 8000 });
+  await expect(demo.locator('[data-stamp]')).toHaveText('Do not open');
+  await demo.getByRole('button', { name: 'notes.zip' }).click();
+  await expect(demo.locator('[data-stamp]')).toHaveText('Clean', { timeout: 8000 });
+  await expect(demo.locator('[data-verdict]')).toBeVisible();
 });
 
 test('Neat clears its queue group by group, and a rule files the next one by itself', async ({ page }) => {
@@ -168,7 +170,7 @@ test('a run lights its stages one after the other, to the end', async ({ page })
 });
 
 test('each of the first five projects has a picture of what runs underneath', async ({ page }) => {
-  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon']) {
+  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield']) {
     await open(page, `/work/${slug}`);
     const flow = page.locator('[data-flow]');
     await expect(flow.locator('svg:visible')).toHaveCount(1);

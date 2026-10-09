@@ -1090,30 +1090,34 @@
 }
 
 /* MalShield */
-.log {
+/* The families it could be, each with a bar for how likely. */
+.families {
   display: grid;
   gap: 0.35em;
-  min-height: 12.5em;
-  padding: var(--space-3);
-  border-radius: 2px;
-  background: #0b0b0d;
-  color: #3ddc84;
+  margin: 0;
   font-family: var(--font-mono);
   font-size: var(--step--1);
-  align-content: start;
 }
 
-.log li::before {
-  content: '> ';
-  opacity: 0.5;
+.families > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
 }
 
-.verdict {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: var(--step-4);
-  line-height: 0.95;
-  text-transform: uppercase;
+.families dd {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  margin: 0;
+}
+
+.families i {
+  flex: none;
+  width: calc(var(--share) * 6rem);
+  height: 0.5rem;
+  background: var(--accent);
 }
 
 /* Local LLM lab */
