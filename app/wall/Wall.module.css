@@ -41,6 +41,19 @@
 .centre {
   grid-column: 1 / -1;
   aspect-ratio: 2 / 1;
+  /* Room for the cat, which sits on the first poster and would cover the name line. */
+  margin-bottom: 1.5rem;
+}
+
+/* Two columns and an odd count leave one sheet alone. It goes to the middle of its row. */
+@media (max-width: 599.98px) {
+  .cell:nth-last-child(2):nth-child(even) {
+    grid-column: 1 / -1;
+  }
+
+  .cell:nth-last-child(2):nth-child(even) > * {
+    width: calc(50% - var(--gap) / 2);
+  }
 }
 
 @media (min-width: 600px) {
@@ -51,6 +64,11 @@
 
   .centre {
     aspect-ratio: 3 / 1.15;
+  }
+
+  /* Three columns: a sheet alone on the last row takes the middle one. */
+  .cell:nth-last-child(2):nth-child(3n + 2) {
+    grid-column: 2;
   }
 }
 
@@ -130,6 +148,11 @@
     grid-row: 2;
     aspect-ratio: auto;
     height: 100%;
+    margin-bottom: 0;
+  }
+
+  .cell:nth-last-child(2):nth-child(n) {
+    grid-column: var(--col);
   }
 }
 

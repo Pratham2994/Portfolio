@@ -990,7 +990,7 @@
 .tick {
   fill: var(--ink);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 9.5px;
   text-anchor: middle;
   opacity: 0.8;
 }

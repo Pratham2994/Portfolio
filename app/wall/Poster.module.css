@@ -37,6 +37,17 @@
   aspect-ratio: 4 / 3;
 }
 
+/* The art takes the room above the caption, so no sheet has a hole in the middle. */
+.poster[data-size='poster'] {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.poster[data-size='poster'] .caption {
+  position: static;
+  padding: 0 7cqw 6cqw;
+}
+
 .caption {
   position: absolute;
   inset: auto 7cqw 6cqw;

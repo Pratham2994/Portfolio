@@ -373,9 +373,57 @@
 }
 
 /*
- * An upright sheet on the wide wall is taller than the art was drawn for. So there the art
- * is not a fixed height: it takes all the room above the caption, however tall that is.
+ * A sheet is taller than the art was drawn for. So the art is not a fixed height: it takes
+ * all the room above the caption, however tall that is.
  */
+[data-size='poster'] > .art {
+  position: relative;
+  inset: auto;
+  display: grid;
+  min-height: 0;
+  padding: 8cqw 8cqw 6cqw;
+}
+
+[data-size='poster'] > .art > :is(.frames, .eq, .sort, .hex) {
+  height: auto;
+  min-height: 0;
+}
+
+[data-size='poster'] > .art > .frames {
+  margin-top: 3cqw;
+}
+
+/* Art made of fixed shapes cannot stretch, so it sits in the middle of its room. */
+[data-size='poster'] > .art > :is(.grid, .code, .device) {
+  align-self: center;
+  margin-top: 0;
+}
+
+/* The bars and the gaps between them grow together. */
+[data-size='poster'] > .art > .rank {
+  grid-auto-rows: 1fr;
+  gap: 0;
+  margin-top: 0;
+}
+
+[data-size='poster'] > .art > .rank i {
+  height: 58%;
+  align-self: center;
+}
+
+[data-size='poster'] > .art > .waves svg:nth-child(1) {
+  top: 8%;
+}
+
+[data-size='poster'] > .art > .waves svg:nth-child(2) {
+  top: 36%;
+}
+
+[data-size='poster'] > .art > .waves svg:nth-child(3) {
+  top: 64%;
+}
+
+/* On the wide wall the same holds for a postcard that hangs on a full sheet. */
 @media (min-width: 900px) and (orientation: landscape) {
   :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art {
     position: relative;
