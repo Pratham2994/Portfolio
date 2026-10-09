@@ -49,6 +49,12 @@ test('Algomotion really sorts', async ({ page }) => {
   const heights = await demo.locator('[class*="sortBars"] i').evaluateAll((bars) => bars.map((bar) => parseFloat((bar as HTMLElement).style.height)));
   expect(heights).toEqual([...heights].sort((a, b) => a - b));
   await expect(demo.locator('[data-count] b')).toHaveText('91');
+  await expect(demo.locator('[data-stamp]')).toHaveText('O(n²)');
+  // Another algorithm, on the same list, does less work.
+  await demo.getByRole('button', { name: 'Quick' }).click();
+  await demo.getByRole('button', { name: 'Sort' }).click();
+  await expect(demo.locator('[data-stamp]')).toHaveText('O(n log n)', { timeout: 15000 });
+  expect(Number(await demo.locator('[data-count] b').textContent())).toBeLessThan(91);
 });
 
 test('the lab ranks the same models differently by the two numbers', async ({ page }) => {
@@ -175,7 +181,7 @@ test('a run lights its stages one after the other, to the end', async ({ page })
 });
 
 test('each of the first five projects has a picture of what runs underneath', async ({ page }) => {
-  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab']) {
+  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'algomotion']) {
     await open(page, `/work/${slug}`);
     const flow = page.locator('[data-flow]');
     await expect(flow.locator('svg:visible')).toHaveCount(1);

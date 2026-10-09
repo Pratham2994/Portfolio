@@ -48,12 +48,12 @@ function Stages({ stages, at, halted = false }: { stages: Stage[]; at: number; h
   );
 }
 
-type Kind = 'film' | 'folder' | 'device' | 'wave' | 'file' | 'model';
+type Kind = 'film' | 'folder' | 'device' | 'wave' | 'file' | 'model' | 'list';
 
 // What is printed at the head of the slip, for each kind of job.
-const JOBS: Record<Kind, string> = { film: 'Encode job', folder: 'Folder scan', device: 'One tap', wave: 'One question', file: 'One file', model: 'One model' };
+const JOBS: Record<Kind, string> = { film: 'Encode job', folder: 'Folder scan', device: 'One tap', wave: 'One question', file: 'One file', model: 'One model', list: 'One sort' };
 
-type Step = { name: string; value: string };
+type Step = { name: string; value: string; live?: boolean };
 
 /**
  * The long half of the slip. It prints one line for each step as the step ends, the way a
@@ -71,7 +71,7 @@ function Console({ kind, steps, at, halted = false }: { kind: Kind; steps: Step[
             <li key={step.name} data-state={state}>
               <b>{step.name}</b>
               <i aria-hidden="true" />
-              <span>{state === 'done' ? step.value : ''}</span>
+              <span>{state === 'done' || (state === 'now' && step.live) ? step.value : ''}</span>
             </li>
           );
         })}
@@ -919,48 +919,216 @@ function Chronicle() {
 
 const START = [8, 3, 11, 5, 14, 2, 9, 6, 13, 1, 10, 4, 12, 7];
 
-/** Algomotion: a real bubble sort, one comparison at a time. */
+// One thing an algorithm did: looked at two places, swapped them, or wrote a value into one.
+type Move = { kind: 'compare' | 'swap' | 'write'; i: number; j: number; value?: number };
+
+/**
+ * The project's own method: the algorithm runs to the end first, at full speed, and writes
+ * down every move. The page then plays that list back. These four write the same moves as
+ * the ones in the repo.
+ */
+const SORTS: Record<string, { bigO: string; note: string; record: (start: number[]) => Move[] }> = {
+  Bubble: {
+    bigO: 'O(n²)',
+    note: 'It checks every pair of neighbours, even when the list is nearly right',
+    record: (start) => {
+      const a = start.slice();
+      const moves: Move[] = [];
+      for (let i = 0; i < a.length - 1; i++) {
+        for (let j = 0; j < a.length - 1 - i; j++) {
+          moves.push({ kind: 'compare', i: j, j: j + 1 });
+          if (a[j] > a[j + 1]) {
+            [a[j], a[j + 1]] = [a[j + 1], a[j]];
+            moves.push({ kind: 'swap', i: j, j: j + 1 });
+          }
+        }
+      }
+      return moves;
+    },
+  },
+  Insertion: {
+    bigO: 'O(n²)',
+    note: 'Very fast when the list is nearly sorted already',
+    record: (start) => {
+      const a = start.slice();
+      const moves: Move[] = [];
+      for (let i = 1; i < a.length; i++) {
+        const key = a[i];
+        let j = i - 1;
+        while (j >= 0) {
+          moves.push({ kind: 'compare', i: j, j: j + 1 });
+          if (a[j] <= key) break;
+          a[j + 1] = a[j];
+          moves.push({ kind: 'write', i: j + 1, j: j + 1, value: a[j] });
+          j--;
+        }
+        a[j + 1] = key;
+        moves.push({ kind: 'write', i: j + 1, j: j + 1, value: key });
+      }
+      return moves;
+    },
+  },
+  Selection: {
+    bigO: 'O(n²)',
+    note: 'The fewest writes: one swap for each place',
+    record: (start) => {
+      const a = start.slice();
+      const moves: Move[] = [];
+      for (let i = 0; i < a.length - 1; i++) {
+        let least = i;
+        for (let j = i + 1; j < a.length; j++) {
+          moves.push({ kind: 'compare', i: least, j });
+          if (a[j] < a[least]) least = j;
+        }
+        if (least !== i) {
+          [a[i], a[least]] = [a[least], a[i]];
+          moves.push({ kind: 'swap', i, j: least });
+        }
+      }
+      return moves;
+    },
+  },
+  Quick: {
+    bigO: 'O(n log n)',
+    note: 'It splits the list round one value, then sorts each side',
+    record: (start) => {
+      const a = start.slice();
+      const moves: Move[] = [];
+      const sort = (lo: number, hi: number) => {
+        if (lo >= hi) return;
+        let i = lo;
+        for (let j = lo; j < hi; j++) {
+          moves.push({ kind: 'compare', i: j, j: hi });
+          if (a[j] <= a[hi]) {
+            if (i !== j) {
+              [a[i], a[j]] = [a[j], a[i]];
+              moves.push({ kind: 'swap', i, j });
+            }
+            i++;
+          }
+        }
+        if (i !== hi) {
+          [a[i], a[hi]] = [a[hi], a[i]];
+          moves.push({ kind: 'swap', i, j: hi });
+        }
+        sort(lo, i - 1);
+        sort(i + 1, hi);
+      };
+      sort(0, a.length - 1);
+      return moves;
+    },
+  },
+};
+
+/** Mixes a list the same way for the same seed, as the project does. */
+function mixed(seed: number) {
+  const list = START.slice();
+  let t = seed;
+  for (let i = list.length - 1; i > 0; i--) {
+    t = (t * 1664525 + 1013904223) >>> 0;
+    const j = t % (i + 1);
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list;
+}
+
+/** Algomotion: a real sort, recorded first and then played back, one move at a time. */
 function Algo() {
-  const [bars, setBars] = useState(START);
-  const [state, setState] = useState({ i: 0, pass: 0, compares: 0, running: false, at: -1 });
+  const [name, setName] = useState('Bubble');
+  const [seed, setSeed] = useState(0);
+  const [played, setPlayed] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const start = seed ? mixed(seed) : START;
+  const sort = SORTS[name];
+  const moves = sort.record(start);
 
   useEffect(() => {
-    if (!state.running) return;
-    const timer = setTimeout(() => {
-      const end = bars.length - 1 - state.pass;
-      if (end <= 0) return setState({ ...state, running: false, at: -1 });
-      const next = [...bars];
-      if (next[state.i] > next[state.i + 1]) [next[state.i], next[state.i + 1]] = [next[state.i + 1], next[state.i]];
-      setBars(next);
-      const last = state.i + 1 >= end;
-      setState({ ...state, at: state.i, i: last ? 0 : state.i + 1, pass: last ? state.pass + 1 : state.pass, compares: state.compares + 1 });
-    }, 45);
-    return () => clearTimeout(timer);
-  }, [bars, state]);
+    if (!playing) return;
+    const timer = setInterval(() => {
+      setPlayed((now) => {
+        if (now + 1 >= moves.length) setPlaying(false);
+        return Math.min(now + 1, moves.length);
+      });
+    }, 40);
+    return () => clearInterval(timer);
+  }, [playing, moves.length]);
 
-  const reset = () => {
-    setBars(START);
-    setState({ i: 0, pass: 0, compares: 0, running: false, at: -1 });
+  // The bars come from the start list and the moves played so far, so they can never drift.
+  const bars = start.slice();
+  let compares = 0;
+  let writes = 0;
+  for (const move of moves.slice(0, played)) {
+    if (move.kind === 'compare') compares++;
+    else if (move.kind === 'swap') {
+      [bars[move.i], bars[move.j]] = [bars[move.j], bars[move.i]];
+      writes++;
+    } else {
+      bars[move.i] = move.value!;
+      writes++;
+    }
+  }
+  const last = played > 0 && played < moves.length ? moves[played - 1] : null;
+  const done = played >= moves.length;
+  const worst = (start.length * (start.length - 1)) / 2;
+  const reset = (next: () => void) => {
+    next();
+    setPlayed(0);
+    setPlaying(false);
   };
+  const steps: Step[] = [
+    { name: 'Record', value: `ran to the end: ${moves.length} moves written down` },
+    { name: 'Play', value: `move ${played} of ${moves.length}`, live: true },
+    { name: 'Count', value: `${compares} compares, ${writes} writes` },
+  ];
 
   return (
     <div className={s.algo}>
-      <div className={s.sortBars} aria-hidden="true">
-        {bars.map((value, i) => (
-          <i key={i} style={{ height: `${(value / 14) * 100}%` }} data-at={i === state.at || i === state.at + 1 || undefined} />
+      <div className={s.choices} role="group" aria-label="Algorithm">
+        {Object.keys(SORTS).map((item) => (
+          <button key={item} type="button" aria-pressed={name === item} onClick={() => reset(() => setName(item))}>
+            {item}
+          </button>
         ))}
       </div>
-      <p className={s.count} data-count>
-        Comparisons: <b>{state.compares}</b>
-      </p>
+      <div className={s.sortBars} aria-hidden="true">
+        {bars.map((value, i) => (
+          <i key={i} style={{ height: `${(value / 14) * 100}%` }} data-at={(last && (i === last.i || i === last.j)) || undefined} />
+        ))}
+      </div>
       <div className={s.choices}>
-        <button type="button" onClick={() => setState({ ...state, running: true })} disabled={state.running}>
+        <button
+          type="button"
+          className={s.action}
+          disabled={playing}
+          onClick={() => {
+            // With reduced motion there is no playback: it goes to the last move.
+            if (prefersReducedMotion()) return setPlayed(moves.length);
+            if (done) setPlayed(0);
+            setPlaying(true);
+          }}
+        >
           Sort
         </button>
-        <button type="button" onClick={reset}>
+        <button type="button" onClick={() => reset(() => setSeed(seed + 1))}>
           Shuffle
         </button>
       </div>
+      <div className={s.bench}>
+        <Console kind="list" steps={steps} at={done ? 3 : 1} />
+        <Report ready={done} wait={playing ? 'Playing it back' : 'Press Sort'} stamp={sort.bigO}>
+          <p className={s.count} data-count>
+            Comparisons: <b>{compares}</b>
+          </p>
+          <Meter share={compares / worst} label={`${compares} of ${worst}. ${worst} is the most that 14 bars can need`} />
+          <ul className={s.points}>
+            <li>
+              {writes} writes to the list
+            </li>
+            <li>{sort.note}</li>
+          </ul>
+        </Report>
+      </div>
+      <p className={s.small}>A real sort. It ran to the end before the first bar moved. What you watch is the recording.</p>
     </div>
   );
 }
@@ -1157,7 +1325,7 @@ const DEMOS: Record<string, { title: string; body: () => ReactElement }> = {
   floatchat: { title: 'Ask it', body: Float },
   'idea-hackathon': { title: 'Raise a query', body: Idea },
   chronicle: { title: 'A day of listening', body: Chronicle },
-  algomotion: { title: 'Watch one', body: Algo },
+  algomotion: { title: 'Sort it', body: Algo },
   malshield: { title: 'Check a file', body: Mal },
   'local-llm-lab': { title: 'Two ways to rank', body: Lab },
 };
