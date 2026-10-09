@@ -374,6 +374,58 @@ html[data-project-open] {
   left: 0;
 }
 
+.sport-ball {
+  z-index: 1;
+}
+
+/* What a ball leaves behind it: small dots that fade. */
+.sport-trail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin: -0.25rem 0 0 -0.25rem;
+  border-radius: 50%;
+  animation: sport-trail 0.45s linear forwards;
+}
+
+/* A ring that opens where something lands. */
+.sport-impact {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5rem;
+  height: 5rem;
+  margin: -2.5rem 0 0 -2.5rem;
+  border: 3px solid var(--bone);
+  border-radius: 50%;
+  animation: sport-impact 0.45s var(--ease-out) forwards;
+}
+
+@keyframes sport-trail {
+  from {
+    opacity: 0.55;
+  }
+
+  to {
+    opacity: 0;
+    scale: 0.3;
+  }
+}
+
+@keyframes sport-impact {
+  from {
+    opacity: 0.9;
+    scale: 0.15;
+  }
+
+  to {
+    opacity: 0;
+    scale: 1.3;
+  }
+}
+
 .sport-tint {
   inset: 0;
   background: linear-gradient(115deg, rgb(209 23 27 / 0.5), rgb(20 20 20 / 0.2) 50%, rgb(212 161 42 / 0.5));
