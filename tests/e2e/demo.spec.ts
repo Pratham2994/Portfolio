@@ -36,7 +36,8 @@ test('OmniCompiler keeps the debugger state when the language changes', async ({
   await demo.getByRole('button', { name: 'Step' }).click();
   const before = await demo.locator('[data-watch]').innerText();
   await demo.getByRole('button', { name: 'Go', exact: true }).click();
-  await expect(demo.locator('ol li').first()).toHaveText('total := 0');
+  await expect(demo.locator('ol li code').first()).toHaveText('total := 0');
+  await expect(demo.locator('[data-native]')).toHaveText('Delve');
   expect(await demo.locator('[data-watch]').innerText()).toBe(before);
 });
 
@@ -103,4 +104,16 @@ test('the deck opens an app from its home page and goes back', async ({ page }) 
     await expect.poll(() => screen.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(640);
     await demo.getByRole('button', { name: 'Back to the home page' }).click();
   }
+});
+
+test('OmniCompiler runs to a breakpoint, with the same controls in every language', async ({ page }) => {
+  await open(page, '/work/omnicompiler');
+  const demo = page.locator('[data-demo="omnicompiler"]');
+  await demo.getByRole('button', { name: 'Breakpoint on line 4' }).click();
+  await demo.getByRole('button', { name: 'Continue' }).click();
+  await expect(demo.locator('ol li[data-here] code')).toHaveText('print(total)');
+  await expect(demo.locator('[data-watch]')).toContainText('12');
+  await demo.getByRole('button', { name: 'Java', exact: true }).click();
+  await expect(demo.locator('[data-native]')).toHaveText('jdb');
+  await expect(demo.locator('[data-watch]')).toContainText('12');
 });

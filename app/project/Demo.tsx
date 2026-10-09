@@ -271,11 +271,25 @@ const RUN = [
   { line: 3, total: 12, n: '-' },
 ];
 
-/** OmniCompiler: switch the language mid-run. The debugger state stays the same. */
+// The debugger each language really runs on. The page never shows these: that is the point.
+const NATIVE: Record<string, string> = { Python: 'bdb', JavaScript: 'Node Inspector', Java: 'jdb', 'C++': 'gdb', Go: 'Delve' };
+// The line the model would mark: the one inside the loop, where the value changes.
+const SUGGESTED = 2;
+
+/** OmniCompiler: one set of debugger controls. Change the language and nothing else changes. */
 function Omni() {
   const [lang, setLang] = useState('Python');
   const [step, setStep] = useState(2);
+  const [stops, setStops] = useState<number[]>([]);
   const at = RUN[step];
+  const ended = step === RUN.length - 1;
+  // Continue runs to the next breakpoint, or to the end when there is none.
+  const resume = () => {
+    const next = RUN.findIndex((run, i) => i > step && stops.includes(run.line));
+    setStep(next === -1 ? RUN.length - 1 : next);
+  };
+  const toggle = (line: number) => setStops(stops.includes(line) ? stops.filter((other) => other !== line) : [...stops, line]);
+
   return (
     <div className={s.omni}>
       <div className={s.choices} role="group" aria-label="Language">
@@ -289,24 +303,52 @@ function Omni() {
         <ol className={s.code}>
           {CODE[lang].map((text, i) => (
             <li key={i} data-here={i === at.line || undefined}>
-              {text}
+              <button
+                type="button"
+                className={s.gutter}
+                aria-pressed={stops.includes(i)}
+                aria-label={`Breakpoint on line ${i + 1}`}
+                data-suggested={(i === SUGGESTED && !stops.includes(i)) || undefined}
+                onClick={() => toggle(i)}
+              >
+                {i + 1}
+              </button>
+              <code>{text}</code>
             </li>
           ))}
         </ol>
-        <dl className={s.watch} data-watch>
-          <div>
-            <dt>total</dt>
-            <dd>{at.total}</dd>
-          </div>
-          <div>
-            <dt>n</dt>
-            <dd>{at.n}</dd>
-          </div>
-        </dl>
+        <div className={s.state}>
+          <dl className={s.watch} data-watch>
+            <div>
+              <dt>total</dt>
+              <dd>{at.total}</dd>
+            </div>
+            <div>
+              <dt>n</dt>
+              <dd>{at.n}</dd>
+            </div>
+          </dl>
+          <dl className={s.watch}>
+            <div>
+              <dt>debugger under it</dt>
+              <dd data-native>{NATIVE[lang]}</dd>
+            </div>
+          </dl>
+          <p className={s.event}>
+            <span>what the page gets, from all five</span>
+            <code>{`{ "event": "${ended ? 'terminated' : 'stopped'}", "line": ${at.line + 1} }`}</code>
+          </p>
+        </div>
       </div>
-      <button type="button" className={s.action} onClick={() => setStep((step + 1) % RUN.length)}>
-        Step
-      </button>
+      <div className={s.choices}>
+        <button type="button" className={s.action} onClick={() => setStep((step + 1) % RUN.length)}>
+          {ended ? 'Restart' : 'Step'}
+        </button>
+        <button type="button" disabled={ended} onClick={resume}>
+          Continue
+        </button>
+      </div>
+      <p className={s.small}>Click a line number to set a breakpoint. The ringed one is where the model would put it.</p>
     </div>
   );
 }
@@ -542,7 +584,7 @@ const DEMOS: Record<string, { title: string; body: () => ReactElement }> = {
   scrub: { title: 'Fit a size', body: Scrub },
   neat: { title: 'The review queue', body: Neat },
   'prats-deck': { title: 'Tap through it', body: Deck },
-  omnicompiler: { title: 'Step through it', body: Omni },
+  omnicompiler: { title: 'Debug it', body: Omni },
   floatchat: { title: 'Ask it', body: Float },
   'idea-hackathon': { title: 'One customer', body: Idea },
   chronicle: { title: 'A day of listening', body: Chronicle },
