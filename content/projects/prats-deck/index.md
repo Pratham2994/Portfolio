@@ -19,6 +19,26 @@ sectors:
     body: A simulator runs the same code on a PC and saves screenshots. A script taps the real deck over USB and checks every app.
 stack: [C++, Python, Raspberry Pi Pico 2 W]
 links: { repo: 'https://github.com/Pratham2994/Prats-Deck' }
+flow:
+  nodes:
+    - { id: stylus, at: [1, 1], name: Stylus, note: a tap or a drag on the screen, kind: you }
+    - { id: touch, at: [2, 1], name: Touch, note: 'calibrated and smoothed. A lift after 100 ms' }
+    - { id: app, at: [3, 1], name: App, note: one of 15. Each is one header file }
+    - { id: draw, at: [4, 1], name: Draw, note: 'smooth shapes and text, with no library' }
+    - { id: cores, at: [5, 1], name: Both cores, note: each one draws its own rows of the frame }
+    - { id: sync, at: [5, 2], name: Sync, note: 'waits for the scan line, then sends' }
+    - { id: screen, at: [4, 2], name: Screen, note: '320 by 240, at about 41 a second' }
+    - { id: pc, at: [1, 2], name: PC, note: a small script sends stats and the song, kind: store }
+    - { id: usb, at: [2, 2], name: USB, note: 'serial in. Keyboard and mouse out' }
+  links:
+    - [stylus, touch]
+    - [touch, app]
+    - [pc, usb]
+    - [usb, app]
+    - [app, draw]
+    - [draw, cores]
+    - [cores, sync]
+    - [sync, screen]
 ---
 I bought a Raspberry Pi Pico and a small touch screen with no plan at all. Now it sits next to my keyboard and I use it all day.
 

@@ -142,6 +142,7 @@ test('FloatChat shows the tool the model calls, and a different picture for each
   // A question that is not about the ocean stops at the gate: no tool, no picture.
   await demo.getByRole('button', { name: /pizza/ }).click();
   await expect(demo.locator('[data-answer][data-refused]')).toContainText('irrelevant or off-topic');
+  await expect(demo.locator('[data-stamp]')).toHaveText('Refused');
   await expect(demo.locator('[data-tool]')).toHaveCount(0);
   await expect(demo.locator('[data-stages] li[data-state="done"]')).toHaveCount(1);
 });
@@ -162,11 +163,12 @@ test('a run lights its stages one after the other, to the end', async ({ page })
   await demo.getByRole('button', { name: 'Run it' }).click();
   await expect(demo.locator('[data-stages][data-over]')).toHaveCount(0);
   await expect(demo.locator('[data-stages][data-over]')).toHaveCount(1, { timeout: 8000 });
-  await expect(demo.locator('[data-stages] li[data-state="done"]')).toHaveCount(5);
+  await expect(demo.locator('[data-stages] li[data-state="done"]')).toHaveCount(6);
+  await expect(demo.locator('[data-stamp]')).toHaveText('Fits');
 });
 
-test('each of the first four projects has a picture of what runs underneath', async ({ page }) => {
-  for (const slug of ['scrub', 'neat', 'omnicompiler', 'floatchat']) {
+test('each of the first five projects has a picture of what runs underneath', async ({ page }) => {
+  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat']) {
     await open(page, `/work/${slug}`);
     const flow = page.locator('[data-flow]');
     await expect(flow.locator('svg:visible')).toHaveCount(1);

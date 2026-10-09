@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactElement } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react';
 
 import { track } from '~/lib/analytics';
 import { prefersReducedMotion } from '~/lib/motion';
@@ -48,7 +48,85 @@ function Stages({ stages, at, halted = false }: { stages: Stage[]; at: number; h
   );
 }
 
-/** Scrub: pick a size limit and a clip length, and see the bitrate it would encode at. */
+type Kind = 'film' | 'folder' | 'device' | 'wave';
+
+// The thing on the bench, as a small line drawing.
+const GLYPHS: Record<Kind, ReactElement> = {
+  film: (
+    <>
+      <rect x="6" y="10" width="36" height="28" rx="2" />
+      <path d="M6 17h36M6 31h36M13 10v7M21 10v7M29 10v7M37 10v7M13 31v7M21 31v7M29 31v7M37 31v7" />
+    </>
+  ),
+  folder: <path d="M5 14h14l4 5h20v20H5z M5 24h38" />,
+  device: (
+    <>
+      <rect x="5" y="9" width="38" height="30" rx="4" />
+      <rect x="10" y="14" width="28" height="20" rx="1" />
+    </>
+  ),
+  wave: <path d="M4 18c5-7 9-7 13 0s9 7 13 0 9-7 14 0M4 30c5-7 9-7 13 0s9 7 13 0 9-7 14 0" />,
+};
+
+type Step = { name: string; value: string };
+
+/**
+ * The dark half of the bench: the thing being worked on, with a line that scans it, and the
+ * steps. A step's result is written in as the step ends. A halted run goes no further.
+ */
+function Console({ kind, steps, at, halted = false }: { kind: Kind; steps: Step[]; at: number; halted?: boolean }) {
+  const running = at < steps.length && !halted;
+  return (
+    <div className={s.console} data-running={running || undefined}>
+      <div className={s.subject} aria-hidden="true">
+        <svg viewBox="0 0 48 48">{GLYPHS[kind]}</svg>
+        <i />
+      </div>
+      <ol className={s.steps} data-stages data-over={at >= steps.length || undefined}>
+        {steps.map((step, i) => {
+          const state = i < at ? 'done' : i === at && !halted ? 'now' : 'todo';
+          return (
+            <li key={step.name} data-state={state}>
+              <b>{step.name}</b>
+              <span>{state === 'done' ? step.value : ''}</span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+/** The paper half: nothing until the run is over, then a stamp and what backs it. */
+function Report({ ready, wait, stamp, tone = 'good', children }: { ready: boolean; wait: string; stamp: string; tone?: 'good' | 'bad'; children: ReactNode }) {
+  return (
+    <div className={s.report} data-report data-ready={ready || undefined}>
+      <span className={s.label}>Report</span>
+      {ready ? (
+        <>
+          <strong className={s.stamp} data-tone={tone} data-stamp>
+            {stamp}
+          </strong>
+          {children}
+        </>
+      ) : (
+        <p className={s.waiting}>{wait}</p>
+      )}
+    </div>
+  );
+}
+
+/** A bar that fills to a share of its length, with a line under it that says what it is. */
+function Meter({ share, label }: { share: number; label: string }) {
+  return (
+    <p className={s.meter}>
+      <i style={{ '--share': Math.min(Math.max(share, 0), 1) } as CSSProperties} />
+      <span>{label}</span>
+    </p>
+  );
+}
+
+/** Scrub: pick a size limit and a clip length, and watch it encode to fit. */
 function Scrub() {
   const limits = [
     { name: 'Discord', mb: 10 },
@@ -60,13 +138,14 @@ function Scrub() {
   const AUDIO = 128;
   const video = Math.max(Math.floor((mb * 8192) / seconds) - AUDIO, 0);
   const size = ((video + AUDIO) * seconds) / 8192;
-  const { at, run } = useRun(5, 560);
-  const stages = [
-    { name: 'Probe', detail: `ffprobe reads it: ${seconds} s long` },
-    { name: 'Budget', detail: `${mb} MB over ${seconds} s is ${video + AUDIO} kbps in all` },
-    { name: 'Pass 1', detail: 'looks at every frame, writes nothing' },
-    { name: 'Pass 2', detail: `encodes at ${video.toLocaleString('en')} kbps` },
-    { name: 'Check', detail: `${size.toFixed(2)} MB. Under.` },
+  const { at, run } = useRun(6, 520);
+  const steps = [
+    { name: 'Upload', value: 'a copy, in a working folder' },
+    { name: 'Probe', value: `${seconds} s of video` },
+    { name: 'Budget', value: `${video + AUDIO} kbps in all` },
+    { name: 'Pass 1', value: 'every frame read, nothing written' },
+    { name: 'Pass 2', value: `encoded at ${video.toLocaleString('en')} kbps` },
+    { name: 'Check', value: `${size.toFixed(2)} MB` },
   ];
   return (
     <div className={s.scrub}>
@@ -91,9 +170,6 @@ function Scrub() {
         </span>
         <input type="range" min={10} max={300} step={5} value={seconds} onChange={(e) => setSeconds(Number(e.target.value))} />
       </label>
-      <p className={s.result} data-result>
-        <b>{video.toLocaleString('en')}</b> kbps of video, plus {AUDIO} for sound. Two passes, and it lands under {mb} MB.
-      </p>
       {/* The command is on screen before it runs. It changes as the numbers do. */}
       <p className={s.command}>
         <span>the command, before it runs</span>
@@ -104,7 +180,20 @@ function Scrub() {
       <button type="button" className={s.action} onClick={run}>
         Run it
       </button>
-      <Stages stages={stages} at={at} />
+      <div className={s.bench}>
+        <Console kind="film" steps={steps} at={at} />
+        <Report ready={at >= steps.length} wait="Encoding" stamp="Fits">
+          <p className={s.result} data-result>
+            <b>{video.toLocaleString('en')}</b> kbps of video, plus {AUDIO} for sound.
+          </p>
+          <Meter share={size / mb} label={`${size.toFixed(2)} of ${mb} MB`} />
+          <ul className={s.points}>
+            <li>Two passes, so the size is planned and not hoped for</li>
+            <li>It lands a little under, on purpose</li>
+            <li>The file never left this PC</li>
+          </ul>
+        </Report>
+      </div>
     </div>
   );
 }
@@ -187,12 +276,12 @@ function Neat() {
   };
   // The scan that makes the groups. Each group comes into view as its stage ends.
   const { at, run } = useRun(5, 480);
-  const stages = [
-    { name: 'Scan', detail: '9 files at the top of Downloads' },
-    { name: 'Source', detail: 'the site each one came from' },
-    { name: 'Hash', detail: '3 files are the same inside' },
-    { name: 'Apps', detail: '3 installers match installed apps' },
-    { name: 'Group', detail: '3 decisions, not 9' },
+  const steps = [
+    { name: 'Scan', value: '9 files at the top of Downloads' },
+    { name: 'Source', value: 'each one has a site it came from' },
+    { name: 'Hash', value: '3 files are the same inside' },
+    { name: 'Apps', value: '3 installers match installed apps' },
+    { name: 'Group', value: '3 groups, not 9 files' },
   ];
   const scan = () => {
     setDone([]);
@@ -202,12 +291,20 @@ function Neat() {
 
   return (
     <div className={s.neat}>
-      <p className={s.result} data-result>
-        <b>{left}</b>
-        {left ? `files to look at, in ${open.length} ${open.length === 1 ? 'decision' : 'decisions'}.` : 'files to look at. Downloads is clean.'}
-        {freed > 0 && ` ${freed} MB back, all of it still in the Recycle Bin.`}
-      </p>
-      <Stages stages={stages} at={at} />
+      <div className={s.bench}>
+        <Console kind="folder" steps={steps} at={at} />
+        <Report ready={at >= steps.length} wait="Scanning" stamp={left ? `${open.length} to decide` : 'Tidy'}>
+          <p className={s.result} data-result>
+            <b>{left}</b>
+            {left ? `files to look at, in ${open.length} ${open.length === 1 ? 'decision' : 'decisions'}.` : 'files to look at. Downloads is clean.'}
+          </p>
+          <Meter share={(9 - left) / 9} label={`${9 - left} of 9 files dealt with`} />
+          <ul className={s.points}>
+            <li>{freed > 0 ? `${freed} MB back, all of it still in the Recycle Bin` : 'Nothing is recycled until you say so'}</li>
+            <li>Every change can be undone</li>
+          </ul>
+        </Report>
+      </div>
       <div className={s.choices}>
         <button type="button" className={s.action} disabled={!sure.length || at < 5} onClick={() => setDone([...done, ...sure])}>
           Apply the {sure.length || ''} sure ones
@@ -296,10 +393,22 @@ function Deck() {
   const [cat, setCat] = useState<'chindi' | 'chindi-dancing' | 'chindi-zoomies'>('chindi');
   const app = open === null ? null : DECK[open];
   const picture = !app ? 'home' : app[0] === 'Chindi' ? cat : app[2];
-  const home = () => {
-    setOpen(null);
+  // What the deck does with one tap, from the stylus to the screen.
+  const { at, run } = useRun(5, 240);
+  const tap = (next: number | null) => {
+    setOpen(next);
     setCat('chindi');
+    run();
   };
+  const home = () => tap(null);
+  const isCat = app?.[0] === 'Chindi';
+  const steps = [
+    { name: 'Touch', value: 'the stylus is down, then up' },
+    { name: 'Filter', value: 'a tap. A lift counts after 100 ms' },
+    { name: 'App', value: app ? `${app[0]} opens` : 'back to the home page' },
+    { name: 'Draw', value: isCat ? 'about 24 ms, on both cores' : 'into a 320 by 240 buffer' },
+    { name: 'Sync', value: 'sent between two redraws' },
+  ];
 
   return (
     <div className={s.deck}>
@@ -315,7 +424,7 @@ function Deck() {
                 type="button"
                 className={s.icon}
                 style={{ left: `${(i % 5) * 20}%`, top: `${22.5 + Math.floor(i / 5) * 25.8}%` }}
-                onClick={() => setOpen(i)}
+                onClick={() => tap(i)}
                 aria-label={`Open ${name}`}
               />
             ))
@@ -341,6 +450,25 @@ function Deck() {
           </button>
         )}
         <p className={s.small}>These pictures come from the simulator, which runs the code of the deck on a PC.</p>
+      </div>
+      <div className={s.bench}>
+        <Console kind="device" steps={steps} at={at} />
+        <Report ready={at >= steps.length} wait="Drawing" stamp={isCat ? '37 fps' : '41 fps'}>
+          <ul className={s.points}>
+            {isCat ? (
+              <>
+                <li>One frame: the cat 9 ms, the room 6.5, the rest 7</li>
+                <li>She drew at 5 frames a second at the start</li>
+              </>
+            ) : (
+              <>
+                <li>The screen redraws 46 times a second</li>
+                <li>No frame is sent across a redraw, so none is torn</li>
+              </>
+            )}
+            <li>Measured on the real board</li>
+          </ul>
+        </Report>
       </div>
     </div>
   );
@@ -419,6 +547,16 @@ function Omni() {
     run();
     setStep(land(what));
   };
+  // A new language is a new session: a new container, a new debugger. The run shows it start.
+  const { at: boot, run: start } = useRun(5, 260);
+  const IMAGE: Record<string, string> = { Python: 'python', JavaScript: 'javascript', Java: 'java', 'C++': 'cpp', Go: 'go' };
+  const session = [
+    { name: 'Detect', detail: `${lang}, from the code alone` },
+    { name: 'Container', detail: `omni-runner:${IMAGE[lang]}, about 300 ms` },
+    { name: 'Attach', detail: lang === 'Go' ? 'Delve starts the program' : `${NATIVE[lang]}, through its adapter` },
+    { name: 'Mark', detail: 'the model rings line 5' },
+    { name: 'Ready', detail: 'paused. It waits for you' },
+  ];
   const trip = [
     { name: 'Page', detail: `{ "type": "${said}" }` },
     // Four languages have a small adapter in the container. For Go the server talks to Delve itself.
@@ -433,10 +571,21 @@ function Omni() {
       <div className={s.ide}>
         <div className={s.tabs} role="group" aria-label="Language">
           {Object.keys(CODE).map((name) => (
-            <button key={name} type="button" aria-pressed={lang === name} onClick={() => setLang(name)}>
+            <button
+              key={name}
+              type="button"
+              aria-pressed={lang === name}
+              onClick={() => {
+                setLang(name);
+                start();
+              }}
+            >
               {name}
             </button>
           ))}
+        </div>
+        <div className={s.boot}>
+          <Stages stages={session} at={boot} />
         </div>
         <div className={s.tools}>
           <button type="button" className={s.go} onClick={() => press('step_over')}>
@@ -554,19 +703,18 @@ function Float() {
   const ask = ASKS[asked];
   const refused = !ask.picks;
   const path = (ask.values ?? []).map((y, i) => `${i ? 'L' : 'M'}${i * 24 + 18} ${92 - y}`).join(' ');
-  // The answer is built in the order it really happens. Each part shows when its stage ends.
+  // The chain, in the order it really runs. A refused question stops at the gate.
   const { at, run } = useRun(6, 520);
-  const stages = [
-    { name: 'Gate', detail: refused ? 'call 1: not about the floats. Stop.' : 'call 1: about the floats, and clear. Go on.' },
-    { name: 'Pick', detail: `call 2 chooses ${ask.picks ?? 'a picture'}` },
-    { name: 'SQL', detail: 'call 3 writes it, from the schema only' },
-    { name: 'Query', detail: `sql_query gives back ${ask.rows ?? 'rows'}` },
-    { name: 'Draw', detail: `${ask.plots ?? 'a tool'} makes the picture` },
-    { name: 'Sum', detail: 'call 4 writes the answer for you' },
+  const steps = [
+    { name: 'Gate', value: refused ? 'call 1 says: irrelevant' : 'call 1 says: proceed' },
+    { name: 'Pick', value: `call 2 picks ${ask.picks}` },
+    { name: 'SQL', value: 'call 3 wrote one SELECT' },
+    { name: 'Query', value: `Postgres gave ${ask.rows}` },
+    { name: 'Draw', value: `${ask.plots} saved a picture` },
+    { name: 'Sum', value: 'call 4 wrote the answer' },
   ];
-  // A refused question never gets past the gate, so the run stops there.
   const reach = refused ? Math.min(at, 1) : at;
-  const drawn = !refused && at > 4;
+  const ready = refused ? at > 0 : at >= steps.length;
   return (
     <div className={s.float}>
       <div className={s.choices} role="group" aria-label="Question">
@@ -584,89 +732,78 @@ function Float() {
           </button>
         ))}
       </div>
-      <Stages stages={stages} at={reach} halted={refused && at > 0} />
-      <div className={s.answer}>
-        <div className={s.thread}>
-          <p className={s.asked}>{ask.q}</p>
-          {!refused && at > 1 && (
-            <p className={s.tool} data-tool>
-              <span>the orchestrator picks</span>
-              <b>{ask.picks}</b>
-            </p>
+      <div className={s.bench}>
+        <Console kind="wave" steps={steps} at={reach} halted={refused && at > 0} />
+        <Report ready={ready} wait="Working on it" stamp={refused ? 'Refused' : 'Answered'} tone={refused ? 'bad' : 'good'}>
+          <p className={s.reply} data-answer data-refused={refused || undefined}>
+            {ask.a}
+          </p>
+          {!refused && (
+            <>
+              <figure className={s.chart}>
+                <svg viewBox="0 0 300 110" role="img" aria-label="The picture that comes with the answer" data-picture={ask.picks} key={asked}>
+                  {ask.picks === 'timeseries_line' && (
+                    <>
+                      <path d="M18 92 H282" className={s.axis} />
+                      <path d={path} className={s.line} pathLength={1} />
+                      {(ask.values ?? []).map((y, i) => (
+                        <circle key={i} cx={i * 24 + 18} cy={92 - y} r="3" className={s.dot} style={{ animationDelay: `${i * 45}ms` }} />
+                      ))}
+                      {['Jan', 'May', 'Sep', 'Dec'].map((month, i) => (
+                        <text key={month} x={[18, 114, 210, 282][i]} y="106" className={s.tick}>
+                          {month}
+                        </text>
+                      ))}
+                    </>
+                  )}
+                  {ask.picks === 'heatmap_grid' &&
+                    SALT.map((value, i) => (
+                      <rect
+                        key={i}
+                        x={(i % 10) * 28 + 10}
+                        y={Math.floor(i / 10) * 20 + 5}
+                        width="26"
+                        height="18"
+                        className={s.cell}
+                        style={{ '--to': value, animationDelay: `${((i % 10) + Math.floor(i / 10)) * 30}ms` } as CSSProperties}
+                      />
+                    ))}
+                  {ask.picks === 'map_points' && (
+                    <>
+                      <rect x="10" y="5" width="280" height="96" className={s.sea} />
+                      {[80, 150, 220].map((x) => (
+                        <path key={x} d={`M${x} 5 V101`} className={s.axis} />
+                      ))}
+                      <path d="M10 53 H290" className={s.axis} />
+                      {/* The coast, as one rough line. */}
+                      <path d="M196 5 L190 30 L204 58 L222 82 L232 101" className={s.coast} />
+                      {FLOATS.map((float, i) => (
+                        <circle key={i} cx={float.x} cy={float.y} r="3" className={s.float1} style={{ animationDelay: `${i * 25}ms` }} />
+                      ))}
+                    </>
+                  )}
+                </svg>
+                <figcaption>
+                  {ask.picks === 'timeseries_line' ? 'Surface temperature, by month' : ask.picks === 'heatmap_grid' ? 'Salinity. Brighter is saltier.' : 'Float positions'}
+                </figcaption>
+              </figure>
+              <p className={s.tool} data-tool>
+                <span>picked</span>
+                <b>{ask.picks}</b>
+                <span>and ran this. Only a SELECT is let through.</span>
+                <code>{ask.sql}</code>
+              </p>
+            </>
           )}
-          {!refused && at > 2 && (
-            <p className={s.tool}>
-              <span>the model writes this. The tool lets only a SELECT through.</span>
-              <code>{ask.sql}</code>
-            </p>
+          {refused && (
+            <ul className={s.points}>
+              <li>No tool ran, and no query was written</li>
+              <li>This is the real reply, word for word</li>
+            </ul>
           )}
-          {(refused ? at > 0 : at > 5) && (
-            <p className={s.reply} data-answer data-refused={refused || undefined}>
-              {ask.a}
-            </p>
-          )}
-        </div>
-        <figure className={s.chart}>
-          <svg viewBox="0 0 300 110" role="img" aria-label="The picture that comes with the answer" data-picture={ask.picks ?? 'none'} key={asked}>
-            {drawn && ask.picks === 'timeseries_line' && (
-              <>
-                <path d="M18 92 H282" className={s.axis} />
-                <path d={path} className={s.line} pathLength={1} />
-                {(ask.values ?? []).map((y, i) => (
-                  <circle key={i} cx={i * 24 + 18} cy={92 - y} r="3" className={s.dot} style={{ animationDelay: `${i * 45}ms` }} />
-                ))}
-                {['Jan', 'May', 'Sep', 'Dec'].map((month, i) => (
-                  <text key={month} x={[18, 114, 210, 282][i]} y="106" className={s.tick}>
-                    {month}
-                  </text>
-                ))}
-              </>
-            )}
-            {drawn &&
-              ask.picks === 'heatmap_grid' &&
-              SALT.map((value, i) => (
-                <rect
-                  key={i}
-                  x={(i % 10) * 28 + 10}
-                  y={Math.floor(i / 10) * 20 + 5}
-                  width="26"
-                  height="18"
-                  className={s.cell}
-                  style={{ '--to': value, animationDelay: `${((i % 10) + Math.floor(i / 10)) * 30}ms` } as CSSProperties}
-                />
-              ))}
-            {drawn && ask.picks === 'map_points' && (
-              <>
-                <rect x="10" y="5" width="280" height="96" className={s.sea} />
-                {[80, 150, 220].map((x) => (
-                  <path key={x} d={`M${x} 5 V101`} className={s.axis} />
-                ))}
-                <path d="M10 53 H290" className={s.axis} />
-                {/* The coast, as one rough line. */}
-                <path d="M196 5 L190 30 L204 58 L222 82 L232 101" className={s.coast} />
-                {FLOATS.map((float, i) => (
-                  <circle key={i} cx={float.x} cy={float.y} r="3" className={s.float1} style={{ animationDelay: `${i * 25}ms` }} />
-                ))}
-              </>
-            )}
-          </svg>
-          <figcaption>
-            {refused
-              ? 'No picture. Nothing ran.'
-              : !drawn
-                ? 'Waiting for the rows'
-                : ask.picks === 'timeseries_line'
-                  ? 'Surface temperature, by month'
-                  : ask.picks === 'heatmap_grid'
-                    ? 'Salinity. Brighter is saltier.'
-                    : 'Float positions'}
-          </figcaption>
-        </figure>
+        </Report>
       </div>
-      <p className={s.small}>
-        Sample answers and sample queries, on the real tables. The refusal is the real one, word for word. The real app runs all of this on the
-        live float data.
-      </p>
+      <p className={s.small}>Sample answers and sample queries, on the real tables. The real app runs all of this on the live float data.</p>
     </div>
   );
 }
