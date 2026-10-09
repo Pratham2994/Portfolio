@@ -94,24 +94,24 @@ export function playEntry(wall: HTMLElement): void {
     .call(() => root.classList.remove(PENDING))
     .to(lines, { opacity: 1, duration: 0.01, stagger: 0.11 }, 0.05)
     // 2. Hard cut to the word.
-    .set(screen, { opacity: 0 }, 0.95)
-    .set(centre.children[0], { opacity: 1 }, 0.95)
+    .set(screen, { opacity: 0 }, 0.85)
+    .set(centre.children[0], { opacity: 1 }, 0.85)
     // 3. The view pulls back.
-    .to(grid, { scale: 1, duration: 1.05, ease: 'expo.inOut' }, 1.1)
-    .to([...centre.children].slice(1), { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.1 }, 1.8);
+    .to(grid, { scale: 1, duration: 1.05, ease: 'expo.inOut' }, 1)
+    .to([...centre.children].slice(1), { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.1 }, 1.7);
 
   if (light) {
     timeline.fromTo(
       light,
       { opacity: 0 },
       { keyframes: [{ opacity: 0.9, duration: 0.07 }, { opacity: 0.1, duration: 0.09 }, { opacity: 1, duration: 0.06 }, { opacity: 0.3, duration: 0.12 }, { opacity: 1, duration: 0.6 }] },
-      1.1,
+      1,
     );
   }
 
   // 4. The deal: each sheet flies out from the middle, spinning, and slaps onto the wall.
   gsap.utils.shuffle(sheets.slice()).forEach((sheet, i) => {
-    const at = 1.65 + i * 0.075;
+    const at = 1.55 + i * 0.075;
     const rect = sheet.getBoundingClientRect();
     // Positions were measured while zoomed in, so the offsets are scaled back.
     const dx = (middle.x - (rect.left + rect.width / 2)) / zoom;
