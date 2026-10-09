@@ -57,7 +57,7 @@ pc:
 cube:
   title: The cube
   best: 45
-  note: Seconds, on my best day. Not fast. Still mine.
+  note: On my best day. Not fast. Still mine.
 now:
   title: Right now
   lines:
