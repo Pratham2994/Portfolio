@@ -51,16 +51,18 @@ export function HydrateFallback() {
   return null;
 }
 
-/** Shown if a page throws. Plain markup, so it works when the rest of the app does not. */
+/** Shown if a page throws. Plain markup and one class, so it works when the rest of the app does not. */
 export function ErrorBoundary() {
   return (
-    <main style={{ display: 'grid', placeContent: 'center', gap: '1rem', minHeight: '100svh', padding: '1.5rem', textAlign: 'center' }}>
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--step-5)', lineHeight: 0.9, textTransform: 'uppercase' }}>
-        Something fell off the wall
-      </h1>
-      <p>That is on me, not you.</p>
+    <main className="fell">
+      <div className="fell-sheet" aria-hidden="true">
+        <span>404-ish</span>
+        <strong>Oops</strong>
+      </div>
+      <h1>Something fell off the wall</h1>
+      <p>That one is on me, not you. The rest of the wall is fine.</p>
       <p>
-        <a href="/">Back to the wall</a>
+        <a href="/">Hang it back up</a>
       </p>
     </main>
   );

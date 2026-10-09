@@ -163,3 +163,82 @@ html[data-project-open] {
   z-index: 39;
   background: #000;
 }
+
+/* The error screen: one poster that has come loose and hangs by a corner. */
+.fell {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-4);
+  min-height: 100svh;
+  padding: var(--gutter);
+  background: var(--wall) url('/textures/wall.webp');
+  text-align: center;
+}
+
+.fell-sheet {
+  display: grid;
+  align-content: space-between;
+  width: min(60vw, 13rem);
+  aspect-ratio: 1 / 1.414;
+  margin-bottom: var(--space-5);
+  padding: 1rem;
+  border-radius: 2px;
+  background: var(--signal);
+  color: var(--wall-shade);
+  text-align: left;
+  transform-origin: 8% 4%;
+  rotate: 14deg;
+  box-shadow: 0 1.4rem 2rem -1rem rgb(0 0 0 / 0.9);
+  animation: fell-swing 3.2s ease-in-out infinite alternate;
+}
+
+.fell-sheet span {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.fell-sheet strong {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 4.5rem;
+  line-height: 0.8;
+  text-transform: uppercase;
+}
+
+.fell h1 {
+  max-width: 14ch;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-5);
+  line-height: 0.9;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.fell p {
+  max-width: 40ch;
+  color: var(--dim);
+}
+
+.fell a {
+  display: inline-block;
+  padding: 0.7em 1.1em;
+  border-radius: 2px;
+  background: var(--bone);
+  color: var(--wall-shade);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+@keyframes fell-swing {
+  to {
+    rotate: 20deg;
+  }
+}

@@ -7,7 +7,7 @@ sports:
     - { sport: Cricket, side: 'India, and RCB' }
     - { sport: Badminton, side: 'Me, on a good day' }
     - { sport: F1, side: 'Ferrari. Leclerc and Max.' }
-    - { sport: Tennis, side: Whoever is in form }
+    - { sport: Tennis, side: "Federer first. Djokovic too, now." }
 games:
   title: Games
   note: Basic FPS player, I know. The story games started when the new PC arrived.

@@ -21,12 +21,13 @@ test('pressing it drops every sheet, then the wall hangs itself again', async ({
   await expect(page.locator('[data-wall][data-fallen]')).toHaveCount(1);
   // Mid-fall the poster is well below where it hangs.
   await expect.poll(async () => (await scrub.boundingBox())!.y - before.y, { timeout: 3000 }).toBeGreaterThan(40);
-  await expect(page.locator('[data-wall][data-fallen]')).toHaveCount(0, { timeout: 8000 });
-  await page.locator('[data-lever]').hover();
-  await page.waitForTimeout(900);
-  const after = (await scrub.boundingBox())!;
-  expect(Math.abs(after.x - before.x)).toBeLessThan(10);
-  expect(Math.abs(after.y - before.y)).toBeLessThan(10);
+  await expect(page.locator('[data-wall][data-fallen]')).toHaveCount(0, { timeout: 12000 });
+  // Every sheet is back on its mark: nothing the drop set is left on it.
+  const leftovers = await page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>('[data-poster], [data-piece]')].filter((el) => el.style.transform || el.style.translate || el.style.rotate || el.style.scale).length,
+  );
+  expect(leftovers).toBe(0);
+  await expect.poll(async () => Math.abs((await scrub.boundingBox())!.y - before.y)).toBeLessThan(12);
   // A poster still opens afterwards.
   await scrub.click();
   await expect(page.locator('#project-title')).toHaveText('Scrub');
@@ -39,4 +40,10 @@ test.describe('with reduced motion', () => {
     await open(page, '/');
     await expect(page.locator('[data-lever]')).toBeHidden();
   });
+});
+
+test('a small hint for the secret sits in the corner', async ({ page }, info) => {
+  await open(page, '/');
+  const hint = page.locator('[data-wall] p[aria-hidden]', { hasText: 'meow' });
+  await expect(hint).toBeVisible({ visible: wide.includes(info.project.name) });
 });

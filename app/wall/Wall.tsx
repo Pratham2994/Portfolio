@@ -12,6 +12,7 @@ import { Piece, PIECES } from './Piece';
 import { Poster } from './Poster';
 import { useDepth } from './useDepth';
 import { useScrollTilt } from './useScrollTilt';
+import { useSpotlight } from './useSpotlight';
 import styles from './Wall.module.css';
 
 type Columns = 2 | 3 | 5;
@@ -22,6 +23,7 @@ const ITEMS: WallItem[] = [
   ...PIECES.map((key) => ({ key, weight: 'small' as const })),
 ];
 const PLAN = hangWall(ITEMS);
+const HAS_HERO = PLAN.hung.some((piece) => piece.paper === 'a3');
 const PLACE = new Map(PLAN.hung.map((piece) => [piece.key, piece]));
 
 // How far each piece stands off the wall, in pixels.
@@ -54,7 +56,9 @@ function Cell({ id, index, children }: { id: string; index: number; children: Re
     '--z': `${DEPTHS[index % DEPTHS.length]}px`,
   } as CSSProperties;
   return (
-    <div className={styles.cell} style={style} data-paper={place.paper} data-outside={place.col === OUTSIDE || undefined}>
+    <div className={styles.cell} style={style} data-paper={place.paper} data-outside={place.col === OUTSIDE || undefined}
+      data-under-hero={(HAS_HERO && place.col === 1 && place.row === 3) || undefined}
+    >
       {children}
     </div>
   );
@@ -66,6 +70,7 @@ export function Wall() {
   const grid = useRef<HTMLDivElement>(null);
   useDepth(wall);
   useScrollTilt(wall);
+  useSpotlight(grid);
   useEffect(() => {
     if (wall.current) playEntry(wall.current);
   }, []);
@@ -95,6 +100,9 @@ export function Wall() {
         ))}
         <Cat grid={grid} />
       </div>
+      <p className={styles.hint} aria-hidden="true">
+        psst. type &quot;meow&quot;
+      </p>
       <button type="button" className={styles.lever} onClick={() => wall.current && dropWall(wall.current)} data-lever>
         Do not press
       </button>

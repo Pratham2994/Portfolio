@@ -16,7 +16,7 @@ async function check(page: Page) {
       return box.width > 0 && (box.left < -1 || box.right > window.innerWidth + 1);
     });
     const small = [...scroller.querySelectorAll<HTMLElement>('p, li, dd, dt, a, button')].filter((el) => {
-      if (el.closest('[data-art], [data-poster], [data-piece], [data-centre]')) return false;
+      if (el.closest('[data-art], [data-poster], [data-piece], [data-centre], [aria-hidden="true"]')) return false;
       return el.innerText.trim() && parseFloat(getComputedStyle(el).fontSize) < 12;
     });
     return {

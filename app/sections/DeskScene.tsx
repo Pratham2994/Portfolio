@@ -104,12 +104,26 @@ export function DeskScene({ active, onPick }: Props) {
           <rect className={s.cup} x="670" y="310" width="18" height="44" rx="7" />
         </g>
 
-        {/* laptop on its stand, with the small deck on top: right now */}
+        {/* the laptop, closed, leaning back on its stand, with the Prats-Deck beside it: right now */}
         <g {...part('now')}>
-          <path className={s.laptop} d="M742 388 L772 300 L900 320 L872 388 Z" />
-          <path className={s.laptopLine} d="M786 316 L852 352 M826 322 L802 372" />
-          <rect className={s.deck} x="790" y="278" width="38" height="24" rx="3" />
-          <rect className={s.deckScreen} x="794" y="282" width="30" height="16" />
+          <path className={s.standLine} d="M772 388 H900 M878 388 L852 318" />
+          <path className={s.laptop} d="M760 380 L792 286 L916 300 L888 380 Z" />
+          <path className={s.laptopEdge} d="M760 380 L888 380 L886 388 L758 388 Z" />
+          <path className={s.laptopLine} d="M800 300 L872 342 M846 304 L816 366" />
+          <rect className={s.stand} x="718" y="382" width="34" height="6" />
+          <rect className={s.stand} x="732" y="370" width="6" height="14" />
+          <rect className={s.deck} x="712" y="334" width="46" height="36" rx="4" />
+          <rect className={s.deckScreen} x="717" y="339" width="36" height="24" rx="1" />
+          <path className={s.deckCat} d="M723 357 h14 v-6 h4 v-4 h2 v12 h-2 v2 h-18 Z" />
+        </g>
+
+        {/* the cube */}
+        <g {...part('cube')}>
+          <rect className={s.cubeFace} x="676" y="364" width="24" height="24" />
+          <path className={s.cubeLine} d="M684 364v24M692 364v24M676 372h24M676 380h24" />
+          <rect className={s.cubeA} x="676" y="364" width="8" height="8" />
+          <rect className={s.cubeB} x="692" y="372" width="8" height="8" />
+          <rect className={s.cubeC} x="684" y="380" width="8" height="8" />
         </g>
 
         {/* small figures: anime. the helmet and bottle are part of the picture. */}
@@ -122,15 +136,6 @@ export function DeskScene({ active, onPick }: Props) {
           <path className={s.helmet} d="M20 388 a17 17 0 0 1 34 0 Z" />
           <path className={s.grill} d="M40 376 h14 M40 381 h14 M40 386 h14" />
           <rect className={s.bottle} x="268" y="330" width="14" height="58" rx="5" />
-        </g>
-
-        {/* the cube */}
-        <g {...part('cube')}>
-          <rect className={s.cubeFace} x="700" y="364" width="24" height="24" />
-          <path className={s.cubeLine} d="M708 364v24M716 364v24M700 372h24M700 380h24" />
-          <rect className={s.cubeA} x="700" y="364" width="8" height="8" />
-          <rect className={s.cubeB} x="716" y="372" width="8" height="8" />
-          <rect className={s.cubeC} x="708" y="380" width="8" height="8" />
         </g>
 
         {/* the tower on the floor, with three fans: the PC */}

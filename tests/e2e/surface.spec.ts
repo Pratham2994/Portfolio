@@ -55,6 +55,30 @@ test('scrolling away tips the wall back, with a mouse on a wide screen', async (
   }
 });
 
+test('a fast sweep over the wall does not dim it, and a rest on one poster does', async ({ page }, info) => {
+  test.skip(!['laptop-short', 'laptop', 'desktop', 'wide'].includes(info.project.name), 'needs a mouse on the wide wall');
+  await open(page, '/');
+  const grid = page.locator('[data-wall] > div');
+  const centreOf = async (slug: string) => {
+    const box = (await page.locator(`[data-poster="${slug}"]`).boundingBox())!;
+    return [box.x + box.width / 2, box.y + box.height / 2] as const;
+  };
+  // Sweep: three posters in well under the dwell time.
+  for (const slug of ['neat', 'prats-deck', 'omnicompiler']) await page.mouse.move(...(await centreOf(slug)));
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(150);
+  await expect(grid).not.toHaveAttribute('data-dim', '');
+  // Rest on one.
+  await page.mouse.move(...(await centreOf('neat')));
+  await expect(grid).toHaveAttribute('data-dim', '');
+  // Moving to the next poster keeps the wall dim: no flicker.
+  await page.mouse.move(...(await centreOf('prats-deck')));
+  await page.waitForTimeout(120);
+  await expect(grid).toHaveAttribute('data-dim', '');
+  await page.mouse.move(5, 5);
+  await expect(grid).not.toHaveAttribute('data-dim', '');
+});
+
 test.describe('with reduced motion', () => {
   test.use({ reducedMotion: 'reduce' });
 

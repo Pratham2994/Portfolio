@@ -170,12 +170,27 @@
 }
 
 .laptop {
-  fill: var(--bone);
+  fill: #d9dbe0;
+}
+
+.laptopEdge {
+  fill: #9a9da6;
+}
+
+.standLine {
+  fill: none;
+  stroke: #6a6d75;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.deckCat {
+  fill: #f5f1ea;
 }
 
 .laptopLine {
   fill: none;
-  stroke: #b9b4a8;
+  stroke: #aeb1b9;
   stroke-width: 1.5;
 }
 
