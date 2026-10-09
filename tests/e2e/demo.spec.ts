@@ -59,7 +59,7 @@ test('the lab ranks the same models differently by the two numbers', async ({ pa
   await expect(demo.locator('ol li').first()).toContainText('Gemma 4 12B coder');
   // A model's own run: the count, and where it stands on both lists.
   await demo.getByRole('button', { name: 'Gemma 4 26B' }).click();
-  await expect(demo.locator('[data-stamp]')).toHaveText('96%', { timeout: 8000 });
+  await expect(demo.locator('[data-stamp]')).toHaveText('93%', { timeout: 8000 });
   await expect(demo.locator('[data-report]')).toContainText('154 of 165');
   await expect(demo.locator('[data-report]')).toContainText('4th of 5 on right answers per hour');
 });

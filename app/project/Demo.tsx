@@ -1081,7 +1081,7 @@ const MODELS = [
   { name: 'Gemma 4 12B coder', pass: 79, right: 131, perHour: 1588 },
   { name: 'Gemma 4 12B', pass: 87, right: 143, perHour: 1519 },
   { name: 'Gemma 4 E4B', pass: 70, right: 115, perHour: 1357 },
-  { name: 'Gemma 4 26B', pass: 96, right: 154, perHour: 1054 },
+  { name: 'Gemma 4 26B', pass: 93, right: 154, perHour: 808 },
   { name: 'GPT-OSS 20B', pass: 81, right: 134, perHour: 792 },
 ];
 const place = (n: number) => ['1st', '2nd', '3rd', '4th', '5th'][n];
