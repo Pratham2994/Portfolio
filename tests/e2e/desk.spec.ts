@@ -60,15 +60,21 @@ test('the clock shows the time in Pune', async ({ page }) => {
   expect(Math.abs(minutes(shown!) - minutes(expected)) % 1439).toBeLessThanOrEqual(1);
 });
 
-test('the room light switch changes the room', async ({ page }) => {
+test('the room light switch steps through six colours and comes back to white', async ({ page }) => {
   await open(page, '/');
   const desk = page.locator('#desk');
+  const lamp = () => desk.evaluate((el) => getComputedStyle(el).getPropertyValue('--lamp'));
   await expect(desk).toHaveAttribute('data-room', 'white');
-  const before = await desk.evaluate((el) => getComputedStyle(el).getPropertyValue('--lamp'));
+  const seen = new Set([await lamp()]);
+  for (const name of ['purple', 'red', 'cyan', 'green', 'amber']) {
+    await page.locator('#desk [data-switch]').click();
+    await expect(desk).toHaveAttribute('data-room', name);
+    await expect(page.locator('#desk [data-switch]')).toContainText(name);
+    seen.add(await lamp());
+  }
+  expect(seen.size).toBe(6);
   await page.locator('#desk [data-switch]').click();
-  await expect(desk).toHaveAttribute('data-room', 'purple');
-  await expect(page.locator('#desk [data-switch]')).toHaveAttribute('aria-pressed', 'true');
-  expect(await desk.evaluate((el) => getComputedStyle(el).getPropertyValue('--lamp'))).not.toBe(before);
+  await expect(desk).toHaveAttribute('data-room', 'white');
 });
 
 test('the stopwatch stops on his best time', async ({ page }) => {

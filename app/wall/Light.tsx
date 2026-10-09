@@ -12,7 +12,8 @@ const vertex = /* glsl */ `
   }
 `;
 
-// Two fixed sources: the monitors below the wall, and one lamp up and to the left.
+// One fixed, neutral light on the middle of the wall. It has no colour, so the wall stays one tone
+// and the posters carry all the colour. The grain is left alone.
 const fragment = /* glsl */ `
   precision highp float;
   uniform vec2 uRes;
@@ -30,9 +31,8 @@ const fragment = /* glsl */ `
   void main() {
     float aspect = uRes.x / uRes.y;
     vec2 p = vec2(vUv.x * aspect, vUv.y);
-    vec3 monitors = vec3(0.045, 0.075, 0.19) * pool(p, vec2(0.5 * aspect, -0.3), 0.72);
-    vec3 lamp = vec3(0.15, 0.115, 0.075) * pool(p, vec2(0.08 * aspect, 1.12), 0.62);
-    vec3 colour = monitors + lamp;
+    float spot = pool(p, vec2(0.5 * aspect, 0.52), 0.62);
+    vec3 colour = vec3(0.058, 0.056, 0.054) * spot;
     colour += (hash(gl_FragCoord.xy) - 0.5) / 96.0;
     gl_FragColor = vec4(max(colour, 0.0), 1.0);
   }

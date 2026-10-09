@@ -2,13 +2,13 @@ import { useEffect, type RefObject } from 'react';
 
 import { finePointer } from '~/lib/motion';
 
-const DWELL = 260; // ms the pointer must rest on a sheet before the others step back
-const GRACE = 350; // ms the wall stays dim after the pointer leaves the sheets
+const GRACE = 320; // ms the wall stays dim after the pointer leaves the sheets
 
 /**
- * Dims the other sheets only when the pointer settles on one. A pointer that sweeps across
- * the wall never rests long enough, so nothing flickers. Once dim, the wall stays dim while
- * the pointer moves from sheet to sheet, and lights up again a moment after it leaves.
+ * The sheet under the pointer keeps its light and the rest step back, at once. The wall
+ * used to flash bright each time the pointer crossed a gap between two sheets. Now it
+ * stays dim across the gaps, and only lights up again a moment after the pointer has left
+ * the sheets for good.
  */
 export function useSpotlight(ref: RefObject<HTMLElement | null>): void {
   useEffect(() => {
@@ -24,10 +24,8 @@ export function useSpotlight(ref: RefObject<HTMLElement | null>): void {
       window.clearTimeout(timer);
       if (!onSheet) {
         timer = window.setTimeout(light, GRACE);
-      } else if (!('dim' in grid.dataset)) {
-        timer = window.setTimeout(() => {
-          grid.dataset.dim = '';
-        }, DWELL);
+      } else {
+        grid.dataset.dim = '';
       }
     };
     const onLeave = () => {

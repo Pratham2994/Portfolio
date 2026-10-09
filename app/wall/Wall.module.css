@@ -170,16 +170,21 @@
 }
 
 /*
- * The piece under the pointer keeps its light and the rest step back. useSpotlight sets
- * data-dim only after the pointer rests on a sheet, so a fast sweep does not flicker.
+ * The piece under the pointer keeps its light and the rest step back. useSpotlight keeps
+ * data-dim set while the pointer crosses the gaps, so the wall does not flash.
+ * A sheet lights up fast and fades back slowly, which leaves a short trail behind the pointer.
  */
 @media (hover: hover) and (pointer: fine) {
   .grid :is([data-poster], [data-piece]) {
-    transition-duration: var(--dur-base), var(--dur-base), 0.6s, var(--dur-base);
+    transition-duration: var(--dur-base), var(--dur-base), 0.5s, var(--dur-base);
+  }
+
+  .grid :is([data-poster], [data-piece]):hover {
+    transition-duration: var(--dur-base), var(--dur-base), 0.08s, var(--dur-base);
   }
 
   .grid[data-dim] :is([data-poster], [data-piece]):not(:hover) {
-    filter: brightness(0.5) saturate(0.7);
+    filter: brightness(0.45) saturate(0.65);
   }
 }
 

@@ -7,6 +7,9 @@ import { prefersReducedMotion } from '~/lib/motion';
 import s from './Desk.module.css';
 import { DeskScene } from './DeskScene';
 
+// The room light. Each press of the switch moves to the next colour.
+const ROOMS = ['white', 'purple', 'red', 'cyan', 'green', 'amber'] as const;
+
 const ORDER: DeskId[] = ['sports', 'games', 'anime', 'music', 'pc', 'cube', 'now'];
 
 /** A scoreboard: the sport, and whose side he is on. */
@@ -151,7 +154,8 @@ function Now() {
 
 export function Desk() {
   const [active, setActive] = useState<DeskId>('sports');
-  const [purple, setPurple] = useState(false);
+  const [light, setLight] = useState(0);
+  const room = ROOMS[light];
 
   const cards: Record<DeskId, { note?: string; body: ReactNode }> = {
     sports: { note: desk.sports.note, body: <Sports /> },
@@ -164,12 +168,12 @@ export function Desk() {
   };
 
   return (
-    <section id="desk" className={s.desk} aria-labelledby="desk-title" data-room={purple ? 'purple' : 'white'}>
+    <section id="desk" className={s.desk} aria-labelledby="desk-title" data-room={room}>
       <header className={s.head} data-reveal>
         <h2 id="desk-title">The desk</h2>
         <p>Under the wall. Pick something up.</p>
-        <button type="button" className={s.switch} aria-pressed={purple} onClick={() => setPurple(!purple)} data-switch>
-          Room light
+        <button type="button" className={s.switch} onClick={() => setLight((light + 1) % ROOMS.length)} data-switch>
+          Room light <span>{room}</span>
         </button>
       </header>
 

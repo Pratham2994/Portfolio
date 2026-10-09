@@ -17,6 +17,26 @@
   --lamp-soft: #3a2470;
 }
 
+.desk[data-room='red'] {
+  --lamp: #ff3b3b;
+  --lamp-soft: #6a1420;
+}
+
+.desk[data-room='cyan'] {
+  --lamp: #2fd6e6;
+  --lamp-soft: #0e4a55;
+}
+
+.desk[data-room='green'] {
+  --lamp: #3ddc84;
+  --lamp-soft: #10492c;
+}
+
+.desk[data-room='amber'] {
+  --lamp: #ffb21a;
+  --lamp-soft: #5a3a06;
+}
+
 .desk > * {
   min-width: 0;
 }
@@ -54,6 +74,11 @@
   font-size: var(--step--1);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.switch span {
+  min-width: 4.2em;
+  color: var(--bone);
 }
 
 .switch::before {

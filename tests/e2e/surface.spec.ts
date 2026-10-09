@@ -55,26 +55,22 @@ test('scrolling away tips the wall back, with a mouse on a wide screen', async (
   }
 });
 
-test('a fast sweep over the wall does not dim it, and a rest on one poster does', async ({ page }, info) => {
+test('the wall dims at once under the pointer and stays dim across the gaps', async ({ page }, info) => {
   test.skip(!['laptop-short', 'laptop', 'desktop', 'wide'].includes(info.project.name), 'needs a mouse on the wide wall');
   await open(page, '/');
   const grid = page.locator('[data-wall] > div');
-  const centreOf = async (slug: string) => {
-    const box = (await page.locator(`[data-poster="${slug}"]`).boundingBox())!;
-    return [box.x + box.width / 2, box.y + box.height / 2] as const;
-  };
-  // Sweep: three posters in well under the dwell time.
-  for (const slug of ['neat', 'prats-deck', 'omnicompiler']) await page.mouse.move(...(await centreOf(slug)));
-  await page.mouse.move(5, 5);
-  await page.waitForTimeout(150);
-  await expect(grid).not.toHaveAttribute('data-dim', '');
-  // Rest on one.
-  await page.mouse.move(...(await centreOf('neat')));
-  await expect(grid).toHaveAttribute('data-dim', '');
-  // Moving to the next poster keeps the wall dim: no flicker.
-  await page.mouse.move(...(await centreOf('prats-deck')));
+  const box = async (slug: string) => (await page.locator(`[data-poster="${slug}"]`).boundingBox())!;
+  const neat = await box('neat');
+  const deck = await box('prats-deck');
+  await page.mouse.move(neat.x + neat.width / 2, neat.y + neat.height / 2);
+  await expect(grid).toHaveAttribute('data-dim', '', { timeout: 150 });
+  // The gap between two posters: the wall must not light up there.
+  await page.mouse.move((neat.x + neat.width + deck.x) / 2, neat.y + neat.height / 2);
   await page.waitForTimeout(120);
   await expect(grid).toHaveAttribute('data-dim', '');
+  await page.mouse.move(deck.x + deck.width / 2, deck.y + deck.height / 2);
+  await expect(grid).toHaveAttribute('data-dim', '');
+  // Off the sheets for good: light again.
   await page.mouse.move(5, 5);
   await expect(grid).not.toHaveAttribute('data-dim', '');
 });

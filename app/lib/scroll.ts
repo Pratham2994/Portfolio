@@ -14,9 +14,24 @@ export function initScroll(): () => void {
 
   void import('lenis').then(({ default: Lenis }) => {
     if (stopped) return;
-    const lenis = new Lenis({ lerp: 0.12, anchors: true });
+    const lenis = new Lenis({ lerp: 0.12 });
     const tick = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(tick);
+    // After a slow frame, carry on from the real time. The default tries to catch up, which shows as a jump.
+    gsap.ticker.lagSmoothing(0);
+
+    // Links inside the page are scrolled here and nowhere else. Left to the browser, the
+    // address would change, the router would jump to the target, and the two would fight.
+    // The wheel can take over at any moment.
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
+      const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
+      const target = link && document.getElementById(link.getAttribute('href')!.slice(1));
+      if (!target) return;
+      event.preventDefault();
+      lenis.scrollTo(target, { duration: 1.1, lock: false });
+    };
+    document.addEventListener('click', onClick);
 
     const root = document.documentElement;
     const sync = () => ('projectOpen' in root.dataset ? lenis.stop() : lenis.start());
@@ -26,6 +41,7 @@ export function initScroll(): () => void {
 
     cleanup = () => {
       watch.disconnect();
+      document.removeEventListener('click', onClick);
       gsap.ticker.remove(tick);
       lenis.destroy();
     };

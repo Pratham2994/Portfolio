@@ -146,3 +146,17 @@ test('typing meow gives the cat the zoomies', async ({ page }, info) => {
   await expect(cat).toHaveAttribute('data-zoomies', '');
   await expect.poll(async () => Math.abs((await cat.boundingBox())!.x - before)).toBeGreaterThan(120);
 });
+
+test('a link inside the page scrolls there, keeps the address, and lets the wheel take over', async ({ page }, info) => {
+  test.skip(['phone', 'tablet'].includes(info.project.name), 'smooth scrolling runs with a mouse only');
+  await open(page, '/');
+  await page.locator('[data-centre]').click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
+  // The address has no #you: nothing else tries to scroll the page.
+  expect(new URL(page.url()).hash).toBe('');
+  // The wheel interrupts the glide and wins.
+  await page.mouse.wheel(0, -4000);
+  await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 4000 }).toBeLessThan(40);
+  await page.waitForTimeout(600);
+  expect(await page.evaluate(() => window.scrollY)).toBeLessThan(40);
+});
