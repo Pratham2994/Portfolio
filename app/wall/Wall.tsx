@@ -117,6 +117,11 @@ export function Wall() {
           secrets {found.length}/{SECRETS.length}
         </button>
         {/* One line along the bottom of the wall, so the list covers nothing. */}
+        {listOpen && (
+          <span className={styles.hint} aria-hidden="true">
+            type one, or click it:
+          </span>
+        )}
         {listOpen ? (
           <ul className={styles.list} id="secret-list" aria-label="Words to type on the wall, or to click">
             {SECRETS.map((secret) => (

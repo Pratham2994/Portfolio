@@ -31,13 +31,18 @@ const centreOf = (el: Element): Point => {
   return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 };
 
-// Each word has more than one way to go. The same one never comes twice in a row.
-const last: Record<string, number> = {};
+// Each word has more than one way to go. It goes through all of them, in a new order each
+// round, so the next try is never the one just seen.
+const rounds: Record<string, { order: number[]; last: number }> = {};
 function pick<T>(key: string, options: T[]): T {
-  let index = Math.floor(Math.random() * options.length);
-  if (options.length > 1 && index === last[key]) index = (index + 1) % options.length;
-  last[key] = index;
-  return options[index];
+  const round = (rounds[key] ??= { order: [], last: -1 });
+  if (!round.order.length) {
+    round.order = gsap.utils.shuffle(options.map((_, i) => i));
+    // A new round does not start with the one the last round ended on.
+    if (options.length > 1 && round.order[0] === round.last) round.order.push(round.order.shift()!);
+  }
+  round.last = round.order.shift()!;
+  return options[round.last];
 }
 
 // The knock a sheet and the wall take when something hits them.
@@ -132,11 +137,11 @@ function kohli(scene: Scene, timeline: Timeline) {
   const middle = bat ? centreOf(bat) : { x: box.left + box.width / 2, y: box.top + box.height / 2 };
   const shot = pick('kohli', [
     // Along the ground through the off side, and gone.
-    { ball: 'Good length. Just outside off.', word: 'Four', line: 'Kohli. Cover drive. Nobody ran.', to: { x: -60, y: box.bottom - 40 }, grow: 1.5, time: 0.6, lean: 4 },
+    { ball: 'Good length. Just outside off.', word: 'Cover drive', line: 'Four. Kohli. Nobody ran.', to: { x: -60, y: box.bottom - 40 }, grow: 1.6, time: 0.8, lean: 4 },
     // Off the pads, with the wrists.
-    { ball: 'On the pads. That is a mistake.', word: 'Four', line: 'Kohli. Off the pads. All wrists.', to: { x: window.innerWidth + 60, y: box.bottom - 30 }, grow: 1.5, time: 0.55, lean: -5 },
+    { ball: 'On the pads. That is a mistake.', word: 'The flick', line: 'Four. Kohli. Off the pads. All wrists.', to: { x: window.innerWidth + 60, y: box.top + box.height * 0.3 }, grow: 1.6, time: 0.75, lean: -6 },
     // Off the back foot, straight back over the bowler, and out of the ground.
-    { ball: 'Back of a length. Quick.', word: 'Six', line: 'Kohli. Back foot. Straight over the bowler.', to: { x: middle.x + 60, y: -90 }, grow: 2.8, time: 0.95, lean: 3 },
+    { ball: 'Back of a length. Quick.', word: 'Six', line: 'Kohli. Back foot. Straight over the bowler.', to: { x: middle.x + 60, y: -90 }, grow: 3, time: 1.05, lean: 3 },
   ]);
   say(shot.ball);
   timeline
