@@ -38,6 +38,8 @@ const project = z.object({
   // One project may be the hero: the single A3 poster on the wall.
   hero: z.boolean().default(false),
   status: text,
+  // The month it was made, as 'YYYY-MM'. The wall uses it to age the paper.
+  made: z.string().regex(/^\d{4}-\d{2}$/).optional(),
   tagline: text,
   // One formal sentence, for the one-page version.
   summary: text.optional(),

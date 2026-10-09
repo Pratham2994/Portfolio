@@ -1,0 +1,167 @@
+/* The album hangs under the "in a hurry" link, top right. Closed, it is one small tag. */
+.album {
+  position: absolute;
+  top: calc(var(--space-4) + 2rem);
+  right: var(--gutter);
+  z-index: 7;
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.cover {
+  padding: 0.4em 0.7em;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--wall-shade);
+  color: var(--dim);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: uppercase;
+  transition:
+    color var(--dur-fast) linear,
+    border-color var(--dur-fast) linear;
+}
+
+.cover:hover,
+.cover:focus-visible,
+.cover[aria-expanded='true'] {
+  border-color: var(--signal);
+  color: var(--bone);
+}
+
+.album[data-full] .cover {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+/* Open, it is a page of the album: bone paper, and a place for each sticker. */
+.page {
+  --ink: #14161c;
+  display: grid;
+  gap: var(--space-3);
+  width: min(calc(100vw - 2 * var(--gutter)), 27rem);
+  padding: var(--space-4);
+  border-radius: 2px;
+  background: #ece8df url('/textures/paper.webp');
+  background-blend-mode: multiply;
+  color: var(--ink);
+  box-shadow: 0 1.4rem 2.4rem -0.8rem rgb(0 0 0 / 0.95);
+  rotate: 0.6deg;
+}
+
+.head {
+  display: grid;
+  gap: 0.15em;
+  letter-spacing: 0.02em;
+}
+
+.head b {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-3);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.slots a {
+  display: grid;
+  align-content: space-between;
+  aspect-ratio: 3 / 4;
+  padding: 0.35rem;
+  border: 1.5px dashed rgb(20 22 28 / 0.45);
+  border-radius: 2px;
+  color: rgb(20 22 28 / 0.55);
+  text-decoration: none;
+}
+
+.slots strong {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.75rem;
+  line-height: 0.95;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+/* A sticker that is in: the colours of its poster, a white edge, a little crooked. */
+.slots li[data-stuck] a {
+  border: 2px solid #fff;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 0.2rem 0.45rem -0.1rem rgb(0 0 0 / 0.6);
+  rotate: calc((var(--i) * 37deg - 90deg) / 60);
+}
+
+.slots li[data-stuck] small {
+  color: var(--accent);
+}
+
+.slots a:focus-visible {
+  outline-color: var(--ink);
+}
+
+.prize {
+  justify-self: start;
+  padding: 0.5em 0.8em;
+  background: var(--ink);
+  color: #ece8df;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .page {
+    animation: album-open 320ms var(--ease-out);
+    transform-origin: 100% 0;
+  }
+
+  /* Each sticker is pressed on, one after the other. */
+  .slots li[data-stuck] a {
+    animation: stick 360ms cubic-bezier(0.2, 1.5, 0.4, 1) calc(var(--i) * 45ms + 120ms) backwards;
+  }
+
+  /* A full album catches the light. */
+  .album[data-full] .slots li[data-stuck] a {
+    background-image: linear-gradient(115deg, transparent 40%, rgb(255 255 255 / 0.35) 50%, transparent 60%);
+    background-size: 260% 100%;
+    animation:
+      stick 360ms cubic-bezier(0.2, 1.5, 0.4, 1) calc(var(--i) * 45ms + 120ms) backwards,
+      foil 2.8s linear calc(var(--i) * 120ms + 0.8s) infinite;
+  }
+}
+
+@keyframes album-open {
+  from {
+    opacity: 0;
+    scale: 0.92;
+  }
+}
+
+@keyframes stick {
+  from {
+    opacity: 0;
+    scale: 1.5;
+    rotate: 9deg;
+  }
+}
+
+@keyframes foil {
+  from {
+    background-position: 130% 0;
+  }
+
+  to {
+    background-position: -130% 0;
+  }
+}

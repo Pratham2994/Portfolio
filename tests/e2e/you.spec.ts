@@ -49,8 +49,11 @@ test('the copy button says when it has copied', async ({ page, context, browserN
   test.skip(browserName !== 'chromium');
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await open(page, '/');
-  const button = page.locator('#contact button');
-  await button.click();
-  await expect(button).toHaveText('Copied');
+  // The address is on strips at the bottom of the flyer. Pulling one copies it.
+  const strips = page.locator('#contact [data-strip]:not([disabled])');
+  const before = await strips.count();
+  await strips.first().click();
+  await expect(page.locator('#contact [data-said]')).toHaveText('Copied');
+  await expect(strips).toHaveCount(before - 1);
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('prathampanchal02994@gmail.com');
 });

@@ -2,6 +2,7 @@
 title: Algomotion
 size: postcard
 order: 10
+made: '2025-08'
 status: Side project
 tagline: Sorting and pathfinding, one step at a time.
 summary: "A visualiser for 11 sorting and 6 pathfinding algorithms that records each run and plays it back, forwards and backwards."

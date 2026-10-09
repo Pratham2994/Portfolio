@@ -2,6 +2,7 @@
 title: Prats-Deck
 size: poster
 order: 3
+made: '2026-10'
 status: On my desk right now
 tagline: A tiny touch screen that runs my desk.
 summary: "A touch-screen control deck on a Raspberry Pi Pico 2 W, with C++ firmware and a Python companion on the PC."

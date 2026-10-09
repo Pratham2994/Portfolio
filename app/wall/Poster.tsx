@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router';
 
+import { projects } from '~/content';
 import type { Project } from '~/content/schema';
 import { markIntent } from '~/project/transition';
 import { track } from '~/lib/analytics';
@@ -8,6 +9,18 @@ import { track } from '~/lib/analytics';
 import { Art } from './art';
 import styles from './Poster.module.css';
 import { useLean } from './useLean';
+
+// Months since a start point, so two dates can be compared.
+const months = (made?: string) => (made ? Number(made.slice(0, 4)) * 12 + Number(made.slice(5)) : null);
+const DATES = projects.map((project) => months(project.made)).filter((n): n is number => n !== null);
+const NEWEST = Math.max(...DATES);
+const OLDEST = Math.min(...DATES);
+
+/** 0 for the newest sheet on the wall, 1 for the oldest. Paper yellows and curls with it. */
+function age(made?: string): number {
+  const at = months(made);
+  return at === null || NEWEST === OLDEST ? 0 : (NEWEST - at) / (NEWEST - OLDEST);
+}
 
 // A small fixed tilt per poster, as if pinned by hand.
 const tilt = (index: number) => (((index * 37) % 7) - 3) * 0.28;
@@ -19,7 +32,9 @@ export function Poster({ project, index }: { project: Project; index: number }) 
     '--fg': project.palette.fg,
     '--accent': project.palette.accent,
     '--tilt': `${tilt(index)}deg`,
+    '--age': age(project.made).toFixed(2),
   } as CSSProperties;
+  const fresh = months(project.made) === NEWEST;
 
   return (
     <Link
@@ -36,6 +51,13 @@ export function Poster({ project, index }: { project: Project; index: number }) 
       }}
     >
       <Art art={project.art} />
+      {/* Old paper curls at a corner. The newest sheet still has its tape. */}
+      <i className={styles.curl} aria-hidden="true" />
+      {fresh && (
+        <b className={styles.fresh} aria-hidden="true">
+          New
+        </b>
+      )}
       <span className={styles.caption}>
         <strong className={styles.title}>{project.title}</strong>
         <span className={styles.tagline}>{project.tagline}</span>

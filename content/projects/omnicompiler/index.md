@@ -2,6 +2,7 @@
 title: OmniCompiler
 size: poster
 order: 4
+made: '2025-09'
 status: Paper under review
 tagline: One debugger for five languages.
 summary: "A web debugger for five languages that puts the native debugger of each one behind a single interface. Research paper submitted, under review."

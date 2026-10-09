@@ -3,6 +3,7 @@ title: Scrub
 size: poster
 order: 1
 hero: true
+made: '2026-09'
 status: Runs on your own PC
 tagline: ffmpeg, minus the terminal.
 summary: "A front end for ffmpeg that runs locally in the browser. 24 operations, including fitting a video to a target file size with two-pass encoding."

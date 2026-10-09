@@ -52,7 +52,7 @@ test('Tab reaches every poster, desk button and contact control with a visible f
   const seen = new Set<string>();
   const noRing = new Set<string>();
   // Enough presses to pass the wall, the desk, the links in the stack list, and the contact controls.
-  for (let i = 0; i < 75; i++) {
+  for (let i = 0; i < 110; i++) {
     await page.keyboard.press('Tab');
     const state = await page.evaluate(() => {
       const el = document.activeElement as HTMLElement | null;
@@ -69,6 +69,7 @@ test('Tab reaches every poster, desk button and contact control with a visible f
   }
   for (const slug of slugs) expect(seen).toContain(slug);
   for (const id of ['sports', 'games', 'anime', 'music', 'now', 'cube']) expect(seen).toContain(`desk-${id}`);
-  for (const label of ['Copy', 'GitHub', 'LinkedIn']) expect(seen).toContain(label);
+  // A strip of the flyer holds the address, so the address is what its button says.
+  for (const label of ['prathampanchal02994@gmail.com', 'GitHub', 'LinkedIn']) expect(seen).toContain(label);
   expect([...noRing]).toEqual([]);
 });

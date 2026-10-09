@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router';
 
 import { neighbours, projects } from '~/content';
 import type { Project } from '~/content/schema';
+import { collect } from '~/wall/Album';
 import { Art } from '~/wall/art';
 import { Paragraphs } from '~/lib/Paragraphs';
 import { track } from '~/lib/analytics';
@@ -41,6 +42,8 @@ export function ProjectPage({ project }: { project: Project }) {
 
   useEffect(() => {
     title.current?.focus({ preventScroll: true });
+    // Opening a page is what puts its sticker in the album on the wall.
+    collect(project.slug);
   }, [project.slug]);
 
   // Closes with the fold-down move, then goes to the wall. A second call while it runs does nothing.

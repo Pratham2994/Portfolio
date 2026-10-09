@@ -2,6 +2,7 @@
 title: Chronicle
 size: postcard
 order: 9
+made: '2026-06'
 status: Side project
 tagline: Your whole Spotify history, not one year of it.
 summary: "An analysis of a full Spotify listening history with DuckDB and FastAPI, run on the user's own machine."

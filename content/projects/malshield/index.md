@@ -2,6 +2,7 @@
 title: MalShield
 size: poster
 order: 7
+made: '2025-02'
 status: Hackathon build
 tagline: Drop in a file. Find out if it bites.
 summary: "Static malware analysis for programs and documents with LightGBM, YARA and macro extraction, and a report that names the likely family."

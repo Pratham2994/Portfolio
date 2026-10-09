@@ -2,6 +2,7 @@
 title: iDEA Hackathon
 size: poster
 order: 6
+made: '2025-03'
 status: 3rd prize
 tagline: A bank service desk that knows who is asking.
 summary: "A bank service desk that identifies the customer by password and face, transcribes speech, and routes the query to a department queue."

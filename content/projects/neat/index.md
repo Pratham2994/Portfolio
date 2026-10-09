@@ -2,6 +2,7 @@
 title: Neat
 size: poster
 order: 2
+made: '2026-09'
 status: I use it every day
 tagline: Stops the Downloads folder from becoming a landfill.
 summary: "A Windows app in Rust and Tauri that watches the Downloads folder, finds duplicates by hash, and groups files for review."

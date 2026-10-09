@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import { projects } from '~/content';
 import { track } from '~/lib/analytics';
 
+import { Album } from './Album';
 import { Cat } from './Cat';
 import { Centre } from './Centre';
 import { dropWall } from './drop';
@@ -99,9 +100,10 @@ export function Wall() {
       aria-label="Projects"
     >
       <Light />
-      <div className={styles.top}>
+      {/* A header, not a div: the grid stays the only div directly in the wall. */}
+      <header className={styles.top}>
         <Threads wall={wall} />
-      </div>
+      </header>
       <div className={styles.grid} style={{ '--rows': PLAN.rows } as CSSProperties} ref={grid}>
         <Centre className={styles.centre} />
         {projects.map((project, i) => (
@@ -120,6 +122,9 @@ export function Wall() {
       <Link to="/brief" className={styles.hurry} onClick={() => track('brief_opened')} data-hurry>
         In a hurry? <span>One page</span>
       </Link>
+      <aside className={styles.top} aria-label="Sticker album">
+        <Album />
+      </aside>
       {/* A footer, not a div: the grid stays the only div directly in the wall. */}
       <footer className={styles.secrets} data-secrets>
         <button type="button" className={styles.cheat} aria-expanded={listOpen} aria-controls="secret-list" onClick={() => setListOpen((open) => !open)} data-cheat>

@@ -2,6 +2,7 @@
 title: Local LLM lab
 size: poster
 order: 8
+made: '2026-09'
 status: Verdict written
 tagline: Which local model is actually worth running?
 summary: "A test harness for local language models on one 12 GB GPU. 4,101 runs, measured as correct answers per hour."
