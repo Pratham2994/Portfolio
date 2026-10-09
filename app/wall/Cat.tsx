@@ -6,7 +6,7 @@ import { track } from '~/lib/analytics';
 import { CAT_HEIGHT, CAT_SCALE, CAT_WIDTH, drawCat, type CatFrame } from './cat-sprite';
 import styles from './Wall.module.css';
 
-type Ledge = { sheet: HTMLElement; from: number; to: number; y: number; z: number };
+type Ledge = { sheet: HTMLElement; from: number; to: number; y: number; z: number; mid: number; height: number };
 
 const WIDTH = CAT_WIDTH * CAT_SCALE;
 const HEIGHT = CAT_HEIGHT * CAT_SCALE;
@@ -46,7 +46,27 @@ function ledges(grid: HTMLElement): Ledge[] {
   return sheets
     .filter((s) => s.y - top < s.height / 2 && s.width > WIDTH * 1.5)
     .sort((a, b) => a.x - b.x)
-    .map((s) => ({ sheet: s.sheet, from: s.x, to: s.x + s.width - WIDTH, y: s.y - HEIGHT + CAT_SCALE, z: s.z }));
+    .map((s) => ({
+      sheet: s.sheet,
+      from: s.x,
+      to: s.x + s.width - WIDTH,
+      y: s.y - HEIGHT + CAT_SCALE,
+      z: s.z,
+      mid: s.x + s.width / 2,
+      height: s.height,
+    }));
+}
+
+/**
+ * A sheet hangs a little crooked, and grows under the pointer, so its top edge is not where
+ * the layout says. This is how far the edge is from there, under a cat at x.
+ */
+function edgeShift(ledge: Ledge | undefined, x: number) {
+  if (!ledge) return 0;
+  const style = getComputedStyle(ledge.sheet);
+  const angle = ((parseFloat(style.rotate) || 0) * Math.PI) / 180;
+  const scale = parseFloat(style.scale) || 1;
+  return (ledge.height / 2) * (1 - scale / Math.cos(angle)) + (x + WIDTH / 2 - ledge.mid) * Math.tan(angle);
 }
 
 export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
@@ -66,7 +86,13 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
     let tumble = 0;
 
     const place = () => {
-      el.style.transform = `translate3d(${cat.x.toFixed(1)}px, ${cat.y.toFixed(1)}px, ${path[cat.ledge]?.z ?? 0}px) scaleX(${cat.dir}) rotate(${tumble.toFixed(0)}deg)`;
+      // In a hop she leaves one edge and lands on the next. In a fall there is no edge.
+      const shift = fall
+        ? 0
+        : hop
+          ? edgeShift(path[cat.ledge], hop.fromX) * (1 - hop.t) + edgeShift(path[hop.ledge], hop.toX) * hop.t
+          : edgeShift(path[cat.ledge], cat.x);
+      el.style.transform = `translate3d(${cat.x.toFixed(1)}px, ${(cat.y + shift).toFixed(1)}px, ${path[cat.ledge]?.z ?? 0}px) scaleX(${cat.dir}) rotate(${tumble.toFixed(0)}deg)`;
     };
     const measure = () => {
       path = ledges(wall);
