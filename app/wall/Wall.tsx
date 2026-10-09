@@ -11,7 +11,7 @@ import { hangWall, OUTSIDE, type WallItem } from './layout';
 import { Light } from './Light';
 import { Piece, PIECES } from './Piece';
 import { Poster } from './Poster';
-import { HINTS, initSecrets } from './secrets';
+import { HINTS, initSecrets, SECRETS, type Secrets } from './secrets';
 import { useDepth } from './useDepth';
 import { useScrollTilt } from './useScrollTilt';
 import { useSpotlight } from './useSpotlight';
@@ -76,8 +76,15 @@ export function Wall() {
   useEffect(() => {
     if (wall.current) playEntry(wall.current);
   }, []);
-  const [hint, setHint] = useState(0);
-  useEffect(() => (wall.current ? initSecrets(wall.current, setHint) : undefined), []);
+  const secrets = useRef<Secrets>(null);
+  const [found, setFound] = useState<string[]>([]);
+  const [listOpen, setListOpen] = useState(false);
+  useEffect(() => {
+    if (!wall.current) return;
+    secrets.current = initSecrets(wall.current, setFound);
+    return secrets.current.stop;
+  }, []);
+  const hint = HINTS[!found.includes('meow') ? 0 : !found.includes('lights') ? 1 : 2];
 
   return (
     <section
@@ -104,9 +111,36 @@ export function Wall() {
         ))}
         <Cat grid={grid} />
       </div>
-      <p className={styles.hint} aria-hidden="true" data-hint>
-        {HINTS[hint]}
-      </p>
+      <div className={styles.secrets} data-secrets>
+        {listOpen && (
+          <div className={styles.list} id="secret-list">
+            <p>Type one on the wall. Or click it.</p>
+            <ul>
+              {SECRETS.map((secret) => (
+                <li key={secret.name} data-found={found.includes(secret.name) || undefined}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setListOpen(false);
+                      secrets.current?.run(secret.name);
+                    }}
+                  >
+                    {secret.word}
+                  </button>
+                  <span>{secret.about}</span>
+                </li>
+              ))}
+            </ul>
+            <p>Also: click the cat, press the button, open the console.</p>
+          </div>
+        )}
+        <p className={styles.hint} aria-hidden="true" data-hint>
+          {hint}
+        </p>
+        <button type="button" className={styles.cheat} aria-expanded={listOpen} aria-controls="secret-list" onClick={() => setListOpen((open) => !open)} data-cheat>
+          secrets {found.length}/{SECRETS.length}
+        </button>
+      </div>
       <button type="button" className={styles.lever} onClick={() => {
           track('lever_pressed');
           if (wall.current) dropWall(wall.current);

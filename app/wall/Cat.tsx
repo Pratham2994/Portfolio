@@ -188,18 +188,27 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
 
     // She comes to the sheet you point at: the ledge above it, and the spot nearest the pointer.
     let call: { ledge: number; x: number } | null = null;
-    const onOver = (event: PointerEvent) => {
-      const sheet = (event.target as Element).closest<HTMLElement>('[data-poster], [data-piece]');
-      if (event.pointerType !== 'mouse' || !sheet || !path.length) return;
+    const come = (sheet: HTMLElement) => {
       const mid = offsetIn(wall, sheet).x + sheet.offsetWidth / 2;
       const centre = (l: Ledge) => (l.from + l.to + WIDTH) / 2;
       const ledge = path.reduce((best, l, i) => (Math.abs(centre(l) - mid) < Math.abs(centre(path[best]) - mid) ? i : best), 0);
       call = { ledge, x: Math.min(Math.max(mid - WIDTH / 2, path[ledge].from), path[ledge].to) };
       cat.rest = 0;
     };
+    const onOver = (event: PointerEvent) => {
+      const sheet = (event.target as Element).closest<HTMLElement>('[data-poster], [data-piece]');
+      if (event.pointerType === 'mouse' && sheet && path.length) come(sheet);
+    };
     const onOut = () => {
       call = null;
     };
+    // A secret can send for her too, and let her go again.
+    const onSummon = (event: Event) => {
+      const sheet = (event as CustomEvent<HTMLElement | null>).detail;
+      if (sheet && path.length) come(sheet);
+      else call = null;
+    };
+    window.addEventListener('wall:cat', onSummon);
     // A small secret: type "meow" and she gets the zoomies for a few seconds.
     let typed = '';
     let zoomies = 0;
@@ -353,6 +362,7 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
       stopMeasuring();
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('pointermove', awake);
+      window.removeEventListener('wall:cat', onSummon);
       window.removeEventListener('pointerdown', awake);
       el.removeEventListener('pointerdown', onPet);
       wall.removeEventListener('pointerover', onOver);

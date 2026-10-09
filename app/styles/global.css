@@ -360,6 +360,139 @@ html[data-project-open] {
   --side-b: #1f7a43;
 }
 
+/* The things a play can put on the stage. Each one is centred on the point it is given. */
+.sport-tint,
+.sport-bit,
+.sport-shuttle,
+.sport-aim,
+.sport-mark,
+.sport-tyre,
+.sport-clone,
+.sport-poof {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.sport-tint {
+  inset: 0;
+  background: linear-gradient(115deg, rgb(209 23 27 / 0.5), rgb(20 20 20 / 0.2) 50%, rgb(212 161 42 / 0.5));
+}
+
+.sport-bit {
+  width: 0.5rem;
+  height: 0.9rem;
+  margin: -0.45rem 0 0 -0.25rem;
+  background: #d1171b;
+}
+
+.sport-bit[data-gold] {
+  background: #d4a12a;
+}
+
+.sport-shuttle {
+  width: 2rem;
+  height: 2rem;
+  margin: -1.6rem 0 0 -1rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M11 22L4 3h24l-7 19z' fill='%23f5f1ea'/%3E%3Cpath d='M12 3l2 19M16 3v19M20 3l-2 19M7 11h18' stroke='%23b9b3a6' fill='none'/%3E%3Cpath d='M10 19h12l-1 3H11z' fill='%23d1171b'/%3E%3Ccircle cx='16' cy='26' r='5' fill='%23efe6d2'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  filter: drop-shadow(0 0.4rem 0.5rem rgb(0 0 0 / 0.6));
+  transform-origin: 50% 80%;
+}
+
+/* The crosshair: four short lines and a gap in the middle. */
+.sport-aim {
+  width: 2.4rem;
+  height: 2.4rem;
+  margin: -1.2rem 0 0 -1.2rem;
+  background:
+    linear-gradient(#3dffb0, #3dffb0) 50% 0 / 2px 34% no-repeat,
+    linear-gradient(#3dffb0, #3dffb0) 50% 100% / 2px 34% no-repeat,
+    linear-gradient(#3dffb0, #3dffb0) 0 50% / 34% 2px no-repeat,
+    linear-gradient(#3dffb0, #3dffb0) 100% 50% / 34% 2px no-repeat;
+  filter: drop-shadow(0 0 2px #000);
+}
+
+.sport-mark {
+  width: 2.2rem;
+  height: 2.2rem;
+  margin: -1.1rem 0 0 -1.1rem;
+  border: 2px solid #ff4655;
+  border-radius: 50%;
+  background:
+    linear-gradient(45deg, transparent 46%, #ff4655 47% 53%, transparent 54%),
+    linear-gradient(-45deg, transparent 46%, #ff4655 47% 53%, transparent 54%), rgb(15 25 35 / 0.7);
+  animation: sport-pop 0.25s var(--ease-out) backwards;
+}
+
+.sport-tyre {
+  width: 2rem;
+  height: 2rem;
+  margin: -1rem 0 0 -1rem;
+  border: 0.3rem solid #101010;
+  border-radius: 50%;
+  /* A yellow band for the worn mediums. The new softs are red. */
+  background: radial-gradient(circle, #2b2b2b 0 30%, #101010 31% 52%, #f2c200 53% 66%, #101010 67%);
+  box-shadow: 0 0.4rem 0.8rem rgb(0 0 0 / 0.6);
+}
+
+.sport-tyre[data-soft] {
+  background: radial-gradient(circle, #2b2b2b 0 30%, #101010 31% 52%, #e10600 53% 66%, #101010 67%);
+}
+
+.sport-clone {
+  margin: -15px 0 0 -24px;
+  image-rendering: pixelated;
+}
+
+.sport-poof {
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: -2.25rem 0 0 -2.25rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(236 232 223 / 0.95), rgb(236 232 223 / 0.5) 45%, transparent 70%);
+  animation: sport-poof 0.5s var(--ease-out) forwards;
+}
+
+@keyframes sport-pop {
+  from {
+    opacity: 0;
+    scale: 2.2;
+  }
+}
+
+@keyframes sport-poof {
+  from {
+    opacity: 1;
+    scale: 0.3;
+  }
+
+  to {
+    opacity: 0;
+    scale: 1.7;
+  }
+}
+
+.sport[data-sport='rcb'] {
+  --side-a: #d1171b;
+  --side-b: #d4a12a;
+}
+
+.sport[data-sport='smash'] {
+  --side-a: #f2c200;
+  --side-b: #f5f1ea;
+}
+
+.sport[data-sport='ace'] {
+  --side-a: #ff4655;
+  --side-b: #0f1923;
+}
+
+.sport[data-sport='boxbox'] {
+  --side-a: #e10600;
+  --side-b: #f2c200;
+}
+
 /* Before the app starts, the armed page is black, so the boot screen never flashes in. */
 .entry-pending body::before {
   content: '';

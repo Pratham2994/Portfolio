@@ -274,22 +274,96 @@
   }
 }
 
-/* A very small hint for the secret, in the corner opposite the lever. */
-.hint {
+/* The secrets, in the corner opposite the lever: a small hint, and a list for those who ask. */
+.secrets {
   position: absolute;
   left: var(--gutter);
   bottom: var(--space-4);
-  z-index: 4;
+  z-index: 5;
   display: none;
+  align-items: baseline;
+  gap: 1em;
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   letter-spacing: 0.06em;
   color: var(--dim);
+}
+
+.hint {
   opacity: 0.55;
 }
 
+.cheat {
+  padding: 0.3em 0.6em;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--wall-shade);
+  color: var(--dim);
+  font: inherit;
+  letter-spacing: inherit;
+  transition:
+    color var(--dur-fast) linear,
+    border-color var(--dur-fast) linear;
+}
+
+.cheat:hover,
+.cheat:focus-visible,
+.cheat[aria-expanded='true'] {
+  border-color: var(--signal);
+  color: var(--bone);
+}
+
+.list {
+  position: absolute;
+  bottom: calc(100% + 0.8em);
+  left: 0;
+  display: grid;
+  gap: 0.9em;
+  width: max-content;
+  padding: 1em 1.1em;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--wall-shade);
+  box-shadow: 0 1rem 2.5rem -0.8rem #000;
+}
+
+.list ul {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.45em 2.2em;
+}
+
+.list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8em;
+}
+
+.list li button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--bone);
+  font: inherit;
+  letter-spacing: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 0.3em;
+}
+
+.list li button:hover,
+.list li button:focus-visible {
+  color: var(--signal);
+}
+
+/* A found one gets a tick. */
+.list li[data-found] button::before {
+  content: '\2713\00a0';
+  color: var(--signal);
+}
+
 @media (min-width: 900px) and (orientation: landscape) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .wall[data-entered] .hint {
-    display: block;
+  .wall[data-entered] .secrets {
+    display: flex;
   }
 }
