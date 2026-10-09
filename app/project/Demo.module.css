@@ -104,45 +104,112 @@
 }
 
 /* Neat */
-.pile,
-.groups ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.pile li,
-.groups li {
-  padding: 0.4em 0.7em;
-  border-radius: 2px;
-  background: var(--soft);
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  overflow-wrap: anywhere;
-}
-
-.pile li:nth-child(3n) {
-  translate: 0 0.4rem;
-}
-
-.groups {
+.queue {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
-.groups h3 {
-  margin-bottom: var(--space-2);
-  padding-bottom: 0.3em;
-  border-bottom: 3px solid var(--accent);
+.queue > li {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-left: 4px solid var(--accent);
+  background: var(--soft);
+}
+
+.queue h3 {
   font-family: var(--font-display);
   font-weight: 900;
   font-size: var(--step-2);
+  line-height: 1;
   text-transform: uppercase;
 }
 
-.groups ul {
-  flex-direction: column;
+.why {
+  font-size: var(--step--1);
+}
+
+.files {
+  display: grid;
+  margin-block: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+}
+
+.files li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 0.8fr);
+  gap: var(--space-3);
+  padding-block: 0.35em;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+.files span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.files span + span {
+  opacity: 0.75;
+}
+
+.files span:last-child {
+  text-align: right;
+}
+
+.always {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+}
+
+.always input {
+  width: 1.1em;
+  height: 1.1em;
+  accent-color: var(--accent);
+}
+
+.choices:has(.always) {
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* A group that has been dealt with is one line, with the way back next to it. */
+.queue > li.settled {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border-left-color: color-mix(in srgb, var(--ink) 35%, transparent);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+}
+
+.learned {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 2px solid var(--ink);
+}
+
+.learned p {
+  flex: 1 1 16rem;
+  font-size: var(--step--1);
+}
+
+/* On a phone the source site goes, so the name has room. */
+@media (max-width: 600px) {
+  .files li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .files span:nth-child(2) {
+    display: none;
+  }
 }
 
 /* Prats-Deck */

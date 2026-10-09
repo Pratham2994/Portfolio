@@ -17,7 +17,7 @@ sectors:
     body: Tick one box and files like that get filed on their own from then on. Rules only ever move things.
   - title: It can take it back
     body: Every change is logged and can be undone. Anything removed goes to the Recycle Bin, never further.
-stack: [Rust, Windows]
+stack: [Rust, Tauri, SQLite, Windows]
 links: { repo: 'https://github.com/Pratham2994/Neat' }
 ---
 Everyone's Downloads folder is the same. Gigabytes of installers you ran once, duplicates everywhere, and the one file you need buried under all of it. You only notice when you have to find something.

@@ -64,3 +64,20 @@ test('MalShield plays one scan to a verdict', async ({ page }) => {
   await demo.getByRole('button', { name: /Scan a sample/ }).click();
   await expect(demo.locator('[data-verdict]')).toBeVisible({ timeout: 8000 });
 });
+
+test('Neat clears its queue group by group, and a rule files the next one by itself', async ({ page }) => {
+  await open(page, '/work/neat');
+  const demo = page.locator('[data-demo="neat"]');
+  const count = demo.locator('[data-result] b');
+  await expect(count).toHaveText('9');
+  await demo.getByRole('button', { name: /sure ones/ }).click();
+  await expect(count).toHaveText('3');
+  await demo.getByRole('checkbox').check();
+  await demo.getByRole('button', { name: /Move to Finance/ }).click();
+  await expect(count).toHaveText('0');
+  await demo.getByRole('button', { name: /one more invoice/ }).click();
+  await expect(demo.locator('[data-learned] p')).toContainText('Filed 1 by itself');
+  // Undo brings a group back.
+  await demo.locator('[data-group="installers"]').getByRole('button', { name: 'Undo' }).click();
+  await expect(count).toHaveText('3');
+});

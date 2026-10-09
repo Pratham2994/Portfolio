@@ -40,49 +40,138 @@ function Scrub() {
   );
 }
 
-const FILES = [
-  ['setup_v2.exe', 'Installers'],
-  ['report (1).pdf', 'Duplicates'],
-  ['photos.zip', 'Archives'],
-  ['invoice_oct.pdf', 'Receipts'],
-  ['report.pdf', 'Duplicates'],
-  ['driver_installer.msi', 'Installers'],
-  ['photos', 'Archives'],
-  ['report (2).pdf', 'Duplicates'],
-  ['ticket_4821.pdf', 'Receipts'],
-  ['game_launcher.exe', 'Installers'],
-] as const;
+type Group = {
+  id: string;
+  title: string;
+  why: string;
+  /** What Neat suggests, as the words on the button and on the line that is left after. */
+  act: string;
+  done: string;
+  /** Megabytes that come back when the group is recycled. Moves free nothing. */
+  frees: number;
+  /** Sure groups go in one press. The rest wait for a decision. */
+  sure: boolean;
+  files: [name: string, from: string, note: string][];
+};
 
-/** Neat: a messy folder, and the same folder after one press. */
+const GROUPS: Group[] = [
+  {
+    id: 'installers',
+    title: 'Installers for apps you already have',
+    why: 'All 3 apps are installed, at the same version or a newer one.',
+    act: 'Recycle',
+    done: 'Recycled 3 installers',
+    frees: 316,
+    sure: true,
+    files: [
+      ['Figma-124.1.2.exe', 'figma.com', 'Installed: 124.3'],
+      ['VSCodeUserSetup-1.104.0.exe', 'code.visualstudio.com', 'Installed: 1.105'],
+      ['python-3.13.5-amd64.exe', 'python.org', 'Installed: 3.13.7'],
+    ],
+  },
+  {
+    id: 'duplicates',
+    title: 'Same file, downloaded 3 times',
+    why: 'All 3 have the same hash. The copy with the first name stays.',
+    act: 'Recycle the copies',
+    done: 'Recycled 2 copies, kept 1',
+    frees: 3,
+    sure: true,
+    files: [
+      ['Semester 5 Timetable.pdf', 'classroom.google.com', 'Kept'],
+      ['Semester 5 Timetable (1).pdf', 'classroom.google.com', 'Copy'],
+      ['Semester 5 Timetable (2).pdf', 'classroom.google.com', 'Copy'],
+    ],
+  },
+  {
+    id: 'receipts',
+    title: 'Receipts and invoices',
+    why: 'From 2 shopping sites, and the names say invoice or order.',
+    act: 'Move to Finance / Receipts',
+    done: 'Moved 3 receipts to Finance / Receipts',
+    frees: 0,
+    sure: false,
+    files: [
+      ['Invoice_402-8831127.pdf', 'amazon.in', ''],
+      ['OD331942773514900.pdf', 'flipkart.com', ''],
+      ['Invoice_171-2210094.pdf', 'amazon.in', ''],
+    ],
+  },
+];
+
+/** Neat: its review queue. One decision per group, a reason for each, and undo on everything. */
 function Neat() {
-  const [tidy, setTidy] = useState(false);
-  const groups = [...new Set(FILES.map(([, group]) => group))];
+  const [done, setDone] = useState<string[]>([]);
+  const [rule, setRule] = useState(false);
+  const [arrived, setArrived] = useState(0);
+  const open = GROUPS.filter((group) => !done.includes(group.id));
+  const left = open.reduce((sum, group) => sum + group.files.length, 0);
+  const freed = GROUPS.filter((group) => done.includes(group.id)).reduce((sum, group) => sum + group.frees, 0);
+  const sure = open.filter((group) => group.sure).map((group) => group.id);
+  const learned = rule && done.includes('receipts');
+  const undo = (id: string) => {
+    setDone(done.filter((other) => other !== id));
+    if (id === 'receipts') setArrived(0);
+  };
+
   return (
-    <div className={s.neat} data-tidy={tidy || undefined}>
-      <button type="button" className={s.action} onClick={() => setTidy(!tidy)}>
-        {tidy ? 'Mess it up again' : 'Tidy it'}
+    <div className={s.neat}>
+      <p className={s.result} data-result>
+        <b>{left}</b>
+        {left ? `files to look at, in ${open.length} ${open.length === 1 ? 'decision' : 'decisions'}.` : 'files to look at. Downloads is clean.'}
+        {freed > 0 && ` ${freed} MB back, all of it still in the Recycle Bin.`}
+      </p>
+      <button type="button" className={s.action} disabled={!sure.length} onClick={() => setDone([...done, ...sure])}>
+        Apply the {sure.length || ''} sure ones
       </button>
-      {tidy ? (
-        <div className={s.groups}>
-          {groups.map((group) => (
-            <div key={group}>
-              <h3>{group}</h3>
-              <ul>
-                {FILES.filter(([, g]) => g === group).map(([name]) => (
-                  <li key={name}>{name}</li>
+      <ul className={s.queue}>
+        {GROUPS.map((group) =>
+          done.includes(group.id) ? (
+            <li key={group.id} className={s.settled} data-group={group.id}>
+              <span>{group.done}</span>
+              <button type="button" onClick={() => undo(group.id)}>
+                Undo
+              </button>
+            </li>
+          ) : (
+            <li key={group.id} data-group={group.id}>
+              <h3>{group.title}</h3>
+              <p className={s.why}>{group.why}</p>
+              <ul className={s.files}>
+                {group.files.map(([name, from, note]) => (
+                  <li key={name}>
+                    <span>{name}</span>
+                    <span>{from}</span>
+                    <span>{note}</span>
+                  </li>
                 ))}
               </ul>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <ul className={s.pile}>
-          {FILES.map(([name], i) => (
-            <li key={name} style={{ rotate: `${((i * 53) % 9) - 4}deg` }}>
-              {name}
+              <div className={s.choices}>
+                <button type="button" aria-pressed="true" onClick={() => setDone([...done, group.id])}>
+                  {group.act}
+                </button>
+                {!group.sure && (
+                  <label className={s.always}>
+                    <input type="checkbox" checked={rule} onChange={(event) => setRule(event.target.checked)} />
+                    Always move files like these
+                  </label>
+                )}
+              </div>
             </li>
-          ))}
-        </ul>
+          ),
+        )}
+      </ul>
+      {learned && (
+        <div className={s.learned} data-learned>
+          <button type="button" onClick={() => setArrived(arrived + 1)}>
+            Download one more invoice
+          </button>
+          <p aria-live="polite">
+            {arrived
+              ? `Filed ${arrived} by itself. Neat did not ask, because you already answered.`
+              : 'Neat has a rule now. See what happens to the next one.'}
+          </p>
+        </div>
       )}
     </div>
   );
@@ -447,7 +536,7 @@ function Lab() {
 
 const DEMOS: Record<string, { title: string; body: () => ReactElement }> = {
   scrub: { title: 'Fit a size', body: Scrub },
-  neat: { title: 'Try it', body: Neat },
+  neat: { title: 'The review queue', body: Neat },
   'prats-deck': { title: 'On the screen', body: Deck },
   omnicompiler: { title: 'Step through it', body: Omni },
   floatchat: { title: 'Ask it', body: Float },
