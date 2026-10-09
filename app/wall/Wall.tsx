@@ -4,6 +4,7 @@ import { projects } from '~/content';
 
 import { Cat } from './Cat';
 import { Centre } from './Centre';
+import { dropWall } from './drop';
 import { playEntry } from './entry';
 import { hangWall, OUTSIDE, type WallItem } from './layout';
 import { Light } from './Light';
@@ -94,6 +95,9 @@ export function Wall() {
         ))}
         <Cat grid={grid} />
       </div>
+      <button type="button" className={styles.lever} onClick={() => wall.current && dropWall(wall.current)} data-lever>
+        Do not press
+      </button>
     </section>
   );
 }

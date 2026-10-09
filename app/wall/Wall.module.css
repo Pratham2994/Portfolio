@@ -155,3 +155,47 @@
     filter: brightness(0.5) saturate(0.7);
   }
 }
+
+/* A small button in the corner of the wall. It does what it says not to. */
+.lever {
+  position: absolute;
+  right: var(--gutter);
+  bottom: var(--space-4);
+  z-index: 4;
+  display: none;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.5em 0.8em;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--wall-shade);
+  color: var(--dim);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition:
+    color var(--dur-fast) linear,
+    border-color var(--dur-fast) linear;
+}
+
+.lever::before {
+  content: '';
+  width: 0.8em;
+  height: 0.8em;
+  border-radius: 50%;
+  background: #c8102e;
+}
+
+.lever:hover,
+.lever:focus-visible {
+  border-color: #c8102e;
+  color: var(--bone);
+}
+
+/* It needs room to fall and a pointer to press it, and it never shows with reduced motion. */
+@media (min-width: 900px) and (orientation: landscape) and (prefers-reduced-motion: no-preference) {
+  .wall[data-entered] .lever {
+    display: flex;
+  }
+}
