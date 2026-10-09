@@ -17,6 +17,6 @@ export default {
   prerender: () => {
     const all = slugs('content/projects');
     if (process.env.VITE_FIXTURES === '1') all.push(...slugs('tests/fixtures/projects'));
-    return ['/', ...all.map((slug) => `/work/${slug}`)];
+    return ['/', '/brief', ...all.map((slug) => `/work/${slug}`)];
   },
 } satisfies Config;

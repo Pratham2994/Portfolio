@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
+import { Link } from 'react-router';
 import { projects } from '~/content';
 import { track } from '~/lib/analytics';
 
@@ -111,6 +112,10 @@ export function Wall() {
         ))}
         <Cat grid={grid} />
       </div>
+      {/* For someone with two minutes: the same facts on one plain page. */}
+      <Link to="/brief" className={styles.hurry} onClick={() => track('brief_opened')} data-hurry>
+        In a hurry? <span>One page</span>
+      </Link>
       {/* A footer, not a div: the grid stays the only div directly in the wall. */}
       <footer className={styles.secrets} data-secrets>
         <button type="button" className={styles.cheat} aria-expanded={listOpen} aria-controls="secret-list" onClick={() => setListOpen((open) => !open)} data-cheat>

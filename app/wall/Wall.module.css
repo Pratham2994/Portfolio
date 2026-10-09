@@ -297,6 +297,33 @@
   }
 }
 
+/* The way out for a reader with no time: top right, small, and always there. */
+.hurry {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--gutter);
+  z-index: 5;
+  padding: 0.35em 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--dim);
+}
+
+.hurry span {
+  color: var(--bone);
+  text-decoration: underline;
+  text-decoration-color: var(--signal);
+  text-underline-offset: 0.3em;
+}
+
+.hurry:hover,
+.hurry:focus-visible {
+  color: var(--bone);
+}
+
 /* The secrets, in the corner opposite the lever: a small hint, and a list for those who ask. */
 .secrets {
   position: absolute;

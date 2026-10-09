@@ -5,6 +5,7 @@ import { open } from './helpers';
 const SITE = 'https://prathampanchal.dev';
 const paths = [
   '/',
+  '/brief',
   ...[
     'scrub',
     'neat',

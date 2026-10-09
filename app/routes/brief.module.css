@@ -1,0 +1,247 @@
+/* The one-page version. No wall, no motion: black ink on bone paper, and it prints on one sheet. */
+.brief {
+  --ink: #14161c;
+  --soft: #55585f;
+  --rule: #cfc9bb;
+  min-height: 100svh;
+  padding: var(--space-5) var(--gutter) var(--space-7);
+  background: var(--bone);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+.brief > * {
+  max-width: 46rem;
+  margin-inline: auto;
+}
+
+.brief a {
+  color: inherit;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 0.2em;
+}
+
+.brief a:hover {
+  text-decoration-color: currentColor;
+}
+
+.brief :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.bar button {
+  padding: 0.55em 0.9em;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.bar button:hover {
+  background: var(--ink);
+  color: var(--bone);
+}
+
+.head h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-5);
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.role {
+  margin-top: var(--space-2);
+  font-size: var(--step-1);
+}
+
+.reach {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em 1.4em;
+  margin-top: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+}
+
+/* The address of the site matters on paper, where there is no link to press. */
+.onPaper {
+  display: none;
+}
+
+.lede {
+  margin-top: var(--space-4);
+  max-width: 38rem;
+  color: var(--soft);
+}
+
+.brief section {
+  margin-top: var(--space-6);
+}
+
+.brief h2 {
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.rows li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+  gap: 0.1em var(--space-4);
+  align-items: baseline;
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+.rows time,
+.fine,
+.projects small {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--soft);
+}
+
+.fine {
+  margin-top: var(--space-2);
+}
+
+.projects li {
+  display: grid;
+  grid-template-columns: 10.5rem minmax(0, 1fr);
+  gap: 0 var(--space-4);
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+.projects small {
+  grid-column: 2;
+}
+
+.code {
+  margin-left: 1.2em;
+}
+
+.tools div {
+  display: grid;
+  grid-template-columns: 10.5rem minmax(0, 1fr);
+  gap: 0 var(--space-4);
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+.tools dt {
+  font-weight: 700;
+}
+
+@media (max-width: 34rem) {
+  .rows li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .rows span {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    color: var(--soft);
+  }
+
+  .projects li,
+  .tools div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .projects small {
+    grid-column: 1;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 11mm 13mm;
+}
+
+@media print {
+  .brief {
+    min-height: 0;
+    padding: 0;
+    background: none;
+    font-size: 9.4pt;
+    line-height: 1.32;
+  }
+
+  .brief > * {
+    max-width: none;
+  }
+
+  .bar,
+  .code {
+    display: none;
+  }
+
+  .onPaper {
+    display: inline;
+  }
+
+  .onScreen {
+    display: none;
+  }
+
+  .head h1 {
+    font-size: 30pt;
+  }
+
+  .role {
+    font-size: 11pt;
+  }
+
+  .lede {
+    margin-top: 6pt;
+    max-width: none;
+  }
+
+  .brief section {
+    margin-top: 9pt;
+    break-inside: avoid;
+  }
+
+  .brief h2,
+  .rows time,
+  .fine,
+  .projects small,
+  .reach {
+    font-size: 7.6pt;
+  }
+
+  .rows li,
+  .projects li,
+  .tools div {
+    padding-block: 2pt;
+  }
+
+  .brief a {
+    text-decoration: none;
+  }
+}

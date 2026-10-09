@@ -14,6 +14,7 @@ const work = join(OUT, 'work');
 const slugs = existsSync(work) ? readdirSync(work).filter((slug) => existsSync(join(work, slug, 'index.html'))) : [];
 const pages = [
   { path: '/', file: join(OUT, 'index.html'), priority: '1.0' },
+  { path: '/brief', file: join(OUT, 'brief', 'index.html'), priority: '0.9' },
   ...slugs.sort().map((slug) => ({ path: `/work/${slug}`, file: join(work, slug, 'index.html'), priority: '0.8' })),
 ];
 const entries = pages.map(
