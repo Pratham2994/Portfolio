@@ -66,4 +66,5 @@ now:
     - swapping models between agent harnesses
     - seeing what breaks
     - building the next thing for this wall
+    - reading And Then There Were None, by Agatha Christie
 ---
