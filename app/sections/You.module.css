@@ -16,25 +16,47 @@
   overflow-wrap: anywhere;
 }
 
-/* A two-colour print: the greyscale photo multiplies over the signal colour. */
+/* The photo is a print on the wall: a pale border, and a strip of tape across the top. */
 .portrait {
   position: relative;
   width: min(100%, 22rem);
   margin: 0;
-  overflow: hidden;
+  padding: 0.5rem;
   border-radius: 2px;
-  background: var(--signal);
+  background: var(--bone);
   rotate: -1.2deg;
   box-shadow: 0 0.9rem 1.6rem -0.7rem rgb(0 0 0 / 0.85);
 }
 
-.portrait img {
+.portrait::before {
+  content: '';
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  z-index: 1;
+  width: 5.5rem;
+  height: 1.5rem;
+  background: rgb(236 232 223 / 0.5);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  translate: -50% 0;
+  rotate: 2.5deg;
+}
+
+/* A two-colour print: the greyscale photo multiplies over the signal colour. */
+.print {
+  position: relative;
+  overflow: hidden;
+  background: var(--signal);
+}
+
+.print img {
+  display: block;
   width: 100%;
   height: auto;
   mix-blend-mode: multiply;
 }
 
-.portrait::after {
+.print::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -129,20 +151,9 @@
     align-items: start;
   }
 
-  .portrait {
-    grid-row: span 2;
-  }
-
-  .stack {
-    grid-column: 1 / -1;
-  }
 }
 
-/* What I build with: each language with the projects that prove it, then the rest in plain lines. */
-.stack {
-  container-type: inline-size;
-}
-
+/* What I build with: the languages as a row of words, and the rest as a few short lines. */
 .stack h3 {
   margin-bottom: var(--space-3);
   font-family: var(--font-mono);
@@ -153,71 +164,108 @@
   color: var(--dim);
 }
 
-.languages li {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0.1rem var(--space-4);
-  align-items: baseline;
-  padding: var(--space-3) 0;
-  border-top: 1px solid var(--line);
+.languages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 1.1rem;
 }
 
-.languages strong {
+.languages button {
+  padding: 0;
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--step-2);
+  font-weight: 900;
+  font-size: var(--step-3);
   line-height: 1.05;
   text-transform: uppercase;
+  color: var(--dim);
+  transition: color var(--dur-fast) linear;
 }
 
 /* The ones I reach for first carry the signal colour. */
-.languages li[data-first] strong {
+.languages button[data-first] {
+  color: color-mix(in srgb, var(--signal) 70%, var(--wall));
+}
+
+.languages button:hover,
+.languages button[aria-pressed='true'] {
+  color: var(--bone);
+}
+
+.languages button[data-first]:hover,
+.languages button[data-first][aria-pressed='true'] {
   color: var(--signal);
 }
 
-.languages li > span {
+.languages sup {
+  margin-left: 0.2em;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  vertical-align: top;
+}
+
+.used {
+  min-height: 3.2em;
+  margin-top: var(--space-2);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line);
   color: var(--dim);
 }
 
-.languages a {
+.used a {
+  color: var(--bone);
   text-decoration: underline;
   text-decoration-color: var(--line);
   text-underline-offset: 0.25em;
 }
 
-.languages a:hover,
-.languages a:focus-visible {
-  color: var(--bone);
+.used a:hover,
+.used a:focus-visible {
   text-decoration-color: var(--signal);
 }
 
 .tools {
   display: grid;
-  border-top: 1px solid var(--line);
-}
-
-.tools div {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0.1rem var(--space-4);
-  align-items: baseline;
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.tools dd {
-  margin: 0;
+  gap: 0.55rem;
+  margin: var(--space-3) 0 0;
+  font-size: var(--step--1);
 }
 
 .tools dt {
+  display: inline;
+  margin-right: 0.8em;
   font-family: var(--font-mono);
-  font-size: var(--step--1);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--dim);
 }
 
-@container (min-width: 28rem) {
-  .languages li,
-  .tools div {
-    grid-template-columns: 9.5rem minmax(0, 1fr);
+.tools dd {
+  display: inline;
+  margin: 0;
+}
+
+/* On a phone the parts come one under the other: photo, words, history, tools. */
+.side,
+.main {
+  display: contents;
+}
+
+.stack {
+  order: 1;
+}
+
+@media (min-width: 900px) {
+  .side,
+  .main {
+    display: grid;
+    align-content: start;
+    gap: var(--space-6);
+    min-width: 0;
+  }
+
+  .stack {
+    order: 0;
   }
 }

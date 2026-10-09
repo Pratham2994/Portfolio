@@ -5,7 +5,7 @@ email: prathampanchal02994@gmail.com
 github: 'https://github.com/Pratham2994'
 linkedin: 'https://www.linkedin.com/in/pratham-panchal-abcd2994/'
 stack:
-  note: The marked ones are what I reach for first. Each language lists where I used it.
+  note: Orange is what I reach for first. The number is how many projects on the wall use it.
   languages:
     - { name: Python, first: true, used: [floatchat, malshield, local-llm-lab, chronicle, omnicompiler, idea-hackathon, prats-deck] }
     - { name: C++, first: true, used: [prats-deck] }

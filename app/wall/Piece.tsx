@@ -19,7 +19,10 @@ function Ticket() {
       <span className={s.kicker}>{pieces.ticket.title}</span>
       <ul className={s.fixtures}>
         {pieces.ticket.fixtures.map((fixture) => (
-          <li key={fixture.sport}>{fixture.sport}</li>
+          <li key={fixture.sport}>
+            {fixture.sport}
+            <small>{fixture.side}</small>
+          </li>
         ))}
       </ul>
     </>
@@ -51,6 +54,7 @@ function Now() {
         {pieces.now.lines.map((line) => (
           <li key={line}>{line}</li>
         ))}
+        {pieces.now.more && <li className={s.more}>{pieces.now.more}</li>}
       </ul>
     </>
   );

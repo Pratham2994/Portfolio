@@ -126,9 +126,17 @@
     aspect-ratio: var(--ratio);
   }
 
-  /* A small upright sheet has room for the title only. */
+  /* A small upright sheet has room for the title only, until the screen is big. */
   :global([data-paper='a5-tall']) > .poster .tagline {
     display: none;
+  }
+
+  @container (min-width: 8.5rem) {
+    :global([data-paper='a5-tall']) > .poster .tagline {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+    }
   }
 
   :global([data-paper='a5-tall']) > .poster .title {

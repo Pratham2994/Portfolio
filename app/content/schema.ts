@@ -75,7 +75,7 @@ const pieces = z.object({
     note: text,
   }),
   ticket: z.object({ title: text, fixtures: z.array(z.object({ sport: text, side: text })) }),
-  now: z.object({ title: text, lines: z.array(text) }),
+  now: z.object({ title: text, lines: z.array(text), more: text.optional() }),
 });
 
 export type Pieces = z.infer<typeof pieces>;

@@ -72,6 +72,40 @@
   text-transform: uppercase;
 }
 
+/* Each side sits next to its sport, on a ticket big enough to hold both. */
+.fixtures li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4cqw;
+}
+
+.fixtures small,
+.more {
+  display: none;
+}
+
+.fixtures small {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6875rem, 4.2cqw, 0.8125rem);
+  font-weight: 400;
+  text-align: right;
+  text-transform: none;
+}
+
+@container (min-width: 11rem) {
+  .fixtures small {
+    display: block;
+  }
+}
+
+/* One more line on the note, when the note is big enough. */
+@container (min-width: 8.5rem) {
+  .lines .more {
+    display: block;
+  }
+}
+
 /* Boarding pass */
 .pass {
   --paper: #ece8df;
