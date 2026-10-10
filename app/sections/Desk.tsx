@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 
 import { desk } from '~/content';
 import type { DeskId } from '~/content/schema';
@@ -81,14 +81,51 @@ function Anime() {
 
 /** One big number and a strip of level bars. */
 function Music() {
+  const { music } = desk;
   return (
     <div className={s.music}>
-      <p className={s.minutes}>{desk.music.minutes}</p>
-      <div className={s.levels} aria-hidden="true">
-        {Array.from({ length: 28 }, (_, i) => (
-          <i key={i} style={{ animationDelay: `-${(i * 173) % 1100}ms`, animationDuration: `${700 + ((i * 97) % 600)}ms` }} />
-        ))}
-      </div>
+      <p className={s.minutes}>
+        {music.minutes}
+        {music.unit && <small>{music.unit}</small>}
+      </p>
+      {music.clock ? (
+        // The real shape of a day: one bar for each hour, midnight on the left.
+        <figure className={s.dayClock}>
+          <div className={s.dayBars} aria-hidden="true">
+            {music.clock.map((hours, hour) => (
+              <i key={hour} style={{ '--h': hours / Math.max(...music.clock!), '--i': hour } as CSSProperties} data-night={hour >= 23 || hour < 5 || undefined} />
+            ))}
+          </div>
+          <figcaption>
+            <span>midnight</span>
+            <span>noon</span>
+            <span>midnight</span>
+          </figcaption>
+        </figure>
+      ) : (
+        <div className={s.levels} aria-hidden="true">
+          {Array.from({ length: 28 }, (_, i) => (
+            <i key={i} style={{ animationDelay: `-${(i * 173) % 1100}ms`, animationDuration: `${700 + ((i * 97) % 600)}ms` }} />
+          ))}
+        </div>
+      )}
+      {music.artists && (
+        <ol className={s.artists}>
+          {music.artists.map((artist) => (
+            <li key={artist.name} style={{ '--h': artist.hours / music.artists![0].hours } as CSSProperties}>
+              <span>{artist.name}</span>
+              <b>{artist.hours} h</b>
+            </li>
+          ))}
+        </ol>
+      )}
+      {music.facts && (
+        <ul className={s.facts}>
+          {music.facts.map((fact) => (
+            <li key={fact}>{fact}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

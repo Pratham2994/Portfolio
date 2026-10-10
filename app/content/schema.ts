@@ -75,7 +75,16 @@ const desk = z.object({
     first: text,
   }),
   anime: z.object({ title: text, note: text, list: z.array(text) }),
-  music: z.object({ title: text, minutes: text, note: text }),
+  music: z.object({
+    title: text,
+    minutes: text,
+    unit: text.optional(),
+    note: text,
+    // Hours listened in each hour of the day, from a real export.
+    clock: z.array(z.number()).length(24).optional(),
+    artists: z.array(z.object({ name: text, hours: z.number() })).optional(),
+    facts: z.array(text).optional(),
+  }),
   pc: z.object({ title: text, note: text, specs: z.array(z.object({ part: text, name: text, quip: text.optional() })) }),
   cube: z.object({ title: text, best: z.number(), note: text }),
   now: z.object({ title: text, lines: z.array(text) }),

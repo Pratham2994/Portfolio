@@ -858,3 +858,92 @@
     opacity: 0;
   }
 }
+
+/* The music card, with real numbers. */
+.minutes small {
+  margin-left: 0.25em;
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.dayClock {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.dayBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 4.5rem;
+}
+
+.dayBars i {
+  flex: 1;
+  height: 100%;
+  background: #3ddc84;
+  transform: scaleY(max(var(--h), 0.03));
+  transform-origin: bottom;
+}
+
+.dayBars i[data-night] {
+  background: var(--lamp);
+}
+
+.dayClock figcaption {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.artists {
+  display: grid;
+}
+
+.artists li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 0.45em 0;
+  /* The time, as a line under the name. */
+  background: linear-gradient(#3ddc84, #3ddc84) left bottom / calc(var(--h) * 100%) 2px no-repeat;
+  border-bottom: 1px solid var(--line);
+}
+
+.artists b {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.facts {
+  display: grid;
+  gap: 0.35em;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--dim);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The day draws itself, hour by hour, each time the card opens. */
+  .dayBars i {
+    animation: hour-up 520ms cubic-bezier(0.2, 0.9, 0.3, 1) calc(var(--i) * 28ms) backwards;
+  }
+}
+
+@keyframes hour-up {
+  from {
+    transform: scaleY(0.03);
+  }
+}
+

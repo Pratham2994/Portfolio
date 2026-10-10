@@ -9,8 +9,8 @@ summary: "An analysis of a full Spotify listening history with DuckDB and FastAP
 palette: { bg: '#ffc21a', fg: '#191200', accent: '#a50d25' }
 art: { template: bars, motif: eq }
 stats:
-  - { value: '8', label: ways it cuts your history }
-  - { value: '300', label: artists looked up for a genre }
+  - { value: '104,329', label: plays in my own export }
+  - { value: '5,059', label: hours it added up for me }
   - { value: '0', label: accounts or logins needed }
 sectors:
   - title: Your clock, not Spotify's
@@ -18,7 +18,7 @@ sectors:
   - title: Chapters
     body: School, college and a first job fall on different years for everyone. So you tell it the year you were born and what came after, it drafts the chapters, and you fix the dates. Each chapter gets its own top songs and its own new find.
   - title: Ghosts and binges
-    body: The most times you played one song in one day. The songs you played 50 times and then dropped for two years. The songs you let run again when they ended. Mine are embarrassing.
+    body: The most times you played one song in one day. Mine is 218. The songs you played 50 times and then dropped for two years. The songs you let run again when they ended.
 stack: [Python, FastAPI, DuckDB, React]
 links: { repo: 'https://github.com/Pratham2994/Chronicle' }
 flow:
