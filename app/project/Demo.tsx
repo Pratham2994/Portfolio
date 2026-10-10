@@ -885,20 +885,33 @@ function Idea() {
   );
 }
 
-// One made-up listener who lives in Mumbai: how much they play in each half hour of their day.
-const AT_HOME = [8, 7, 6, 5, 3, 2, 1, 1, 0, 0, 0, 0, 0, 1, 2, 3, 4, 4, 3, 3, 2, 2, 2, 3, 3, 4, 4, 3, 3, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 9, 10, 12, 12, 11, 10, 9, 9];
-// Spotify writes every play down in UTC. Mumbai is 11 half hours ahead of it.
+// My own Spotify export, counted by Chronicle: 104,329 plays from July 2019 to October 2026.
+// Hours listened in each half hour of the day, as Spotify stores them: in UTC.
+const STORED = [7, 7, 8, 12, 24, 48, 72, 93, 109, 129, 118, 113, 119, 136, 142, 151, 159, 151, 146, 149, 158, 170, 175, 180, 184, 178, 180, 158, 148, 152, 146, 139, 152, 144, 150, 153, 164, 157, 120, 70, 38, 21, 10, 5, 4, 3, 4, 5];
+// I live in Mumbai, which is 11 half hours ahead of UTC.
 const HOME = 11;
-const STORED = AT_HOME.map((_, i) => AT_HOME[(i + HOME) % 48]);
 const ZONES = [
   { name: 'UTC', id: 'UTC', ahead: 0 },
   { name: 'Mumbai', id: 'Asia/Kolkata', ahead: 11 },
   { name: 'Tokyo', id: 'Asia/Tokyo', ahead: 18 },
 ];
+// Hours listened in each hour of each weekday, in Mumbai time. Row 0 is Monday.
+const WEEK = [
+  [38, 12, 2, 0, 2, 1, 3, 9, 23, 41, 47, 31, 34, 40, 40, 43, 47, 51, 53, 37, 43, 39, 43, 43],
+  [38, 11, 3, 1, 1, 0, 3, 7, 24, 36, 43, 41, 36, 46, 39, 36, 43, 56, 64, 46, 37, 42, 42, 50],
+  [40, 15, 5, 3, 2, 4, 3, 7, 22, 40, 44, 37, 41, 49, 43, 42, 53, 52, 44, 40, 39, 40, 33, 37],
+  [38, 15, 5, 2, 0, 1, 2, 4, 18, 33, 45, 32, 35, 42, 36, 42, 50, 53, 52, 42, 40, 35, 46, 47],
+  [37, 18, 4, 0, 0, 3, 3, 5, 21, 30, 30, 33, 43, 43, 47, 42, 41, 44, 44, 38, 40, 33, 37, 47],
+  [43, 13, 4, 1, 1, 2, 0, 2, 7, 12, 21, 27, 39, 40, 36, 34, 34, 38, 39, 40, 43, 49, 44, 43],
+  [44, 24, 9, 1, 0, 0, 0, 3, 4, 9, 19, 31, 50, 50, 56, 69, 76, 72, 63, 63, 56, 53, 48, 50],
+];
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const YEARS: [year: number, hours: number][] = [[2019, 9], [2020, 9], [2021, 135], [2022, 83], [2023, 1450], [2024, 1441], [2025, 1009], [2026, 925]];
 const hourName = (h: number) => (h === 0 ? '12 am' : h === 12 ? '12 pm' : h < 12 ? `${h} am` : `${h - 12} pm`);
 
-/** Chronicle: the same plays, read on three clocks. Only one of them is true. */
+/** Chronicle: my own listening history. The same plays, read on three clocks, then cut by week and by year. */
 function Chronicle() {
+  // It opens on the clock Spotify stores, which is the wrong one. Picking home puts it right.
   const [picked, setPicked] = useState(0);
   const { at, run } = useRun(5, 420);
   const zone = ZONES[picked];
@@ -910,12 +923,14 @@ function Chronicle() {
   const night = hours.reduce((sum, n, h) => sum + (h >= 23 || h < 5 ? n : 0), 0);
   const day = hours.reduce((sum, n, h) => sum + (h >= 9 && h < 17 ? n : 0), 0);
   const off = Math.abs(zone.ahead - HOME) / 2;
+  const heat = Math.max(...WEEK.flat());
+  const tallest = Math.max(...YEARS.map(([, n]) => n));
   const steps: Step[] = [
-    { name: 'Load', value: 'the zip from Spotify, into DuckDB' },
+    { name: 'Load', value: '104,329 plays, 12 files, into DuckDB' },
     { name: 'Clock', value: zone.ahead ? `UTC to ${zone.id}, +${Math.floor(zone.ahead / 2)}:${zone.ahead % 2 ? '30' : '00'}` : 'left in UTC, as stored' },
     { name: 'Count', value: `by weekday and hour. Peak: ${hourName(peak)}` },
     { name: 'Night', value: `${(night / day).toFixed(2)}x night against day` },
-    { name: 'Chapters', value: 'cut at the dates you gave' },
+    { name: 'Chapters', value: 'cut into the 7 chapters I gave it' },
   ];
 
   return (
@@ -937,7 +952,7 @@ function Chronicle() {
       </div>
       <div className={s.hours} aria-hidden="true">
         {hours.map((plays, hour) => (
-          <i key={hour} style={{ transform: `scaleY(${Math.max(plays / 24, 0.02)})` }} data-night={hour >= 23 || hour < 5 || undefined} />
+          <i key={hour} style={{ transform: `scaleY(${Math.max(plays / 370, 0.02)})` }} data-night={hour >= 23 || hour < 5 || undefined} />
         ))}
       </div>
       <p className={s.scale}>
@@ -948,14 +963,61 @@ function Chronicle() {
       <div className={s.bench}>
         <Console kind="clock" steps={steps} at={at} />
         <Report ready={at >= steps.length} wait="Reading the history" stamp={hourName(peak)} tone={off ? 'bad' : 'good'}>
-          <Meter share={night / total} label={`${Math.round((night / total) * 100)}% of plays between 11 pm and 5 am`} />
+          <Meter share={night / total} label={`${Math.round((night / total) * 100)}% of the hours fall between 11 pm and 5 am`} />
           <ul className={s.points}>
-            <li>{off ? `Wrong by ${off} hours. This listener lives in Mumbai` : 'This is where the listener lives. These hours are true'}</li>
+            <li>{off ? `Wrong by ${off} hours. I live in Mumbai` : 'This is where I live. These hours are true'}</li>
             <li>The same plays each time. Only the clock they are read on changes</li>
           </ul>
         </Report>
       </div>
-      <p className={s.small}>One made-up listener. Spotify stores every play in UTC, so the first thing Chronicle does is move it home.</p>
+
+      {/* The rest is what it found once the clock was right. Numbers only: what I played stays with me. */}
+      <div className={s.found}>
+        <figure className={s.week}>
+          <figcaption>My week, in Mumbai time. Each square is one hour.</figcaption>
+          <div className={s.weekGrid} role="img" aria-label="Listening by weekday and hour. Quiet from 2 am to 7 am, loudest on Sunday afternoon.">
+            {WEEK.map((row, d) => (
+              <div key={d}>
+                <span>{WEEKDAYS[d]}</span>
+                {row.map((n, h) => (
+                  <i key={h} style={{ '--heat': Math.pow(n / heat, 0.75), '--i': d + h } as CSSProperties} />
+                ))}
+              </div>
+            ))}
+          </div>
+        </figure>
+        <figure className={s.yearly}>
+          <figcaption>Hours a year.</figcaption>
+          <ol>
+            {YEARS.map(([year, n], i) => (
+              <li key={year} style={{ '--share': n / tallest, '--i': i } as CSSProperties}>
+                <span>{year}</span>
+                <i />
+                <b>{n.toLocaleString('en')}</b>
+              </li>
+            ))}
+          </ol>
+        </figure>
+        <dl className={s.records}>
+          <div>
+            <dt>5,059</dt>
+            <dd>hours in all. That is 211 days with no sleep</dd>
+          </div>
+          <div>
+            <dt>1,021</dt>
+            <dd>days in a row with music</dd>
+          </div>
+          <div>
+            <dt>218</dt>
+            <dd>plays of one song in one day</dd>
+          </div>
+          <div>
+            <dt>70%</dt>
+            <dd>of my skips come in the first 30 seconds</dd>
+          </div>
+        </dl>
+      </div>
+      <p className={s.small}>My own export, counted on my own PC. Spotify stores every play in UTC, so the first thing Chronicle does is move it home.</p>
     </div>
   );
 }
@@ -1373,7 +1435,7 @@ const DEMOS: Record<string, { title: string; body: () => ReactElement }> = {
   omnicompiler: { title: 'Debug it', body: Omni },
   floatchat: { title: 'Ask it', body: Float },
   'idea-hackathon': { title: 'Raise a query', body: Idea },
-  chronicle: { title: 'Three clocks', body: Chronicle },
+  chronicle: { title: 'My own history', body: Chronicle },
   algomotion: { title: 'Find the way out', body: Algo },
   malshield: { title: 'Check a file', body: Mal },
   'local-llm-lab': { title: 'Two ways to rank', body: Lab },

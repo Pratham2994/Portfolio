@@ -26,7 +26,8 @@ test('Scrub works out the bitrate from the size limit and the clip length', asyn
   const result = page.locator('[data-demo="scrub"] [data-result] b');
   // 10 MB over 60 seconds: 10 * 8192 / 60 = 1365 kbps, less 128 for sound.
   await expect(result).toHaveText('1,237');
-  await page.getByRole('button', { name: /Email/ }).click();
+  // The flyer at the foot of the wall has email strips too, so the button is looked for in the demo only.
+  await page.locator('[data-demo="scrub"]').getByRole('button', { name: /Email/ }).click();
   await expect(result).toHaveText('3,285');
 });
 
@@ -62,7 +63,8 @@ test('Chronicle reads the same plays on three clocks', async ({ page }) => {
   await open(page, '/work/chronicle');
   const demo = page.locator('[data-demo="chronicle"]');
   await demo.getByRole('button', { name: 'Mumbai' }).click();
-  await expect(demo.locator('[data-stamp]')).toHaveText('9 pm', { timeout: 8000 });
+  // The real peak of my own history, once the clock is right.
+  await expect(demo.locator('[data-stamp]')).toHaveText('5 pm', { timeout: 8000 });
   await expect(demo.locator('[data-report]')).toContainText('These hours are true');
   await demo.getByRole('button', { name: 'UTC' }).click();
   await expect(demo.locator('[data-report]')).toContainText('Wrong by 5.5 hours', { timeout: 8000 });

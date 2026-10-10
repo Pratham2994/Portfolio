@@ -251,6 +251,8 @@
  * graphics card, and does not wait for the page that is loading behind it.
  */
 .poster[data-opening] .curl {
+  /* Over everything on the sheet, the tape and the art too, so that what is left is one clean colour. */
+  z-index: 10;
   width: 40cqw;
   transform-origin: 100% 100%;
   animation: peel 600ms cubic-bezier(0.5, 0, 0.3, 1) 70ms both;

@@ -48,7 +48,10 @@ export function playEntry(wall: HTMLElement): void {
     wall.dataset.entered = '';
   };
   // The head script decides whether to play. A page that opened on a project has not armed it.
-  if (!pending || prefersReducedMotion()) return done();
+  // Loaded part way down the page, as after a reload: the wall is not on screen, and the view
+  // on it is tilted by the scroll. The opening would play unseen, and end at a slant. So it does not play.
+  const below = window.scrollY > wall.offsetHeight * 0.35;
+  if (!pending || below || prefersReducedMotion()) return done();
 
   const grid = wall.querySelector<HTMLElement>(':scope > div')!;
   const centre = wall.querySelector<HTMLElement>('[data-centre]')!;

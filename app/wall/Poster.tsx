@@ -54,7 +54,7 @@ export function Poster({ project, index }: { project: Project; index: number }) 
       {/* Old paper curls at a corner. The newest sheet still has its tape. */}
       <svg className={styles.curl} viewBox="0 0 100 100" aria-hidden="true" data-curl>
         {/* The wall, where the corner has come away. Its edge is a curve, as paper bends. */}
-        <path className={styles.gap} d="M100 22 C 84 60, 60 84, 22 100 L100 100 Z" />
+        <path className={styles.gap} d="M100 22 C 84 60, 60 84, 22 100 L22 140 L140 140 L140 22 Z" />
         {/* The corner itself, rolled back over the sheet: pale, with a shadow along the roll. */}
         <path className={styles.roll} d="M100 22 C 84 60, 60 84, 22 100 C 44 78, 50 62, 52 52 C 62 50, 78 44, 100 22 Z" />
         <path className={styles.crease} d="M100 22 C 84 60, 60 84, 22 100" />

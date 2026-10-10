@@ -48,14 +48,9 @@ music:
   note: Every play since July 2019, counted by my own Chronicle. Something is always playing.
   # Hours listened in each hour of the day, midnight first.
   clock: [278, 108, 31, 8, 7, 12, 14, 36, 120, 202, 248, 232, 278, 310, 297, 307, 345, 364, 358, 306, 298, 291, 293, 317]
-  artists:
-    - { name: Pritam, hours: 223 }
-    - { name: Vishal-Shekhar, hours: 158 }
-    - { name: Michael Jackson, hours: 142 }
-    - { name: The Weeknd, hours: 131 }
-    - { name: Anirudh Ravichander, hours: 95 }
   facts:
-    - 218 plays of one song in one day. Banda, January 2024. No regrets
+    - 218 plays of one song in one day. No regrets
+    - '104,329 plays, 1,784 artists, 5,543 songs'
     - '1,021 days in a row with music'
     - 'Peak hour: 6 pm. Peak day: Sunday'
 pc:
