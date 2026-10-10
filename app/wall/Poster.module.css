@@ -216,12 +216,26 @@
   right: 0;
   bottom: 0;
   z-index: 2;
-  width: calc(var(--age, 0) * 15cqw);
+  /* --peel is 0 at rest. When the sheet is opened it grows, and the curl takes the whole sheet. */
+  width: calc(var(--age, 0) * 24cqw + var(--peel, 0) * 330cqw);
   aspect-ratio: 1;
-  /* The lifted corner shows the wall under it, and the pale back of the paper. */
-  background: linear-gradient(315deg, var(--wall) 0 50%, color-mix(in srgb, var(--bg) 55%, #fff) 50% 62%, transparent 62%);
-  filter: drop-shadow(-0.1rem -0.1rem 0.15rem rgb(0 0 0 / 0.45));
+  overflow: visible;
+  filter: drop-shadow(-0.12rem -0.12rem 0.2rem rgb(0 0 0 / 0.5));
   pointer-events: none;
+}
+
+.gap {
+  fill: var(--wall);
+}
+
+.roll {
+  fill: color-mix(in srgb, var(--bg) 62%, #fff);
+}
+
+.crease {
+  fill: none;
+  stroke: rgb(0 0 0 / 0.28);
+  stroke-width: 2.5;
 }
 
 .fresh {

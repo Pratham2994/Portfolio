@@ -220,7 +220,7 @@
     transition:
       opacity 90ms linear,
       scale 260ms cubic-bezier(0.2, 1.6, 0.4, 1);
-    transition-delay: 720ms;
+    transition-delay: 480ms;
   }
 }
 
@@ -377,15 +377,57 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .portrait:not([data-seen]) .print img {
-    filter: brightness(2.6) contrast(0.25) blur(3px);
-    opacity: 0.1;
+  /* It is not there. Then it is thrown at the wall: it comes in big and crooked, hits, and holds. */
+  .portrait:not([data-seen]) {
+    opacity: 0;
   }
 
-  .portrait[data-seen] .print img {
-    transition:
-      filter 2.8s cubic-bezier(0.3, 0, 0.2, 1) 0.35s,
-      opacity 1.6s linear 0.35s;
+  .portrait[data-seen] {
+    transition: none;
+    animation: slap 520ms cubic-bezier(0.5, 0, 0.3, 1) both;
+  }
+
+  /* The tape goes on after the photo has landed. */
+  .portrait[data-seen]::before {
+    animation: tape-on 220ms cubic-bezier(0.2, 1.6, 0.4, 1) 470ms backwards;
+  }
+}
+
+@keyframes slap {
+  0% {
+    opacity: 0;
+    scale: 2.1;
+    rotate: 17deg;
+    translate: 18% -22%;
+    filter: blur(6px);
+    box-shadow: 0 4rem 5rem -1rem rgb(0 0 0 / 0.6);
+  }
+
+  55% {
+    opacity: 1;
+    scale: 0.93;
+    rotate: -4.5deg;
+    translate: 0 0;
+    filter: none;
+    box-shadow: 0 0.2rem 0.4rem rgb(0 0 0 / 0.9);
+  }
+
+  72% {
+    scale: 1.035;
+    rotate: 0.6deg;
+  }
+
+  100% {
+    scale: 1;
+    rotate: -1.2deg;
+  }
+}
+
+@keyframes tape-on {
+  from {
+    opacity: 0;
+    scale: 1.8 1;
+    translate: -50% -0.8rem;
   }
 }
 

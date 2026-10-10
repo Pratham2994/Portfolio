@@ -61,7 +61,7 @@ function PassBack() {
         <b>{pass.fromCity}</b>
         <b>{pass.toCity}</b>
       </span>
-      <span className={s.far}>150 km. Home at one end, work at the other.</span>
+      <span className={s.far}>150 km, door to door</span>
     </span>
   );
 }

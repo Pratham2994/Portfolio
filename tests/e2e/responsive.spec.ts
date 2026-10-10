@@ -9,9 +9,9 @@ async function check(page: Page) {
   const result = await page.evaluate(() => {
     const root = document.querySelector<HTMLElement>('[data-project]') ?? document.documentElement;
     const scroller = document.querySelector('[data-project]') ?? document.querySelector('main')!;
-    // Poster art is clipped by its poster, so it is not part of the layout check.
+    // Poster art and the curl at a poster's corner are clipped by the poster, so they are not part of the layout check.
     const past = [...scroller.querySelectorAll<HTMLElement>('*')].filter((el) => {
-      if (el.closest('[data-art], [data-cat], [data-light]')) return false;
+      if (el.closest('[data-art], [data-curl], [data-cat], [data-light]')) return false;
       const box = el.getBoundingClientRect();
       return box.width > 0 && (box.left < -1 || box.right > window.innerWidth + 1);
     });

@@ -70,6 +70,6 @@ test('Tab reaches every poster, desk button and contact control with a visible f
   for (const slug of slugs) expect(seen).toContain(slug);
   for (const id of ['sports', 'games', 'anime', 'music', 'now', 'cube']) expect(seen).toContain(`desk-${id}`);
   // A strip of the flyer holds the address, so the address is what its button says.
-  for (const label of ['prathampanchal02994@gmail.com', 'GitHub', 'LinkedIn']) expect(seen).toContain(label);
+  for (const label of ['prathampanchal02994@gmail.com', 'github.com/Pratham2994', 'LinkedIn']) expect(seen).toContain(label);
   expect([...noRing]).toEqual([]);
 });
