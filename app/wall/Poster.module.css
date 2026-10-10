@@ -217,7 +217,8 @@
   bottom: 0;
   z-index: 2;
   /* --peel is 0 at rest. When the sheet is opened it grows, and the curl takes the whole sheet. */
-  width: calc(var(--age, 0) * 24cqw + var(--peel, 0) * 330cqw);
+  /* 560cqw is past the far corner of the tallest sheet, so at 1 nothing of the print is left. */
+  width: calc(var(--age, 0) * 24cqw + var(--peel, 0) * 560cqw);
   aspect-ratio: 1;
   overflow: visible;
   filter: drop-shadow(-0.12rem -0.12rem 0.2rem rgb(0 0 0 / 0.5));
@@ -226,6 +227,15 @@
 
 .gap {
   fill: var(--wall);
+}
+
+/* While it opens, what is under the print is the page it becomes, not the wall. */
+.poster[data-opening] .gap {
+  fill: var(--bg);
+}
+
+.poster[data-opening] {
+  z-index: 4;
 }
 
 .roll {

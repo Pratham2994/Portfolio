@@ -25,7 +25,13 @@ const insetFor = (rect: DOMRect) =>
 const FULL = 'inset(0px 0px 0px 0px)';
 const RECEDE = { scale: 0.92, opacity: 0.25 };
 // How long the sheet takes to peel off the wall, from its corner, before the page opens.
-const PEELED = 0.46;
+const PEELED = 0.55;
+
+/** Puts a peeled sheet back on the wall, whole. */
+function resetPoster(poster: HTMLElement): void {
+  poster.removeAttribute('data-opening');
+  gsap.set(poster, { clearProps: '--peel' });
+}
 
 // The wall scales around the middle of the screen, wherever the page is scrolled.
 const origin = () => `50% ${window.scrollY + window.innerHeight / 2}px`;
@@ -65,18 +71,22 @@ export function openFrom(poster: HTMLElement | null, page: HTMLElement): Promise
       gsap.set(page, { clearProps: 'clipPath,opacity' });
       gsap.set(main, { clearProps: 'scale,opacity,transform,transformOrigin' });
       gsap.set(items, { clearProps: 'opacity,transform' });
-      gsap.set(poster, { clearProps: '--peel' });
+      resetPoster(poster);
       resolve();
     })
       .set(page, { clipPath: insetFor(poster.getBoundingClientRect()), opacity: 0 })
       .set(items, { opacity: 0, y: 48 })
-      // The sheet comes off the wall first: the curl at its corner runs across it, as paper peels.
-      .fromTo(poster, { '--peel': 0 }, { '--peel': 1, duration: PEELED + 0.12, ease: 'power2.in' }, 0)
-      .to(page, { opacity: 1, duration: 0.14, ease: 'none' }, PEELED)
-      .to(page, { clipPath: FULL, duration: 0.8, ease: 'expo.inOut' }, PEELED + 0.08)
-      .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.8, ease: 'expo.inOut' }, PEELED + 0.08)
-      .set(poster, { clearProps: '--peel' }, PEELED + 0.7)
-      .to(items, { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out', stagger: 0.05 }, PEELED + 0.55);
+      // One move in two parts. First the printed sheet peels off from its corner, all the way,
+      // and what is under it is the page, in the same colour. Nothing is left half done.
+      .call(() => poster.setAttribute('data-opening', ''), [], 0)
+      .fromTo(poster, { '--peel': 0 }, { '--peel': 1, duration: PEELED, ease: 'power2.inOut' }, 0)
+      // The page is put exactly where the sheet was, so the eye sees no change.
+      .to(page, { opacity: 1, duration: 0.04, ease: 'none' }, PEELED - 0.04)
+      // Then that same patch of colour grows to fill the screen, and the wall steps back.
+      .to(page, { clipPath: FULL, duration: 0.75, ease: 'expo.inOut' }, PEELED)
+      .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.75, ease: 'expo.inOut' }, PEELED)
+      .call(() => resetPoster(poster), [], PEELED + 0.5)
+      .to(items, { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out', stagger: 0.05 }, PEELED + 0.45);
   });
 }
 
