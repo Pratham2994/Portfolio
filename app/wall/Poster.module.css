@@ -216,9 +216,7 @@
   right: 0;
   bottom: 0;
   z-index: 2;
-  /* --peel is 0 at rest. When the sheet is opened it grows, and the curl takes the whole sheet. */
-  /* 560cqw is past the far corner of the tallest sheet, so at 1 nothing of the print is left. */
-  width: calc(var(--age, 0) * 24cqw + var(--peel, 0) * 560cqw);
+  width: calc(var(--age, 0) * 24cqw);
   aspect-ratio: 1;
   overflow: visible;
   filter: drop-shadow(-0.12rem -0.12rem 0.2rem rgb(0 0 0 / 0.5));
@@ -234,8 +232,39 @@
   fill: var(--bg);
 }
 
-.poster[data-opening] {
+/*
+ * The sheet that is opening holds still, straight and lit, whatever the pointer does. The page
+ * is then placed on its exact outline, so the two line up.
+ */
+.poster.poster[data-opening] {
   z-index: 4;
+  rotate: 0deg;
+  scale: 1.06;
+  filter: none;
+  animation: none;
+  transition: none;
+}
+
+/*
+ * The peel. The curl grows from its corner until it is past the far corner of the sheet, so
+ * nothing of the print is left. It grows by scale, not by size: a scale is drawn by the
+ * graphics card, and does not wait for the page that is loading behind it.
+ */
+.poster[data-opening] .curl {
+  width: 40cqw;
+  transform-origin: 100% 100%;
+  animation: peel 600ms cubic-bezier(0.5, 0, 0.3, 1) 70ms both;
+  will-change: transform;
+}
+
+@keyframes peel {
+  from {
+    transform: scale(calc(var(--age, 0) * 0.6));
+  }
+
+  to {
+    transform: scale(14);
+  }
 }
 
 .roll {

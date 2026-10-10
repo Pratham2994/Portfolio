@@ -248,7 +248,7 @@
     transition-duration: var(--dur-base), var(--dur-base), 0.05s, var(--dur-base);
   }
 
-  .grid[data-dim] :is([data-poster], [data-piece]):not(:hover) {
+  .grid[data-dim] :is([data-poster], [data-piece]):not(:hover, [data-opening]) {
     filter: brightness(0.45) saturate(0.65);
   }
 }
