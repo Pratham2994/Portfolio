@@ -151,7 +151,6 @@ export function closeLive(poster: HTMLElement | null, page: HTMLElement): Promis
 
   return new Promise((resolve) => {
     const items = [...page.querySelectorAll('[data-in]')].reverse();
-    page.scrollTo({ top: 0 });
     start(() => {
       gsap.set(main, { clearProps: 'scale,opacity,transform,transformOrigin' });
       closed = true;
