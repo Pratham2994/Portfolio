@@ -349,3 +349,20 @@ button.piece {
     transition: none;
   }
 }
+
+/*
+ * Off the wide wall the ticket is as wide as half a phone. Five lines with a side on each
+ * do not fit a fixed shape there, so the ticket is as tall as its list.
+ */
+@media not ((min-width: 900px) and (orientation: landscape)) {
+  .ticket,
+  .now {
+    aspect-ratio: auto;
+    min-height: 100%;
+  }
+
+  .ticket .body,
+  .now .body {
+    height: auto;
+  }
+}

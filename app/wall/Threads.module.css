@@ -129,3 +129,9 @@
   }
 }
 
+/* On a phone the tags leave the top line to the album and the "in a hurry" link. */
+@media not ((min-width: 900px) and (orientation: landscape)) {
+  .row {
+    margin-top: 0.4rem;
+  }
+}

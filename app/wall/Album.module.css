@@ -165,3 +165,20 @@
     background-position: -130% 0;
   }
 }
+
+/*
+ * On a phone the row of language tags starts right under the top of the wall, and the album
+ * sat on it. Here the album takes the left end of the top line, across from "in a hurry".
+ */
+@media not ((min-width: 900px) and (orientation: landscape)) {
+  .album {
+    top: calc(var(--space-4) - 0.15rem);
+    right: auto;
+    left: var(--gutter);
+    justify-items: start;
+  }
+
+  .page {
+    transform-origin: 0 0;
+  }
+}
