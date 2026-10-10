@@ -265,34 +265,117 @@
 
 .pager {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-4);
   padding-top: var(--space-4);
   border-top: 1px solid var(--rule);
 }
 
-.pager a {
+.pager kbd {
+  display: none;
+  padding: 0.05em 0.4em;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  font: inherit;
+}
+
+/* The next project, in its own colours: its name on the left, its sheet half out on the right. */
+.upNext {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(6.5rem, 26%, 17rem);
+  align-items: center;
+  gap: var(--space-4);
+  overflow: hidden;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  border-radius: 2px;
+  background: var(--bg);
+  color: var(--fg);
+  text-decoration: none;
+  box-shadow: 0 1.2rem 2rem -1.2rem rgb(0 0 0 / 0.6);
+}
+
+.pager .upNext:focus-visible {
+  outline-color: var(--page-fg);
+}
+
+.upText {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.upText > span,
+.before span {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.upText strong {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--step-5);
+  line-height: 0.88;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.upText em {
+  max-width: 34ch;
+  font-style: normal;
+  font-size: var(--step-0);
+}
+
+/* The sheet is the art of that project in swapped colours, as on its own page. It hangs low. */
+.sheet {
+  position: relative;
+  display: grid;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  container-type: inline-size;
+  border-radius: 2px;
+  background: var(--bg);
+  color: var(--fg);
+  rotate: 3deg;
+  translate: 0 18%;
+  box-shadow: 0 0.8rem 1.4rem -0.6rem rgb(0 0 0 / 0.6);
+  transition:
+    translate var(--dur-base) var(--ease-out),
+    rotate var(--dur-base) var(--ease-out);
+}
+
+.before {
+  display: grid;
+  justify-self: start;
   gap: 0.2rem;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: var(--step-3);
+  font-size: var(--step-2);
   line-height: 0.95;
   text-transform: uppercase;
   text-decoration: none;
   overflow-wrap: anywhere;
 }
 
-.pager a:last-child {
-  text-align: right;
+.before span {
+  font-weight: 400;
+  color: var(--muted);
 }
 
-.pager span {
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  color: var(--muted);
+@media (hover: hover) and (pointer: fine) {
+  .pager kbd {
+    display: inline;
+  }
+
+  /* Under the pointer the sheet comes up and straightens, ready to be taken. */
+  .upNext:hover .sheet,
+  .upNext:focus-visible .sheet {
+    rotate: -1deg;
+    translate: 0 2%;
+  }
 }
 
 .missing {

@@ -77,13 +77,13 @@
 /*
  * The slip. Each run prints on a strip of paper, like the ticket and the boarding pass on the
  * wall: a line for each step on the long half, and the result on the stub past the tear line.
- * It is always paper and ink, whatever colour the page is.
+ * It is printed on stock in the colour of its page, one shade off, so no two pages have the same slip.
  */
 .bench {
-  --ink: #14161c;
-  --paper: #ece8df;
-  --accent: #a8320f;
-  --soft: #dcd7cc;
+  --ink: var(--page-fg);
+  --paper: color-mix(in srgb, var(--page-fg) 11%, var(--page-bg));
+  --accent: var(--slip-accent);
+  --soft: color-mix(in srgb, var(--page-fg) 22%, var(--page-bg));
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   border-radius: 3px;

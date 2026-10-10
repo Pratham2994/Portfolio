@@ -12,10 +12,28 @@ import { Demo } from './Demo';
 import { Flap } from './Flap';
 import { Flow } from './Flow';
 import s from './ProjectPage.module.css';
-import { cancelTransition, closeLive, closeTo, openFrom, takeClosed, takeIntent } from './transition';
+import { cancelTransition, closeLive, closeTo, openFrom, riseIn, takeClosed, takeIntent, takeTurned, turnTo } from './transition';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const longestWord = (text: string) => Math.max(...text.split(/\s+/).map((word) => word.length));
+
+// How bright a colour is, from 0 to 1, by the WCAG rule.
+function light(hex: string): number {
+  const [r, g, b] = [1, 3, 5].map((at) => {
+    const c = parseInt(hex.slice(at, at + 2), 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** The accent, if small type in it can be read on the page colour. If not, the text colour. */
+function readable({ bg, fg, accent }: Project['palette']): string {
+  const [a, b] = [light(accent), light(bg)];
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) >= 4.5 ? accent : fg;
+}
+
+// Arrow keys belong to these when one of them has the focus.
+const USES_ARROWS = 'input, select, textarea, video, audio, [contenteditable], [role="slider"]';
 
 export function ProjectPage({ project }: { project: Project }) {
   const navigate = useNavigate();
@@ -32,7 +50,10 @@ export function ProjectPage({ project }: { project: Project }) {
       void openFrom(poster(), node);
     }
     // A page that opens with a cut (history, next, previous) must not sit under a closing sheet.
-    else cancelTransition();
+    else {
+      cancelTransition();
+      if (takeTurned()) riseIn(node);
+    }
     return () => {
       // Runs before the page leaves the DOM. Only a return to the wall shrinks back to the poster.
       if (takeClosed()) return;
@@ -59,10 +80,28 @@ export function ProjectPage({ project }: { project: Project }) {
     );
   }, [navigate, project.slug]);
 
+  // Turns to the next or the previous project. The sheet covers this page, then the page changes.
+  const upNext = useRef<HTMLAnchorElement>(null);
+  const turn = useCallback(
+    (to: Project, side: 'left' | 'right') => {
+      if (closing.current) return;
+      closing.current = true;
+      track('project_turned', { from: project.slug, to: to.slug });
+      void turnTo(to.palette.bg, side, side === 'right' ? upNext.current : null).then(() =>
+        navigate(`/work/${to.slug}`, { preventScrollReset: true }),
+      );
+    },
+    [navigate, project.slug],
+  );
+
   // A layout effect, so Escape works from the first frame the page is on screen.
   useLayoutEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') close();
+      if (event.key === 'Escape') return close();
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (event.target instanceof Element && event.target.closest(USES_ARROWS)) return;
+      if (event.key === 'ArrowRight') turn(next, 'right');
+      if (event.key === 'ArrowLeft') turn(prev, 'left');
     };
     const root = document.documentElement;
     window.addEventListener('keydown', onKey);
@@ -74,13 +113,19 @@ export function ProjectPage({ project }: { project: Project }) {
       delete root.dataset.projectOpen;
       root.style.backgroundColor = '';
     };
-  }, [close, project.palette.bg]);
+  }, [close, turn, next, prev, project.palette.bg]);
 
   // A plain click plays the close. A modified click (new tab) is left to the browser.
   const onCloseClick = (event: MouseEvent) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
     event.preventDefault();
     close();
+  };
+
+  const onTurnClick = (to: Project, side: 'left' | 'right') => (event: MouseEvent) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+    event.preventDefault();
+    turn(to, side);
   };
 
   // "Under review" is a decision that has not come yet, so the page shows it the way a match does.
@@ -92,6 +137,7 @@ export function ProjectPage({ project }: { project: Project }) {
     '--accent': project.palette.accent,
     '--page-bg': project.palette.bg,
     '--page-fg': project.palette.fg,
+    '--slip-accent': readable(project.palette),
   } as CSSProperties;
 
   return (
@@ -235,13 +281,38 @@ export function ProjectPage({ project }: { project: Project }) {
         </section>
 
         <nav className={s.pager} aria-label="Other projects" data-in>
-          <Link to={`/work/${prev.slug}`} data-prev preventScrollReset>
-            <span>Previous</span>
-            {prev.title}
+          {/* The next project is already there, in its own colours, with its sheet half out. */}
+          <Link
+            to={`/work/${next.slug}`}
+            className={s.upNext}
+            style={{ '--bg': next.palette.bg, '--fg': next.palette.fg, '--accent': next.palette.accent } as CSSProperties}
+            ref={upNext}
+            data-next
+            preventScrollReset
+            onClick={onTurnClick(next, 'right')}
+          >
+            <span className={s.upText}>
+              <span>
+                Next project
+                <kbd aria-hidden="true">&rarr;</kbd>
+              </span>
+              <strong>{next.title}</strong>
+              <em>{next.tagline}</em>
+            </span>
+            <span
+              className={s.sheet}
+              style={{ '--bg': next.palette.fg, '--fg': next.palette.bg } as CSSProperties}
+              aria-hidden="true"
+            >
+              <Art art={next.art} />
+            </span>
           </Link>
-          <Link to={`/work/${next.slug}`} data-next preventScrollReset>
-            <span>Next</span>
-            {next.title}
+          <Link to={`/work/${prev.slug}`} className={s.before} data-prev preventScrollReset onClick={onTurnClick(prev, 'left')}>
+            <span>
+              <kbd aria-hidden="true">&larr;</kbd>
+              Previous
+            </span>
+            {prev.title}
           </Link>
         </nav>
       </div>

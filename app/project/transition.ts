@@ -130,6 +130,57 @@ export function closeTo(poster: HTMLElement | null, page: HTMLElement): Promise<
   });
 }
 
+let turned = false;
+
+/** True once, on the page that a turn has just brought in. */
+export function takeTurned(): boolean {
+  const hit = turned;
+  turned = false;
+  return hit;
+}
+
+/**
+ * Turns to another project: a sheet in the colour of that project covers this page, and the
+ * caller then changes the page under it. It grows from `from` when that is on screen (the block
+ * for the next project), and comes in from the side when it is not (the arrow keys). The sheet
+ * stays until the new page is in the DOM and cancels the transition.
+ */
+export function turnTo(colour: string, side: 'left' | 'right', from?: HTMLElement | null): Promise<void> {
+  cancelTransition();
+  if (prefersReducedMotion()) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    const sheet = document.createElement('div');
+    sheet.dataset.ghost = '';
+    sheet.setAttribute('aria-hidden', 'true');
+    Object.assign(sheet.style, { position: 'fixed', inset: '0', zIndex: '21', pointerEvents: 'none', background: colour });
+    document.body.append(sheet);
+    ghost = sheet;
+
+    const rect = from?.getBoundingClientRect();
+    const seen = rect && rect.bottom > 0 && rect.top < window.innerHeight;
+    const edge = side === 'right' ? 'inset(0px 0px 0px 100%)' : 'inset(0px 100% 0px 0px)';
+    document.documentElement.dataset.transitioning = '';
+    turned = true;
+    active = gsap
+      .timeline({ onComplete: resolve })
+      .fromTo(sheet, { clipPath: seen ? insetFor(rect) : edge }, { clipPath: FULL, duration: 0.5, ease: 'expo.inOut' });
+  });
+}
+
+/** The parts of a page that a turn brought in rise into place. */
+export function riseIn(page: HTMLElement): void {
+  if (prefersReducedMotion()) return;
+  gsap.from(page.querySelectorAll('[data-in]'), {
+    opacity: 0,
+    y: 32,
+    duration: 0.55,
+    ease: 'expo.out',
+    stagger: 0.04,
+    clearProps: 'opacity,transform',
+  });
+}
+
 let closed = false;
 
 /** True once, right after `closeLive` has played, so the unmount does not play a second close. */

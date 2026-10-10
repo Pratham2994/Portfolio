@@ -28,6 +28,18 @@ test('next and previous walk the wall in order and wrap', async ({ page }) => {
   await expect(page).toHaveURL(/\/work\/algomotion$/);
 });
 
+test('the next project waits at the end of the page, and the arrow keys turn the pages', async ({ page }) => {
+  await open(page, '/work/algomotion');
+  await expect(page.locator('[data-next]')).toContainText('Scrub');
+  await page.keyboard.press('ArrowRight');
+  await expect(page).toHaveURL(/\/work\/scrub$/);
+  await expect(page.locator('#project-title')).toHaveText('Scrub');
+  // The sheet that covered the turn is gone once the new page is in.
+  await expect(page.locator('[data-ghost]')).toHaveCount(0);
+  await page.keyboard.press('ArrowLeft');
+  await expect(page).toHaveURL(/\/work\/algomotion$/);
+});
+
 test('unknown slug shows the not-found page with a way home', async ({ page }) => {
   await open(page, '/work/nope');
   await expect(page.getByRole('heading', { name: /not on the wall/i })).toBeVisible();

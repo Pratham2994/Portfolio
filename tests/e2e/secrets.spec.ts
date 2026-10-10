@@ -68,8 +68,8 @@ test('"meow" moves the hint on to the next secret', async ({ page }) => {
 });
 
 test('a click on the cat is a pet', async ({ page }) => {
-  const box = (await page.locator('[data-cat]').boundingBox())!;
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  // She walks, so a click at a measured point can miss her. The press goes to her directly.
+  await page.locator('[data-cat]').dispatchEvent('pointerdown');
   await expect(page.locator('[data-puff="heart"]')).toHaveCount(1);
 });
 

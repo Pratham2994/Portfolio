@@ -3,7 +3,7 @@ import { useEffect, useRef, type RefObject } from 'react';
 import { prefersReducedMotion } from '~/lib/motion';
 import { track } from '~/lib/analytics';
 
-import { CAT_HEIGHT, CAT_SCALE, CAT_WIDTH, drawCat, type CatFrame } from './cat-sprite';
+import { CAT, CAT_HEIGHT, CAT_SCALE, CAT_WIDTH, drawCat, type CatPose } from './cat-sprite';
 import styles from './Wall.module.css';
 
 type Ledge = { sheet: HTMLElement; from: number; to: number; y: number; z: number; mid: number; height: number };
@@ -12,6 +12,7 @@ const WIDTH = CAT_WIDTH * CAT_SCALE;
 const HEIGHT = CAT_HEIGHT * CAT_SCALE;
 const SPEED = 34; // pixels per second
 const HOP = 0.5; // seconds
+const STRIDE = 6; // pixels she covers in one frame of the walk, so her feet do not slide
 const SLEEP = 40_000; // she dozes off when nobody has moved for this long, in milliseconds
 
 /** Where an element sits inside the grid, in layout pixels. Transforms do not change this. */
@@ -80,7 +81,7 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
     if (!el || !wall || !ctx) return;
 
     let path = ledges(wall);
-    const cat = { ledge: 0, x: path[0]?.from ?? 0, y: path[0]?.y ?? 0, dir: 1, rest: 0, frame: 0 as CatFrame, tick: 0 };
+    const cat = { ledge: 0, x: path[0]?.from ?? 0, y: path[0]?.y ?? 0, dir: 1, rest: 0, frame: 0, tick: 0, pace: 0, walked: 0 };
     let hop: { t: number; fromX: number; fromY: number; toX: number; toY: number; ledge: number } | null = null;
     // When the wall drops, she has nothing to stand on. See onFallen below.
     let fall: { phase: 'hang' | 'drop' | 'down' | 'up'; t: number; fromY: number; floor: number; speed: number } | null = null;
@@ -107,7 +108,16 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
       place();
     };
 
-    drawCat(ctx, 0, true);
+    // Draws a pose, and does nothing when that frame is already on the canvas.
+    let drawn = '';
+    const show = (pose: CatPose, frame = 0) => {
+      const key = `${pose} ${frame % CAT[pose].length}`;
+      if (key === drawn) return;
+      drawn = key;
+      drawCat(ctx, pose, frame);
+    };
+
+    show('sit');
     measure();
     const resize = new ResizeObserver(measure);
     resize.observe(wall);
@@ -125,6 +135,7 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
         cat.rest = 0;
       } else if (fall) {
         fall = { ...fall, phase: 'up', t: 0, fromY: cat.y };
+        show('jump');
       }
     };
     const fallen = new MutationObserver(onFallen);
@@ -172,7 +183,7 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
       if (pets.length === 1) track('cat_petted');
       if (!hop) {
         cat.rest = 1.4;
-        drawCat(ctx, 0, true);
+        show('sit');
       }
     };
     el.addEventListener('pointerdown', onPet);
@@ -236,10 +247,12 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
           // The cartoon moment: her legs keep running on nothing.
           if (cat.tick > 0.05) {
             cat.tick = 0;
-            cat.frame = cat.frame ? 0 : 1;
-            drawCat(ctx, cat.frame);
+            show('walk', ++cat.frame);
           }
-          if (fall.t > 0.6) fall = { ...fall, phase: 'drop', t: 0 };
+          if (fall.t > 0.6) {
+            fall = { ...fall, phase: 'drop', t: 0 };
+            show('jump');
+          }
         } else if (fall.phase === 'drop') {
           fall.speed += 2600 * dt;
           cat.y += fall.speed * dt;
@@ -249,13 +262,12 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
             cat.y = fall.floor;
             tumble = 0;
             fall.phase = 'down';
-            drawCat(ctx, 0, true);
+            show('sit');
           }
         } else if (fall.phase === 'down') {
           if (cat.tick > 0.4) {
             cat.tick = 0;
-            cat.frame = cat.frame ? 0 : 1;
-            drawCat(ctx, cat.frame, true);
+            show('sit', ++cat.frame);
           }
         } else {
           // One big jump back to where she was, with a flip on the way.
@@ -278,7 +290,8 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
         doze -= dt;
         if (doze <= 0) {
           doze = 1.8;
-          drawCat(ctx, 0, true);
+          // Curled up. Her back rises and falls with each breath.
+          show('sleep', ++cat.frame);
           puff('z');
         }
         return;
@@ -287,7 +300,7 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
       if (call && !hop && zoomies <= 0) {
         if (call.ledge === cat.ledge && Math.abs(call.x - cat.x) < 3) {
           // Arrived: sit and wait for as long as the pointer stays.
-          if (cat.rest <= 0) drawCat(ctx, 0, true);
+          if (cat.rest <= 0) show('sit');
           cat.rest = 0.4;
         } else {
           cat.rest = 0;
@@ -296,16 +309,20 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
       }
       if (cat.rest > 0) {
         cat.rest -= dt;
-        if (cat.tick > 0.5) {
+        cat.pace = 0;
+        // Sitting: now and then the tip of her tail lifts, or she blinks.
+        if (drawn.startsWith('sit') ? cat.tick > 0.45 : true) {
           cat.tick = 0;
-          cat.frame = cat.frame ? 0 : 1;
-          drawCat(ctx, cat.frame, true);
+          show('sit', ++cat.frame);
         }
         return;
       }
       if (hop) {
         hop.t = Math.min(hop.t + dt / HOP, 1);
-        cat.x = hop.fromX + (hop.toX - hop.fromX) * hop.t;
+        show('jump');
+        // She pushes off and lands softly: slow at both ends, fast in the middle.
+        const eased = hop.t * hop.t * (3 - 2 * hop.t);
+        cat.x = hop.fromX + (hop.toX - hop.fromX) * eased;
         cat.y = hop.fromY + (hop.toY - hop.fromY) * hop.t - Math.sin(hop.t * Math.PI) * 26;
         if (hop.t === 1) {
           cat.ledge = hop.ledge;
@@ -314,13 +331,12 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
         }
         return;
       }
-      cat.x += cat.dir * speed * dt;
+      // She gets up to speed and does not start at it. The legs follow the ground she covers.
+      cat.pace += (speed - cat.pace) * Math.min(dt * 7, 1);
+      cat.x += cat.dir * cat.pace * dt;
+      cat.walked += cat.pace * dt;
       if (call && call.ledge === cat.ledge && (call.x - cat.x) * cat.dir < 0) cat.x = call.x;
-      if (cat.tick > (call ? 0.09 : 0.16)) {
-        cat.tick = 0;
-        cat.frame = cat.frame ? 0 : 1;
-        drawCat(ctx, cat.frame);
-      }
+      show('walk', Math.floor(cat.walked / STRIDE));
       const atEnd = cat.dir > 0 ? cat.x >= ledge.to : cat.x <= ledge.from;
       if (atEnd) {
         const next = path[cat.ledge + cat.dir];
