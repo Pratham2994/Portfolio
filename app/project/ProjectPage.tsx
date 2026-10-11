@@ -175,6 +175,13 @@ export function ProjectPage({ project }: { project: Project }) {
   const why = (
     <div className={s.why} data-in>
       <Paragraphs text={project.body} />
+      {/* On a team project, exactly what was mine. */}
+      {project.role && (
+        <p className={s.role} data-role>
+          <b>My part</b>
+          {project.role}
+        </p>
+      )}
     </div>
   );
 
@@ -270,8 +277,8 @@ export function ProjectPage({ project }: { project: Project }) {
               {why}
               {stats}
             </div>
-            {kind === 'tool' ? demo : how}
-            {kind === 'tool' ? how : demo}
+            {how}
+            {demo}
           </>
         ) : (
           <>
@@ -322,11 +329,6 @@ export function ProjectPage({ project }: { project: Project }) {
               <li key={item}>{item}</li>
             ))}
           </ul>
-          {project.role && (
-            <p className={s.role} data-role>
-              {project.role}
-            </p>
-          )}
           <p className={s.links}>
             <a href={project.links.repo} target="_blank" rel="noreferrer" onClick={() => track('repo_clicked', { project: project.slug })}>
               Code on GitHub

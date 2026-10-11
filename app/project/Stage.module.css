@@ -23,6 +23,30 @@
   aspect-ratio: 16 / 11;
 }
 
+/* A scene that lies across the whole page is long and low. */
+.stage[data-wide] > * {
+  aspect-ratio: 16 / 6;
+}
+
+.stage button {
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.stage :focus-visible {
+  outline: 0.5cqw solid var(--accent);
+  outline-offset: 0.3cqw;
+}
+
+/* A line under a scene that says what it is showing now. */
+.caption {
+  font-size: 2.1cqw;
+  letter-spacing: 0.06em;
+}
+
 /* ---- OmniCompiler: a debugger window. */
 .omni {
   grid-template-rows: auto 1fr auto;
@@ -37,7 +61,7 @@
   text-transform: uppercase;
 }
 
-.tabs span {
+.tabs button {
   padding: 2cqw 2.6cqw;
   color: var(--soft);
   transition:
@@ -45,7 +69,7 @@
     color 0.25s linear;
 }
 
-.tabs span[data-on] {
+.tabs button[aria-pressed='true'] {
   background: var(--fg);
   color: var(--bg);
 }
@@ -104,14 +128,14 @@
   font-size: 2.3cqw;
 }
 
-.seen dt {
+.seen > span {
   font-size: 1.9cqw;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--soft);
 }
 
-.seen div {
+.seen p {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -119,11 +143,7 @@
   border-bottom: 0.2cqw solid var(--faint);
 }
 
-.seen dd {
-  margin: 0;
-}
-
-.seen dd:last-child {
+.seen b {
   font-family: var(--font-display);
   font-size: 5.4cqw;
   font-weight: 900;
@@ -142,10 +162,15 @@
   text-transform: uppercase;
 }
 
-.controls span {
+.controls button {
   padding: 1cqw 1.5cqw;
   border: 0.25cqw solid var(--fg);
   border-radius: 0.4cqw;
+  font-weight: 700;
+}
+
+.controls button:hover {
+  background: var(--faint);
 }
 
 .controls em {
@@ -157,9 +182,12 @@
   letter-spacing: 0;
 }
 
-.controls em b {
+.controls em b,
+.controls em code {
   display: inline-block;
   color: var(--fg);
+  font: inherit;
+  font-weight: 700;
 }
 
 /* ---- Local LLM lab: a board that is ranked two ways. */
@@ -183,7 +211,7 @@
   color: var(--soft);
 }
 
-.by b {
+.by button {
   padding: 0.9cqw 1.5cqw;
   border: 0.25cqw solid var(--faint);
   border-radius: 0.4cqw;
@@ -194,7 +222,7 @@
     border-color 0.3s linear;
 }
 
-.by b[data-on] {
+.by button[aria-pressed='true'] {
   border-color: var(--fg);
   background: var(--fg);
   color: var(--bg);
@@ -262,6 +290,11 @@
   font-weight: 600;
 }
 
+.moral span {
+  font-weight: 400;
+  color: var(--soft);
+}
+
 /* ---- Prats-Deck: the thing itself. */
 .deck {
   grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
@@ -298,6 +331,30 @@
 
 .glass img[data-on] {
   opacity: 1;
+}
+
+/* The parts of the picture that take a tap: each icon on the home page, and the whole screen in an app. */
+.icon,
+.back {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: 12%;
+  background: none;
+}
+
+.icon {
+  width: 20%;
+  height: 25.8%;
+}
+
+.back {
+  inset: 0;
+  border-radius: 0;
+}
+
+.icon:hover {
+  background: rgb(255 255 255 / 0.14);
 }
 
 /* The USB lead, out of the bottom of the case and off the sheet. */
@@ -340,6 +397,488 @@
   line-height: 1.3;
 }
 
+.onScreen small {
+  margin-top: 1.4cqw;
+  font-size: 1.7cqw;
+  line-height: 1.4;
+  color: var(--soft);
+}
+
+/* ---- Scrub: a strip of frames, two handles, and the command they write. */
+.scrub {
+  grid-template-rows: 1fr auto auto;
+  gap: 3cqw;
+  padding: 5cqw;
+}
+
+.strip {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 1cqw;
+  align-self: center;
+  height: 24cqw;
+}
+
+.strip i {
+  background: color-mix(in srgb, var(--fg) var(--shade), var(--bg));
+  transition:
+    opacity 0.5s var(--ease-out),
+    translate 0.7s var(--ease-in-out),
+    rotate 0.7s var(--ease-in-out);
+}
+
+.strip i[data-out] {
+  opacity: 0.3;
+}
+
+/* The cut: what is outside the handles drops away. */
+.strip[data-done] i[data-out] {
+  opacity: 0;
+  translate: 0 70%;
+  rotate: 7deg;
+}
+
+.strip b {
+  position: absolute;
+  top: -1.6cqw;
+  bottom: -1.6cqw;
+  left: calc(var(--from) * 12.5%);
+  width: 1.2cqw;
+  border-radius: 0.6cqw;
+  background: var(--accent);
+  transition: left 0.8s var(--ease-in-out);
+}
+
+.strip b + b {
+  left: calc(var(--to) * 12.5% - 1.2cqw);
+}
+
+.command {
+  display: grid;
+  gap: 1.2cqw;
+}
+
+.command span {
+  font-size: 1.9cqw;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.command code {
+  padding: 2cqw 2.4cqw;
+  background: var(--fg);
+  color: var(--bg);
+  font: inherit;
+  font-size: 2.5cqw;
+  white-space: nowrap;
+}
+
+.command mark {
+  display: inline-block;
+  min-width: 1.4em;
+  border-bottom: 0.4cqw solid var(--accent);
+  background: none;
+  color: inherit;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ---- Neat: a messy pile, then three tidy ones. */
+.neat {
+  grid-template-rows: auto 1fr auto;
+  gap: 2cqw;
+  padding: 4cqw;
+}
+
+.piles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2cqw;
+  font-size: 1.8cqw;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.6s linear 0.5s;
+}
+
+.piles span {
+  padding-bottom: 1.2cqw;
+  border-bottom: 0.3cqw solid var(--fg);
+}
+
+.neat[data-tidy] .piles {
+  opacity: 1;
+}
+
+.files {
+  position: relative;
+}
+
+.files li {
+  position: absolute;
+  top: var(--my);
+  left: var(--mx);
+  padding: 1cqw 1.5cqw;
+  border: 0.25cqw solid var(--fg);
+  border-radius: 0.4cqw;
+  background: var(--bg);
+  font-size: 1.95cqw;
+  white-space: nowrap;
+  rotate: var(--turn);
+  transition:
+    top 0.9s var(--ease-in-out) calc(var(--i) * 55ms),
+    left 0.9s var(--ease-in-out) calc(var(--i) * 55ms),
+    rotate 0.9s var(--ease-in-out) calc(var(--i) * 55ms);
+}
+
+.neat[data-tidy] .files li {
+  top: calc(4% + var(--row) * 27%);
+  left: calc(var(--pile) * (100% + 2cqw) / 3);
+  rotate: 0deg;
+}
+
+/* ---- FloatChat: the sea, cut through. */
+.float {
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+}
+
+.sea {
+  position: relative;
+  border-top: 0.4cqw solid var(--fg);
+  background: linear-gradient(color-mix(in srgb, var(--fg) 8%, var(--bg)), color-mix(in srgb, var(--fg) 30%, var(--bg)));
+}
+
+.sea span {
+  position: absolute;
+  left: 1.4cqw;
+  font-size: 1cqw;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sea span:nth-child(1) {
+  top: 4%;
+}
+
+.sea span:nth-child(2) {
+  top: 48%;
+}
+
+.sea span:nth-child(3) {
+  bottom: 4%;
+}
+
+.buoy {
+  position: absolute;
+  top: 3%;
+  left: 24%;
+  width: 0.9cqw;
+  height: 3.2cqw;
+  border-radius: 0.5cqw;
+  background: var(--accent);
+  box-shadow: 0 0 0 0.25cqw var(--bg);
+}
+
+.sea svg {
+  position: absolute;
+  inset: 0 6% 0 34%;
+  width: 60%;
+  height: 100%;
+  overflow: visible;
+}
+
+.profile {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+}
+
+.asked {
+  display: grid;
+  align-content: center;
+  gap: 1cqw;
+  padding: 3cqw;
+}
+
+.asked span {
+  font-size: 1cqw;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.asked strong {
+  font-family: var(--font-text);
+  font-size: 2.3cqw;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.asked em {
+  font-family: var(--font-text);
+  font-size: 1.3cqw;
+  font-style: normal;
+}
+
+/* ---- iDEA: three ways to say it, one desk it goes to. */
+.idea {
+  grid-template-rows: auto 1fr auto;
+  gap: 3cqw;
+  padding: 5cqw;
+}
+
+.ways {
+  display: flex;
+  gap: 1.4cqw;
+  font-size: 2.1cqw;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ways span {
+  padding: 0.9cqw 1.6cqw;
+  border: 0.25cqw solid var(--faint);
+  border-radius: 0.4cqw;
+  color: var(--soft);
+  transition:
+    background-color 0.3s linear,
+    color 0.3s linear;
+}
+
+.ways span[data-on] {
+  border-color: var(--fg);
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.words {
+  align-self: center;
+  font-family: var(--font-text);
+  font-size: 3.7cqw;
+  font-weight: 600;
+  line-height: 1.22;
+}
+
+.goes {
+  display: grid;
+  gap: 0.6cqw;
+}
+
+.goes span {
+  font-size: 1.9cqw;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.goes strong {
+  font-family: var(--font-display);
+  font-size: 10cqw;
+  font-weight: 900;
+  line-height: 0.85;
+  text-transform: uppercase;
+}
+
+/* ---- MalShield: a page of bytes and a line that reads it. */
+.mal {
+  position: relative;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+}
+
+.bytes {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-content: center;
+  gap: 0.5cqw 0.3cqw;
+  padding: 2.4cqw 3cqw;
+  font-size: 1.35cqw;
+  text-align: center;
+}
+
+.bytes li {
+  padding: 0.35cqw 0;
+  transition:
+    background-color 0.25s linear,
+    color 0.25s linear;
+}
+
+/* A byte that a rule matched, once the line has read it. */
+.bytes li[data-hit] {
+  background: var(--fg);
+  color: var(--bg);
+  font-weight: 700;
+}
+
+.scan {
+  position: absolute;
+  top: calc(12% + var(--line) * 9.6%);
+  left: 0;
+  width: 61.5%;
+  height: 0.25cqw;
+  background: var(--accent);
+  box-shadow: 0 0 1.2cqw 0.2cqw var(--accent);
+  transition: top 0.4s linear;
+}
+
+.verdict {
+  display: grid;
+  align-content: center;
+  gap: 0.8cqw;
+  padding: 3cqw;
+  border-left: 0.25cqw solid var(--faint);
+}
+
+/* The verdict is not there until the line has read the whole page. */
+.verdict > * {
+  visibility: hidden;
+}
+
+.mal[data-done] .verdict > * {
+  visibility: visible;
+}
+
+.verdict span {
+  font-size: 1cqw;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.verdict strong {
+  font-family: var(--font-display);
+  font-size: 5.2cqw;
+  font-weight: 900;
+  line-height: 0.85;
+  text-transform: uppercase;
+}
+
+/* ---- Chronicle: a day of listening, as a clock. */
+.chronicle {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 9cqw;
+  padding: 6cqw 5cqw 6cqw 9cqw;
+}
+
+.dial {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--bg) 0 30%, var(--faint) 30% 31%, var(--bg) 31%);
+}
+
+.dial ol {
+  position: absolute;
+  inset: 6%;
+  rotate: var(--turn);
+  transition: rotate 1.6s var(--ease-in-out);
+}
+
+/* One bar for each hour, from the ring out. Midnight is at the top. */
+.dial li {
+  position: absolute;
+  bottom: 50%;
+  left: calc(50% - 1.6%);
+  width: 3.2%;
+  height: 50%;
+  background: linear-gradient(to top, transparent 0 36%, var(--fg) 36% calc(38% + var(--share) * 60%), transparent 0);
+  transform-origin: 50% 100%;
+  rotate: calc(var(--hour) * 15deg + 7.5deg);
+}
+
+.dial span {
+  position: absolute;
+  font-size: 1.6cqw;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.dial span:nth-of-type(1) {
+  top: -1%;
+  left: 50%;
+  translate: -50% -100%;
+}
+
+.dial span:nth-of-type(2) {
+  top: 50%;
+  right: -1%;
+  translate: 100% -50%;
+}
+
+.dial span:nth-of-type(3) {
+  bottom: -1%;
+  left: 50%;
+  translate: -50% 100%;
+}
+
+.dial span:nth-of-type(4) {
+  top: 50%;
+  left: -1%;
+  translate: -100% -50%;
+}
+
+.clock {
+  display: grid;
+  gap: 1.2cqw;
+  min-width: 0;
+}
+
+.clock span {
+  font-size: 1.9cqw;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.clock strong {
+  font-family: var(--font-display);
+  font-size: 13cqw;
+  font-weight: 900;
+  line-height: 0.82;
+  text-transform: uppercase;
+}
+
+.clock em {
+  font-family: var(--font-text);
+  font-size: 2.5cqw;
+  font-style: normal;
+  line-height: 1.3;
+}
+
+/* ---- Algomotion: bars that are sorted, one swap at a time. */
+.algo {
+  grid-template-rows: 1fr auto;
+  gap: 2.4cqw;
+  padding: 5cqw;
+}
+
+.bars {
+  position: relative;
+}
+
+.bars li {
+  position: absolute;
+  bottom: 0;
+  left: calc(var(--at) * 100% / 12);
+  width: calc(100% / 12 - 1cqw);
+  height: calc(var(--tall) * 100%);
+  background: var(--bar);
+  transition:
+    left 0.22s var(--ease-out),
+    background-color 0.3s linear;
+}
+
+.bars li[data-on] {
+  background: var(--accent);
+}
+
+.bars[data-sorted] li {
+  background: var(--fg);
+}
+
 /*
  * On a narrow sheet the same scenes are stacked and their type is larger, so a phone gets a
  * picture it can read and not a small copy of the wide one.
@@ -353,7 +892,7 @@
     font-size: 2.8cqw;
   }
 
-  .tabs span {
+  .tabs button {
     padding: 2.8cqw 2.1cqw;
   }
 
@@ -384,16 +923,16 @@
     font-size: 3.2cqw;
   }
 
-  .seen dt {
+  .seen > span {
     font-size: 2.5cqw;
   }
 
-  .seen div {
+  .seen p {
     padding-bottom: 0;
     border-bottom: 0;
   }
 
-  .seen dd:last-child {
+  .seen b {
     font-size: 7cqw;
   }
 
@@ -404,7 +943,7 @@
     font-size: 2.6cqw;
   }
 
-  .controls span {
+  .controls button {
     padding: 1.3cqw 1.6cqw;
   }
 
@@ -458,30 +997,222 @@
     min-height: 2.6em;
     font-size: 3.8cqw;
   }
+
+  .onScreen small {
+    font-size: 2.7cqw;
+  }
+
+  .stage[data-wide] > * {
+    grid-template-columns: minmax(0, 1fr);
+    aspect-ratio: auto;
+  }
+
+  .caption {
+    font-size: 3cqw;
+  }
+
+  .command span {
+    font-size: 2.7cqw;
+  }
+
+  .command code {
+    font-size: 2.9cqw;
+  }
+
+  .piles {
+    font-size: 2.3cqw;
+  }
+
+  .files li {
+    font-size: 2.6cqw;
+  }
+
+  .sea {
+    height: 62cqw;
+  }
+
+  .sea span {
+    font-size: 2.7cqw;
+  }
+
+  .buoy {
+    width: 2cqw;
+    height: 7cqw;
+  }
+
+  .asked,
+  .verdict {
+    gap: 2cqw;
+    padding: 5cqw;
+  }
+
+  .asked span,
+  .verdict span {
+    font-size: 2.7cqw;
+  }
+
+  .asked strong {
+    font-size: 5.4cqw;
+  }
+
+  .asked em {
+    font-size: 3.6cqw;
+  }
+
+  .ways {
+    font-size: 2.8cqw;
+  }
+
+  .words {
+    font-size: 4.8cqw;
+  }
+
+  .goes span {
+    font-size: 2.7cqw;
+  }
+
+  .goes strong {
+    font-size: 14cqw;
+  }
+
+  .bytes {
+    padding: 5cqw 4cqw;
+    font-size: 3.1cqw;
+  }
+
+  .scan {
+    top: calc(4.5% + var(--line) * 6.6%);
+    width: 100%;
+  }
+
+  .verdict {
+    border-top: 0.25cqw solid var(--faint);
+    border-left: 0;
+  }
+
+  .verdict strong {
+    font-size: 12cqw;
+  }
+
+  .chronicle {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9cqw;
+    padding: 11cqw 12cqw 7cqw;
+  }
+
+  .stage > .chronicle {
+    aspect-ratio: auto;
+  }
+
+  .dial span {
+    font-size: 2.7cqw;
+  }
+
+  .clock span {
+    font-size: 2.7cqw;
+  }
+
+  .clock strong {
+    font-size: 20cqw;
+  }
+
+  .clock em {
+    font-size: 3.7cqw;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   /* A value that has just changed lands with a small drop. */
-  .seen div {
+  .seen p {
     animation: land 0.3s var(--ease-out);
   }
 
   /* The button that was pressed goes dark for a moment. */
-  .controls span[data-on] {
+  .controls button[data-on] {
     animation: press 0.5s linear;
   }
 
   .controls em b,
+  .controls em code,
   .onScreen strong,
-  .onScreen em {
+  .onScreen em,
+  .goes strong,
+  .clock strong,
+  .command mark,
+  .mal[data-done] .verdict strong {
     animation: land 0.35s var(--ease-out);
+  }
+
+  /* What was said comes out from left to right, as it is typed or heard. */
+  .words {
+    animation: said 1.1s steps(28);
+  }
+
+  /* The float goes down, waits, and comes back up. Its line is drawn on the way down. */
+  .buoy {
+    animation: dive 9s var(--ease-in-out) infinite;
+  }
+
+  .profile {
+    stroke-dasharray: 100;
+    animation: measure 9s var(--ease-in-out) infinite;
   }
 }
 
+@keyframes said {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes dive {
+  0%,
+  6% {
+    top: 3%;
+  }
+
+  46%,
+  58% {
+    top: 88%;
+  }
+
+  96%,
+  100% {
+    top: 3%;
+  }
+}
+
+@keyframes measure {
+  0%,
+  6% {
+    stroke-dashoffset: 100;
+  }
+
+  46%,
+  92% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+/* It drops into place. It is never faint, so it can be read the moment it is there. */
 @keyframes land {
   from {
-    opacity: 0;
-    translate: 0 -0.5em;
+    translate: 0 -0.45em;
+    clip-path: inset(0 0 60% 0);
+  }
+
+  to {
+    clip-path: inset(-20%);
   }
 }
 

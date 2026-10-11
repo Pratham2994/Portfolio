@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test';
 
 import { open } from './helpers';
 
-const slugs = ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'chronicle', 'algomotion', 'malshield', 'local-llm-lab'];
+// The projects that still have a demo under the drawing. The other three are driven on their stage.
+const slugs = ['scrub', 'neat', 'floatchat', 'idea-hackathon', 'chronicle', 'algomotion', 'malshield'];
 
 // Playwright needs the first argument to be a destructuring pattern.
 // eslint-disable-next-line no-empty-pattern
@@ -29,17 +30,6 @@ test('Scrub works out the bitrate from the size limit and the clip length', asyn
   // The flyer at the foot of the wall has email strips too, so the button is looked for in the demo only.
   await page.locator('[data-demo="scrub"]').getByRole('button', { name: /Email/ }).click();
   await expect(result).toHaveText('3,285');
-});
-
-test('OmniCompiler keeps the debugger state when the language changes', async ({ page }) => {
-  await open(page, '/work/omnicompiler');
-  const demo = page.locator('[data-demo="omnicompiler"]');
-  await demo.getByRole('button', { name: 'Step over' }).click();
-  const before = await demo.locator('[data-watch]').innerText();
-  await demo.getByRole('button', { name: 'Go', exact: true }).click();
-  await expect(demo.locator('ol li code').nth(2)).toHaveText('total := 0');
-  await expect(demo.locator('[data-native]')).toHaveText('Delve');
-  expect(await demo.locator('[data-watch]').innerText()).toBe(before);
 });
 
 test('Algomotion really searches, and the recording goes back', async ({ page }) => {
@@ -70,19 +60,6 @@ test('Chronicle reads the same plays on three clocks', async ({ page }) => {
   await expect(demo.locator('[data-report]')).toContainText('Wrong by 5.5 hours', { timeout: 8000 });
 });
 
-test('the lab ranks the same models differently by the two numbers', async ({ page }) => {
-  await open(page, '/work/local-llm-lab');
-  const demo = page.locator('[data-demo="local-llm-lab"]');
-  await expect(demo.locator('ol li').first()).toContainText('Gemma 4 26B');
-  await demo.getByRole('button', { name: /per hour/ }).click();
-  await expect(demo.locator('ol li').first()).toContainText('Gemma 4 12B coder');
-  // A model's own run: the count, and where it stands on both lists.
-  await demo.getByRole('button', { name: 'Gemma 4 26B' }).click();
-  await expect(demo.locator('[data-stamp]')).toHaveText('93%', { timeout: 8000 });
-  await expect(demo.locator('[data-report]')).toContainText('154 of 165');
-  await expect(demo.locator('[data-report]')).toContainText('4th of 5 on right answers per hour');
-});
-
 test('MalShield plays one scan to a verdict', async ({ page }) => {
   await open(page, '/work/malshield');
   const demo = page.locator('[data-demo="malshield"]');
@@ -107,53 +84,6 @@ test('Neat clears its queue group by group, and a rule files the next one by its
   // Undo brings a group back.
   await demo.locator('[data-group="installers"]').getByRole('button', { name: 'Undo' }).click();
   await expect(count).toHaveText('3');
-});
-
-test('the deck opens an app from its home page and goes back', async ({ page }) => {
-  await open(page, '/work/prats-deck');
-  const demo = page.locator('[data-demo="prats-deck"]');
-  const screen = demo.locator('[data-screen]');
-  await expect(screen).toHaveAttribute('data-screen', 'home');
-  await expect(demo.getByRole('button', { name: /^Open / })).toHaveCount(15);
-  await demo.getByRole('button', { name: 'Open Chindi' }).click();
-  await demo.getByRole('button', { name: /Play a song/ }).click();
-  await expect(screen).toHaveAttribute('data-screen', 'chindi-dancing');
-  await expect(screen.locator('img')).toHaveJSProperty('complete', true);
-  expect(await screen.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(640);
-  await demo.getByRole('button', { name: 'Back to the home page' }).click();
-  await expect(screen).toHaveAttribute('data-screen', 'home');
-  // Every app has its own picture.
-  for (const [name, picture] of [['Galaxy', 'galaxy'], ['Wi-Fi', 'wifi'], ['Settings', 'settings']]) {
-    await demo.getByRole('button', { name: `Open ${name}` }).click();
-    await expect(screen).toHaveAttribute('data-screen', picture);
-    await expect(demo.locator('h3')).toHaveText(name);
-    await expect.poll(() => screen.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(640);
-    await demo.getByRole('button', { name: 'Back to the home page' }).click();
-  }
-});
-
-test('OmniCompiler runs to a breakpoint, with the same controls in every language', async ({ page }) => {
-  await open(page, '/work/omnicompiler');
-  const demo = page.locator('[data-demo="omnicompiler"]');
-  await demo.getByRole('button', { name: 'Breakpoint on line 6' }).click();
-  await demo.getByRole('button', { name: 'Continue' }).click();
-  await expect(demo.locator('ol li[data-here] code')).toHaveText('print(total)');
-  await expect(demo.locator('[data-watch]')).toContainText('29');
-  await demo.getByRole('button', { name: 'Java', exact: true }).click();
-  await expect(demo.locator('[data-native]')).toHaveText('jdb');
-  await expect(demo.locator('[data-watch]')).toContainText('29');
-});
-
-test('OmniCompiler steps into the function and out of it, and the call stack follows', async ({ page }) => {
-  await open(page, '/work/omnicompiler');
-  const demo = page.locator('[data-demo="omnicompiler"]');
-  // It starts on line 5, the call. A step in goes to the function.
-  await demo.getByRole('button', { name: 'Step in' }).click();
-  await expect(demo.locator('[data-stack] li')).toHaveText(['area, line 2', 'main, line 5']);
-  await expect(demo.locator('[data-watch]')).toContainText('w');
-  await demo.getByRole('button', { name: 'Step out' }).click();
-  await expect(demo.locator('[data-stack] li')).toHaveCount(1);
-  await expect(demo.locator('[data-watch]')).toContainText('4');
 });
 
 test('FloatChat shows the tool the model calls, and a different picture for each question', async ({ page }) => {
@@ -193,21 +123,50 @@ test('a run lights its stages one after the other, to the end', async ({ page })
   await expect(demo.locator('[data-stamp]')).toHaveText('Fits');
 });
 
-test('every project has a picture of what runs underneath', async ({ page }) => {
-  for (const slug of ['scrub', 'neat', 'floatchat', 'idea-hackathon', 'malshield', 'algomotion', 'chronicle']) {
-    await open(page, `/work/${slug}`);
-    const flow = page.locator('[data-flow]');
-    await expect(flow.locator('svg:visible')).toHaveCount(1);
-    expect(await flow.locator('svg:visible g[data-kind]').count()).toBeGreaterThanOrEqual(8);
-  }
-  // These three have a small drawing of their own: a few parts and one sentence.
-  for (const slug of ['prats-deck', 'omnicompiler', 'local-llm-lab']) {
+test('every project has a small drawing of what runs underneath, with one sentence', async ({ page }) => {
+  for (const slug of [...slugs, 'prats-deck', 'omnicompiler', 'local-llm-lab']) {
     await open(page, `/work/${slug}`);
     const sketch = page.locator(`[data-sketch="${slug}"]`);
     await expect(sketch.locator('svg')).toBeVisible();
     expect(await sketch.locator('g[data-part]').count()).toBeGreaterThanOrEqual(2);
     await expect(sketch.locator('figcaption')).not.toBeEmpty();
   }
+});
+
+test('the OmniCompiler stage is a debugger you can drive: a language, and the same buttons', async ({ page }) => {
+  await open(page, '/work/omnicompiler');
+  const stage = page.locator('[data-stage="omnicompiler"]');
+  await stage.getByRole('button', { name: 'Go', exact: true }).click();
+  await expect(stage.locator('[data-native]')).toContainText('Delve');
+  // From the first line, a step in goes one frame on, and a continue runs to the end.
+  await stage.getByRole('button', { name: 'Continue' }).click();
+  await stage.getByRole('button', { name: 'Continue' }).click();
+  await stage.getByRole('button', { name: 'Step in' }).click();
+  await expect(stage.locator('[data-seen]')).toContainText('total');
+  await stage.getByRole('button', { name: 'C++' }).click();
+  await expect(stage.locator('[data-native]')).toContainText('gdb');
+  await stage.getByRole('button', { name: 'Step in' }).click();
+  await expect(stage.locator('[data-native]')).toContainText('-exec-step');
+});
+
+test('the lab stage ranks the same models differently by the two numbers', async ({ page }) => {
+  await open(page, '/work/local-llm-lab');
+  const stage = page.locator('[data-stage="local-llm-lab"]');
+  await stage.getByRole('button', { name: 'Tasks passed' }).click();
+  await expect(stage.locator('[data-board] li[data-place="1"]')).toContainText('Gemma 4 26B');
+  await stage.getByRole('button', { name: 'Right answers per hour' }).click();
+  await expect(stage.locator('[data-board] li[data-place="1"]')).toContainText('Gemma 4 12B coder');
+  await expect(stage.locator('[data-board] li[data-place="4"]')).toContainText('Gemma 4 26B');
+});
+
+test('the deck stage opens an app from its home page and goes back', async ({ page }) => {
+  await open(page, '/work/prats-deck');
+  const stage = page.locator('[data-stage="prats-deck"]');
+  await stage.getByRole('button', { name: 'Open Snake' }).click();
+  await expect(stage.locator('[data-on-screen]')).toContainText('Snake');
+  await expect(stage.locator('[data-screen]')).toHaveAttribute('data-screen', 'snake');
+  await stage.getByRole('button', { name: 'Back to the home page' }).click();
+  await expect(stage.locator('[data-screen]')).toHaveAttribute('data-screen', 'home');
 });
 
 test('iDEA sorts what the customer says, and a new message goes to a new department', async ({ page }) => {

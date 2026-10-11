@@ -41,7 +41,7 @@ test('the next project waits at the end of the page, and the arrow keys turn the
 });
 
 test('a project with a stage shows it, and the sectors in the bar fill as the page goes by', async ({ page }) => {
-  for (const slug of ['omnicompiler', 'local-llm-lab', 'prats-deck']) {
+  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'chronicle', 'algomotion']) {
     await open(page, `/work/${slug}`);
     await expect(page.locator(`[data-stage="${slug}"]`)).toBeVisible();
     await expect(page.locator('#project-title')).toBeVisible();
@@ -50,6 +50,13 @@ test('a project with a stage shows it, and the sectors in the bar fill as the pa
   await expect(project).toHaveAttribute('data-sector', '0');
   await project.evaluate((el) => el.scrollTo(0, el.scrollHeight));
   await expect(project).toHaveAttribute('data-sector', '3');
+});
+
+test('a team project says what was mine', async ({ page }) => {
+  await open(page, '/work/floatchat');
+  await expect(page.locator('[data-role]')).toContainText('My part');
+  await open(page, '/work/scrub');
+  await expect(page.locator('[data-role]')).toHaveCount(0);
 });
 
 test('unknown slug shows the not-found page with a way home', async ({ page }) => {

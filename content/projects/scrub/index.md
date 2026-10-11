@@ -2,7 +2,6 @@
 title: Scrub
 size: poster
 order: 1
-hero: true
 made: '2026-09'
 status: Runs on your own PC
 tagline: ffmpeg, minus the terminal.

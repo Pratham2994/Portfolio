@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactElement, typ
 import { track } from '~/lib/analytics';
 import { prefersReducedMotion } from '~/lib/motion';
 
-import { CODE, DECK, MODELS, NATIVE, RUN } from './data';
+import { HOME, SAID, STORED, YEARS } from './data';
 import s from './Demo.module.css';
 
 /* One small working part per project. Each shows the idea of the project in a few seconds. */
@@ -28,25 +28,6 @@ function useRun(count: number, pace = 520) {
     }, pace);
   };
   return { at, run, over: at >= count };
-}
-
-type Stage = { name: string; detail: string };
-
-/**
- * What goes on underneath, as a row of stages. Each one lights up as the run reaches it.
- * A halted run goes no further: the stages after it stay dark.
- */
-function Stages({ stages, at, halted = false }: { stages: Stage[]; at: number; halted?: boolean }) {
-  return (
-    <ol className={s.stages} data-stages data-over={at >= stages.length || undefined}>
-      {stages.map((stage, i) => (
-        <li key={stage.name} data-state={i < at ? 'done' : i === at && !halted ? 'now' : 'todo'}>
-          <b>{stage.name}</b>
-          <span>{stage.detail}</span>
-        </li>
-      ))}
-    </ol>
-  );
 }
 
 type Kind = 'film' | 'folder' | 'device' | 'wave' | 'file' | 'model' | 'maze' | 'clock';
@@ -351,246 +332,6 @@ function Neat() {
   );
 }
 
-/** Prats-Deck: its real home page. Tap an app to open it, and the arrow to go back. */
-function Deck() {
-  const [open, setOpen] = useState<number | null>(null);
-  const [cat, setCat] = useState<'chindi' | 'chindi-dancing' | 'chindi-zoomies'>('chindi');
-  const app = open === null ? null : DECK[open];
-  const picture = !app ? 'home' : app[0] === 'Chindi' ? cat : app[2];
-  // What the deck does with one tap, from the stylus to the screen.
-  const { at, run } = useRun(5, 240);
-  const tap = (next: number | null) => {
-    setOpen(next);
-    setCat('chindi');
-    run();
-  };
-  const home = () => tap(null);
-  const isCat = app?.[0] === 'Chindi';
-  const steps = [
-    { name: 'Touch', value: 'the stylus is down, then up' },
-    { name: 'Filter', value: 'a tap. A lift counts after 100 ms' },
-    { name: 'App', value: app ? `${app[0]} opens` : 'back to the home page' },
-    { name: 'Draw', value: isCat ? 'about 24 ms, on both cores' : 'into a 320 by 240 buffer' },
-    { name: 'Sync', value: 'sent between two redraws' },
-  ];
-
-  return (
-    <div className={s.deck}>
-      <div className={s.device}>
-        <div className={s.screen} data-screen={picture}>
-          <img src={`/deck/${picture}.webp`} width={640} height={480} alt={app ? `The ${app[0]} app on the deck` : 'The home page of the deck, with 15 app icons'} />
-          {app ? (
-            <button type="button" className={s.back} onClick={home} aria-label="Back to the home page" />
-          ) : (
-            DECK.map(([name], i) => (
-              <button
-                key={name}
-                type="button"
-                className={s.icon}
-                style={{ left: `${(i % 5) * 20}%`, top: `${22.5 + Math.floor(i / 5) * 25.8}%` }}
-                onClick={() => tap(i)}
-                aria-label={`Open ${name}`}
-              />
-            ))
-          )}
-        </div>
-      </div>
-      <div className={s.about} aria-live="polite">
-        <h3>{app ? app[0] : 'Home'}</h3>
-        <p>{app ? app[1] : 'Fifteen apps on a 2.8 inch screen. Tap one.'}</p>
-        {app?.[0] === 'Chindi' && (
-          <div className={s.choices}>
-            <button type="button" aria-pressed={cat === 'chindi-dancing'} onClick={() => setCat(cat === 'chindi-dancing' ? 'chindi' : 'chindi-dancing')}>
-              Play a song on the PC
-            </button>
-            <button type="button" aria-pressed={cat === 'chindi-zoomies'} onClick={() => setCat(cat === 'chindi-zoomies' ? 'chindi' : 'chindi-zoomies')}>
-              Zoomies
-            </button>
-          </div>
-        )}
-        {app && (
-          <button type="button" onClick={home}>
-            Home
-          </button>
-        )}
-        <p className={s.small}>These pictures come from the simulator, which runs the code of the deck on a PC.</p>
-      </div>
-      <div className={s.bench}>
-        <Console kind="device" steps={steps} at={at} />
-        <Report ready={at >= steps.length} wait="Drawing" stamp={isCat ? '37 fps' : '41 fps'}>
-          <ul className={s.points}>
-            {isCat ? (
-              <>
-                <li>One frame: the cat 9 ms, the room 6.5, the rest 7</li>
-                <li>She drew at 5 frames a second at the start</li>
-              </>
-            ) : (
-              <>
-                <li>The screen redraws 46 times a second</li>
-                <li>No frame is sent across a redraw, so none is torn</li>
-              </>
-            )}
-            <li>Measured on the real board</li>
-          </ul>
-        </Report>
-      </div>
-    </div>
-  );
-}
-
-type Press = 'step_over' | 'step_in' | 'step_out' | 'continue';
-// What each debugger is really told for each button. The page only ever says the button's own word.
-const SAYS: Record<string, Record<Press, string>> = {
-  Python: { step_over: 'set_next(frame)', step_in: 'set_step()', step_out: 'set_return(frame)', continue: 'set_continue()' },
-  JavaScript: { step_over: 'Debugger.stepOver', step_in: 'Debugger.stepInto', step_out: 'Debugger.stepOut', continue: 'Debugger.resume' },
-  Java: { step_over: 'next', step_in: 'step', step_out: 'step up', continue: 'cont' },
-  'C++': { step_over: '-exec-next', step_in: '-exec-step', step_out: '-exec-finish', continue: '-exec-continue' },
-  Go: { step_over: 'next', step_in: 'step', step_out: 'stepout', continue: 'continue' },
-};
-// The line the model would mark: the one in the loop that calls the function.
-const SUGGESTED = 4;
-
-/** OmniCompiler: one set of debugger controls. Change the language and nothing else changes. */
-function Omni() {
-  const [lang, setLang] = useState('Python');
-  const [step, setStep] = useState(2);
-  const [stops, setStops] = useState<number[]>([]);
-  const at = RUN[step];
-  const last = RUN.length - 1;
-  const ended = step === last;
-  const toggle = (line: number) => setStops(stops.includes(line) ? stops.filter((other) => other !== line) : [...stops, line]);
-
-  // Where each button lands. A step over stays at this depth, a step out goes up one, and
-  // continue runs to the next breakpoint. With nowhere to go, each one runs to the end.
-  const land = (what: Press) => {
-    if (ended) return 0;
-    if (what === 'step_in') return step + 1;
-    const next = RUN.findIndex((frame, i) => {
-      if (i <= step) return false;
-      if (what === 'continue') return stops.includes(frame.line);
-      return what === 'step_over' ? frame.deep <= at.deep : frame.deep < at.deep;
-    });
-    return next === -1 ? last : next;
-  };
-
-  // One press, followed down to the debugger and back.
-  const [said, setSaid] = useState<Press>('step_over');
-  const { at: hop, run } = useRun(4, 190);
-  const press = (what: Press) => {
-    setSaid(what);
-    run();
-    setStep(land(what));
-  };
-  // A new language is a new session: a new container, a new debugger. The run shows it start.
-  const { at: boot, run: start } = useRun(5, 260);
-  const IMAGE: Record<string, string> = { Python: 'python', JavaScript: 'javascript', Java: 'java', 'C++': 'cpp', Go: 'go' };
-  const session = [
-    { name: 'Detect', detail: `${lang}, from the code alone` },
-    { name: 'Container', detail: `omni-runner:${IMAGE[lang]}, about 300 ms` },
-    { name: 'Attach', detail: lang === 'Go' ? 'Delve starts the program' : `${NATIVE[lang]}, through its adapter` },
-    { name: 'Mark', detail: 'the model rings line 5' },
-    { name: 'Ready', detail: 'paused. It waits for you' },
-  ];
-  const trip = [
-    { name: 'Page', detail: `{ "type": "${said}" }` },
-    // Four languages have a small adapter in the container. For Go the server talks to Delve itself.
-    { name: lang === 'Go' ? 'Server' : 'Adapter', detail: lang === 'Go' ? 'talks to Delve itself' : 'puts it in that debugger\'s words' },
-    { name: NATIVE[lang], detail: SAYS[lang][said] },
-    { name: 'Back', detail: `{ "event": "${ended ? 'terminated' : 'stopped'}", "line": ${at.line + 1} }` },
-  ];
-
-  return (
-    <div className={s.omni}>
-      {/* One dark window, laid out as a debugger: tabs, controls, code, state, and the wire under it. */}
-      <div className={s.ide}>
-        <div className={s.tabs} role="group" aria-label="Language">
-          {Object.keys(CODE).map((name) => (
-            <button
-              key={name}
-              type="button"
-              aria-pressed={lang === name}
-              onClick={() => {
-                setLang(name);
-                start();
-              }}
-            >
-              {name}
-            </button>
-          ))}
-        </div>
-        <div className={s.boot}>
-          <Stages stages={session} at={boot} />
-        </div>
-        <div className={s.tools}>
-          <button type="button" className={s.go} onClick={() => press('step_over')}>
-            {ended ? 'Restart' : 'Step over'}
-          </button>
-          <button type="button" disabled={ended} onClick={() => press('step_in')}>
-            Step in
-          </button>
-          <button type="button" disabled={ended || at.deep === 0} onClick={() => press('step_out')}>
-            Step out
-          </button>
-          <button type="button" disabled={ended} onClick={() => press('continue')}>
-            Continue
-          </button>
-          <span data-state>{ended ? 'finished' : `paused on line ${at.line + 1}`}</span>
-        </div>
-        <div className={s.panes}>
-          <ol className={s.code}>
-            {CODE[lang].map((text, i) => (
-              <li key={i} data-here={i === at.line || undefined}>
-                <button
-                  type="button"
-                  className={s.gutter}
-                  aria-pressed={stops.includes(i)}
-                  aria-label={`Breakpoint on line ${i + 1}`}
-                  data-suggested={(i === SUGGESTED && !stops.includes(i)) || undefined}
-                  onClick={() => toggle(i)}
-                >
-                  {i + 1}
-                </button>
-                <code>{text}</code>
-              </li>
-            ))}
-          </ol>
-          <div className={s.side}>
-            <h3>Variables</h3>
-            <dl className={s.watch} data-watch>
-              {at.seen.map(([name, value]) => (
-                <div key={name}>
-                  <dt>{name}</dt>
-                  <dd>{value}</dd>
-                </div>
-              ))}
-            </dl>
-            <h3>Call stack</h3>
-            <ol className={s.frames} data-stack>
-              {at.deep === 1 && <li>area, line 2</li>}
-              <li>main, line {at.deep === 1 ? 5 : at.line + 1}</li>
-            </ol>
-            <h3>Debugger under it</h3>
-            <p className={s.native} data-native>
-              {NATIVE[lang]}
-            </p>
-          </div>
-        </div>
-        <div className={s.wire}>
-          <Stages stages={trip} at={hop} />
-          <p>
-            <span>output</span>
-            <code>{ended ? '29' : ' '}</code>
-          </p>
-        </div>
-      </div>
-      <p className={s.small}>
-        Click a line number to set a breakpoint. The ringed one is where the model would put it. Press Step in on line 5, in two languages, and
-        watch the row at the bottom: the page says the same thing, and each debugger hears its own.
-      </p>
-    </div>
-  );
-}
-
 // Four questions, and what really happens to each. Three go the whole way. One is stopped at the gate.
 type Ask = { q: string; picks?: string; plots?: string; sql?: string; rows?: string; a: string; values?: number[] };
 const ASKS: Ask[] = [
@@ -762,11 +503,6 @@ function sortMessage(text: string) {
   return counts.reduce((best, next) => (next.count > best.count ? next : best));
 }
 
-const SAID = [
-  { how: 'Video', text: 'Someone made an unauthorized transfer. This is fraud and I want to file a complaint.' },
-  { how: 'Voice', text: 'I want to know the interest and the eligibility for a home loan.' },
-  { how: 'Typed', text: 'I forgot my password and the mobile app shows an error at login.' },
-];
 // How many live tickets are ahead, for the made-up branch. The real wait is five minutes for each.
 const AHEAD = 3;
 
@@ -836,11 +572,6 @@ function Idea() {
   );
 }
 
-// My own Spotify export, counted by Chronicle: 104,329 plays from July 2019 to October 2026.
-// Hours listened in each half hour of the day, as Spotify stores them: in UTC.
-const STORED = [7, 7, 8, 12, 24, 48, 72, 93, 109, 129, 118, 113, 119, 136, 142, 151, 159, 151, 146, 149, 158, 170, 175, 180, 184, 178, 180, 158, 148, 152, 146, 139, 152, 144, 150, 153, 164, 157, 120, 70, 38, 21, 10, 5, 4, 3, 4, 5];
-// I live in Mumbai, which is 11 half hours ahead of UTC.
-const HOME = 11;
 const ZONES = [
   { name: 'UTC', id: 'UTC', ahead: 0 },
   { name: 'Mumbai', id: 'Asia/Kolkata', ahead: 11 },
@@ -857,7 +588,6 @@ const WEEK = [
   [44, 24, 9, 1, 0, 0, 0, 3, 4, 9, 19, 31, 50, 50, 56, 69, 76, 72, 63, 63, 56, 53, 48, 50],
 ];
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const YEARS: [year: number, hours: number][] = [[2019, 9], [2020, 9], [2021, 135], [2022, 83], [2023, 1450], [2024, 1441], [2025, 1009], [2026, 925]];
 const hourName = (h: number) => (h === 0 ? '12 am' : h === 12 ? '12 pm' : h < 12 ? `${h} am` : `${h - 12} pm`);
 
 /** Chronicle: my own listening history. The same plays, read on three clocks, then cut by week and by year. */
@@ -1306,82 +1036,14 @@ function Mal() {
   );
 }
 
-const place = (n: number) => ['1st', '2nd', '3rd', '4th', '5th'][n];
-
-/** Local LLM lab: the same five models, ranked by two different numbers. Pick one to see its run. */
-function Lab() {
-  const [byHour, setByHour] = useState(false);
-  const [picked, setPicked] = useState('Gemma 4 26B');
-  const { at, run } = useRun(5, 460);
-  const key = byHour ? 'perHour' : 'pass';
-  const top = Math.max(...MODELS.map((m) => m[key]));
-  const ranked = [...MODELS].sort((a, b) => b[key] - a[key]);
-  const model = MODELS.find((m) => m.name === picked)!;
-  const rank = (by: 'pass' | 'perHour') => [...MODELS].sort((a, b) => b[by] - a[by]).indexOf(model);
-  const steps = [
-    { name: 'Load', value: 'llama-server starts with this model' },
-    { name: 'Ask', value: '33 tasks, 5 times each' },
-    { name: 'Check', value: 'tests run, SQL rows compared' },
-    { name: 'Count', value: `${model.right} of 165 right` },
-    { name: 'Rate', value: `${model.perHour.toLocaleString('en')} right answers an hour` },
-  ];
-  return (
-    <div className={s.lab}>
-      <div className={s.choices} role="group" aria-label="Rank by">
-        <button type="button" aria-pressed={!byHour} onClick={() => setByHour(false)}>
-          Tasks passed
-        </button>
-        <button type="button" aria-pressed={byHour} onClick={() => setByHour(true)}>
-          Right answers per hour
-        </button>
-      </div>
-      <ol className={s.ranks}>
-        {ranked.map((item) => (
-          <li key={item.name}>
-            <button
-              type="button"
-              aria-pressed={picked === item.name}
-              onClick={() => {
-                setPicked(item.name);
-                run();
-              }}
-            >
-              {item.name}
-            </button>
-            <i style={{ transform: `scaleX(${item[key] / top})` }} />
-            <b>{byHour ? item.perHour.toLocaleString('en') : `${item.pass}%`}</b>
-          </li>
-        ))}
-      </ol>
-      <div className={s.bench}>
-        <Console kind="model" steps={steps} at={at} />
-        <Report ready={at >= steps.length} wait="Running the tasks" stamp={`${model.pass}%`}>
-          <p className={s.reply} data-model>
-            {model.name}
-          </p>
-          <Meter share={model.right / 165} label={`${model.right} of 165 runs right`} />
-          <ul className={s.points}>
-            <li>{place(rank('pass'))} of 5 on tasks passed</li>
-            <li>{place(rank('perHour'))} of 5 on right answers per hour</li>
-          </ul>
-        </Report>
-      </div>
-      <p className={s.small}>Real results. The biggest model wins the first list and comes fourth in the second. Pick a model to see its run.</p>
-    </div>
-  );
-}
-
 const DEMOS: Record<string, { title: string; body: () => ReactElement }> = {
   scrub: { title: 'Fit a size', body: Scrub },
   neat: { title: 'The review queue', body: Neat },
-  'prats-deck': { title: 'Tap through it', body: Deck },
-  omnicompiler: { title: 'Debug it', body: Omni },
   floatchat: { title: 'Ask it', body: Float },
   'idea-hackathon': { title: 'Raise a query', body: Idea },
   chronicle: { title: 'My own history', body: Chronicle },
   algomotion: { title: 'Find the way out', body: Algo },
   malshield: { title: 'Check a file', body: Mal },
-  'local-llm-lab': { title: 'Two ways to rank', body: Lab },
 };
 
 const touched = new Set<string>();

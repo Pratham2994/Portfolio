@@ -104,10 +104,14 @@
   }
 }
 
-/* In a funnel and on a lead, things go one way only. */
-[data-sketch='local-llm-lab'] .dot,
-[data-sketch='prats-deck'] .dot {
+/* Only at a hub does the word go out and come back. In the others, things go one way. */
+.sketch:not([data-sketch='omnicompiler']) .dot {
   animation-name: one-way;
+}
+
+/* One thing on one line: it sets off again soon after it has arrived. */
+:is([data-sketch='scrub'], [data-sketch='algomotion'], [data-sketch='floatchat'], [data-sketch='malshield']) .dot {
+  animation-duration: 3.4s;
 }
 
 [data-sketch='prats-deck'] .dot {

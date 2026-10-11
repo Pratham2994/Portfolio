@@ -20,6 +20,7 @@ sectors:
   - title: The chat
     body: You type a question in plain words. The answer streams back with the chart or the map next to it, and you can see which tool it used.
 stack: [Python, FastMCP, PostgreSQL, ChromaDB, Node, React]
+role: "A team project. I built the whole frontend. I did the prompt work: the gatekeeper, the context that goes through the MCP server, and the checks that stop made-up answers. I wrote the first ETL for the float data, and many of the MCP tools for the graphs and the summaries."
 links: { repo: 'https://github.com/VarnikaBajpai4/FloatChat_DebugDynasty_SiH' }
 flow:
   nodes:

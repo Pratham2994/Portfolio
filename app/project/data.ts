@@ -51,11 +51,35 @@ export const RUN: Frame[] = [
 // The debugger each language really runs on. The page never shows these: that is the point.
 export const NATIVE: Record<string, string> = { Python: 'bdb', JavaScript: 'Node Inspector', Java: 'jdb', 'C++': 'gdb', Go: 'Delve' };
 
+export type Press = 'step_over' | 'step_in' | 'step_out' | 'continue';
+// What each debugger is really told for each button. The page only ever says the button's own word.
+export const SAYS: Record<string, Record<Press, string>> = {
+  Python: { step_over: 'set_next(frame)', step_in: 'set_step()', step_out: 'set_return(frame)', continue: 'set_continue()' },
+  JavaScript: { step_over: 'Debugger.stepOver', step_in: 'Debugger.stepInto', step_out: 'Debugger.stepOut', continue: 'Debugger.resume' },
+  Java: { step_over: 'next', step_in: 'step', step_out: 'step up', continue: 'cont' },
+  'C++': { step_over: '-exec-next', step_in: '-exec-step', step_out: '-exec-finish', continue: '-exec-continue' },
+  Go: { step_over: 'next', step_in: 'step', step_out: 'stepout', continue: 'continue' },
+};
+
 // From my own report: 4,101 runs on an RTX 5070. Each model did 33 checked tasks, 5 times each.
 export const MODELS = [
   { name: 'Gemma 4 12B coder', pass: 79, right: 131, perHour: 1588 },
   { name: 'Gemma 4 12B', pass: 87, right: 143, perHour: 1519 },
   { name: 'Gemma 4 E4B', pass: 70, right: 115, perHour: 1357 },
   { name: 'Gemma 4 26B', pass: 93, right: 154, perHour: 808 },
-  { name: 'GPT-OSS 20B', pass: 81, right: 134, perHour: 792 },
+  { name: 'Qwen3.6 35B', pass: 88, right: 145, perHour: 613 },
+];
+
+// My own Spotify export, counted by Chronicle: 104,329 plays from July 2019 to October 2026.
+// Hours listened in each half hour of the day, as Spotify stores them: in UTC.
+export const STORED = [7, 7, 8, 12, 24, 48, 72, 93, 109, 129, 118, 113, 119, 136, 142, 151, 159, 151, 146, 149, 158, 170, 175, 180, 184, 178, 180, 158, 148, 152, 146, 139, 152, 144, 150, 153, 164, 157, 120, 70, 38, 21, 10, 5, 4, 3, 4, 5];
+// I live in Mumbai, which is 11 half hours ahead of UTC.
+export const HOME = 11;
+export const YEARS: [year: number, hours: number][] = [[2019, 9], [2020, 9], [2021, 135], [2022, 83], [2023, 1450], [2024, 1441], [2025, 1009], [2026, 925]];
+
+// Three things a customer says, one for each way to say it.
+export const SAID = [
+  { how: 'Video', text: 'Someone made an unauthorized transfer. This is fraud and I want to file a complaint.' },
+  { how: 'Voice', text: 'I want to know the interest and the eligibility for a home loan.' },
+  { how: 'Typed', text: 'I forgot my password and the mobile app shows an error at login.' },
 ];
