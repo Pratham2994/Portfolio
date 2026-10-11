@@ -1,13 +1,44 @@
-/* The working part of a project page. It uses the page's own colours. */
+/*
+ * The working part of a project page: the part a visitor can use. It is a sheet in the swapped
+ * colours of the page, the same as the stage at the top, so the two read as one family.
+ */
 .demo {
-  --ink: var(--page-fg);
-  --paper: var(--page-bg);
-  --soft: color-mix(in srgb, var(--page-fg) 12%, var(--page-bg));
+  --ink: var(--page-bg);
+  --paper: var(--page-fg);
+  --fg: var(--page-bg);
+  --bg: var(--page-fg);
+  --soft: color-mix(in srgb, var(--page-bg) 9%, var(--page-fg));
+  --muted: color-mix(in srgb, var(--page-bg) 82%, var(--page-fg));
+  --rule: color-mix(in srgb, var(--page-bg) 30%, var(--page-fg));
+  /* The accent, for small type on this sheet: the accent itself where it can be read, the ink where it cannot. */
+  --accent-ink: var(--sheet-accent, var(--ink));
   display: grid;
   gap: var(--space-4);
-  padding: clamp(1rem, 2.6vw, 2rem);
-  border: 2px solid var(--ink);
-  border-radius: 2px;
+  padding: clamp(1.1rem, 3vw, 2.5rem);
+  border-radius: 3px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 2rem 3rem -1.6rem rgb(0 0 0 / 0.6);
+}
+
+/* The name of the demo, and a mark that says it is for the hands, not only the eyes. */
+.demo > h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  margin: 0;
+  color: var(--ink);
+}
+
+.demo > h2::before {
+  content: 'Try it';
+  padding: 0.25em 0.6em;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.demo :focus-visible {
+  outline-color: var(--ink);
 }
 
 .demo > * {
@@ -72,21 +103,14 @@
 }
 
 /*
- * The slip. Each run prints on a strip of paper, like the ticket and the boarding pass on the
- * wall: a line for each step on the long half, and the result on the stub past the tear line.
- * It is printed on stock in the colour of its page, one shade off, so no two pages have the same slip.
+ * A run and its result, side by side on one flat panel: a line for each step on the long half,
+ * and what came of it on the other.
  */
 .bench {
-  --ink: var(--page-fg);
-  --paper: color-mix(in srgb, var(--page-fg) 11%, var(--page-bg));
-  --accent: var(--slip-accent);
-  --soft: color-mix(in srgb, var(--page-fg) 22%, var(--page-bg));
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  border-radius: 3px;
-  background: var(--paper) url('/textures/paper.webp');
-  color: var(--ink);
-  box-shadow: 0 0.9rem 1.6rem -0.9rem rgb(0 0 0 / 0.6);
+  border-radius: 2px;
+  background: var(--soft);
 }
 
 .printed,
@@ -146,30 +170,10 @@
   border-bottom-color: transparent;
 }
 
-/* The tear line, with a notch cut out of the paper at each end of it. */
+/* The result, set off from the run by one thin rule. */
 .stub {
-  position: relative;
   min-height: 9rem;
-  border-top: 2px dashed color-mix(in srgb, var(--ink) 40%, transparent);
-}
-
-.stub::before,
-.stub::after {
-  content: '';
-  position: absolute;
-  top: -0.6rem;
-  width: 1.2rem;
-  height: 1.2rem;
-  border-radius: 50%;
-  background: var(--page-bg);
-}
-
-.stub::before {
-  left: -0.6rem;
-}
-
-.stub::after {
-  right: -0.6rem;
+  border-top: 1px solid var(--rule);
 }
 
 @media (min-width: 760px) {
@@ -179,18 +183,7 @@
 
   .stub {
     border-top: 0;
-    border-left: 2px dashed color-mix(in srgb, var(--ink) 40%, transparent);
-  }
-
-  .stub::before,
-  .stub::after {
-    left: -0.6rem;
-    right: auto;
-  }
-
-  .stub::after {
-    top: auto;
-    bottom: -0.6rem;
+    border-left: 1px solid var(--rule);
   }
 }
 
@@ -210,7 +203,7 @@
 }
 
 .verdict[data-tone='bad'] {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .meter {
@@ -239,7 +232,7 @@
 
 .points li::before {
   content: '\2022\00a0\00a0';
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -361,7 +354,7 @@
 }
 
 .command code b {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .range {
@@ -544,7 +537,7 @@
 }
 
 .tool b {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .tool code {
@@ -863,7 +856,9 @@
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   gap: 1px;
-  max-width: 44rem;
+  max-width: 62rem;
+  margin-inline: auto;
+  width: 100%;
   cursor: pointer;
 }
 

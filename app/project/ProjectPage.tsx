@@ -143,7 +143,8 @@ export function ProjectPage({ project }: { project: Project }) {
     '--accent': project.palette.accent,
     '--page-bg': project.palette.bg,
     '--page-fg': project.palette.fg,
-    '--slip-accent': readable(project.palette),
+    // The same accent on a sheet in the swapped colours, where the page's text colour is the ground.
+    '--sheet-accent': readable({ bg: project.palette.fg, fg: project.palette.bg, accent: project.palette.accent }),
   } as CSSProperties;
 
   // A project with a stage gets a page of its own kind. The others keep the plain one.
