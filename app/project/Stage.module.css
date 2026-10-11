@@ -1,3 +1,47 @@
+/* The stage and the line under it. */
+.frame {
+  display: grid;
+  gap: 0.7rem;
+  min-width: 0;
+  margin: 0;
+}
+
+/* One line in the colours of the page: a light that says it is playing, and what it is. */
+.clue {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8em;
+  padding-inline: var(--gutter);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.clue b {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.clue b::before {
+  content: '';
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.clue em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--fg);
+}
+
 /*
  * The stage: a large sheet in the swapped colours of the page, with the project at work on it.
  * Everything inside is sized from the width of the sheet, so it is the same picture at any size.
@@ -1122,6 +1166,10 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .clue b::before {
+    animation: on-air 1.4s steps(2, jump-none) infinite;
+  }
+
   /* A value that has just changed lands with a small drop. */
   .seen p {
     animation: land 0.3s var(--ease-out);
@@ -1221,5 +1269,11 @@
   55% {
     background: var(--fg);
     color: var(--bg);
+  }
+}
+
+@keyframes on-air {
+  50% {
+    opacity: 0.25;
   }
 }

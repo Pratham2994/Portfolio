@@ -509,6 +509,10 @@
 }
 
 /* ---- A page with a stage. The name on one side, and the project at work on the other. */
+.hero figcaption {
+  padding-inline: 0;
+}
+
 .hero {
   display: grid;
   gap: clamp(1.25rem, 3.2vh, 2.5rem);
@@ -530,6 +534,16 @@
     gap: var(--space-6);
     /* The stage runs off the right edge of the page. */
     margin-right: calc(-1 * var(--gutter));
+  }
+
+  .hero[data-kind='tool'] figcaption,
+  .hero[data-kind='study'] figcaption {
+    padding-right: var(--gutter);
+  }
+
+  .hero[data-kind='hardware'] figcaption,
+  .hero[data-kind='field'] figcaption {
+    padding-inline: var(--gutter);
   }
 
   /* Hardware is shown first and named second. */

@@ -14,11 +14,15 @@ function useTick(pace: number, from = 0, held = false): number {
   const [tick, setTick] = useState(from);
   useEffect(() => {
     if (held || prefersReducedMotion()) return;
-    const timer = window.setInterval(() => {
-      // A tab in the background does not need the show.
-      if (!document.hidden) setTick((before) => before + 1);
-    }, pace);
-    return () => window.clearInterval(timer);
+    // A tab in the background does not need the show.
+    const next = () => !document.hidden && setTick((before) => before + 1);
+    // The first move comes soon after the page opens, so nobody scrolls past a still picture.
+    const first = window.setTimeout(next, Math.min(pace, 650));
+    const timer = window.setInterval(next, pace);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(timer);
+    };
   }, [pace, held]);
   return tick;
 }
@@ -441,17 +445,18 @@ function Algo() {
 }
 
 type Kind = 'tool' | 'study' | 'hardware' | 'field';
-const STAGES: Record<string, { kind: Kind; scene: () => ReactElement }> = {
-  omnicompiler: { kind: 'tool', scene: Omni },
-  'local-llm-lab': { kind: 'study', scene: Lab },
-  'prats-deck': { kind: 'hardware', scene: Deck },
-  scrub: { kind: 'tool', scene: Scrub },
-  neat: { kind: 'hardware', scene: Neat },
-  floatchat: { kind: 'field', scene: Float },
-  'idea-hackathon': { kind: 'hardware', scene: Idea },
-  malshield: { kind: 'field', scene: Mal },
-  chronicle: { kind: 'study', scene: Chronicle },
-  algomotion: { kind: 'tool', scene: Algo },
+// `clue` says, in one line, what the scene is. `try` is there when the visitor can drive it.
+const STAGES: Record<string, { kind: Kind; scene: () => ReactElement; clue: string; try?: string }> = {
+  omnicompiler: { kind: 'tool', scene: Omni, clue: 'One small program, stepped through in five languages.', try: 'Press a language or a button to take over.' },
+  'local-llm-lab': { kind: 'study', scene: Lab, clue: 'My real results, ranked two ways.', try: 'Press a ranking to hold it.' },
+  'prats-deck': { kind: 'hardware', scene: Deck, clue: 'The real screens of the deck.', try: 'Tap an app to open it.' },
+  scrub: { kind: 'tool', scene: Scrub, clue: 'A trim: two handles on your frames, and one command.' },
+  neat: { kind: 'hardware', scene: Neat, clue: 'What Neat does to a Downloads folder.' },
+  floatchat: { kind: 'field', scene: Float, clue: 'One float, one dive. This is where the answers come from.' },
+  'idea-hackathon': { kind: 'hardware', scene: Idea, clue: 'Three ways to say what is wrong, and where each one lands.' },
+  malshield: { kind: 'field', scene: Mal, clue: 'A file being read, without being run.' },
+  chronicle: { kind: 'study', scene: Chronicle, clue: 'When I listen, from my own 104,329 plays.' },
+  algomotion: { kind: 'tool', scene: Algo, clue: 'A bubble sort, run once and played back.' },
 };
 
 /** What kind of page a project gets. Without a stage it keeps the plain one. */
@@ -459,10 +464,20 @@ export const kindOf = (slug: string) => STAGES[slug]?.kind;
 
 /** The live scene at the top of a project page: the project doing its one thing, on a loop. */
 export function Stage({ slug }: { slug: string }) {
-  const Scene = STAGES[slug].scene;
+  const { scene: Scene, kind, clue, try: hint } = STAGES[slug];
   return (
-    <div className={s.stage} data-stage={slug} data-wide={STAGES[slug].kind === 'field' || undefined} data-in>
-      <Scene />
-    </div>
+    <figure className={s.frame} data-in>
+      <div className={s.stage} data-stage={slug} data-wide={kind === 'field' || undefined}>
+        <Scene />
+      </div>
+      {/* A small light, as on a camera, and one line that says what is on the stage. */}
+      <figcaption className={s.clue} data-clue>
+        <b>Live</b>
+        <span>
+          {clue}
+          {hint && <em> {hint}</em>}
+        </span>
+      </figcaption>
+    </figure>
   );
 }

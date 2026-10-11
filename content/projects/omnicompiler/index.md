@@ -21,7 +21,7 @@ sectors:
   - title: It guesses for you
     body: Paste code and it works out the language. On a test set with text made to fool it, it got none wrong. A second model marks the lines where a breakpoint is likely to help, with an F1 score of 0.86.
 stack: [Python, FastAPI, Docker, React, Random Forest, Gemini]
-role: "A team project, and most of it is mine. I built the whole frontend, the backend routes, the database, and the WebSocket flow for run and debug. I worked on the design of the debugger protocol. The paper was half mine."
+role: "A team project. I built the frontend, the backend routes, the database, and the WebSocket flow for run and debug. I worked with the team on the design of the debugger protocol, and we wrote the paper together."
 links: { repo: 'https://github.com/Pratham2994/OmniCompiler' }
 flow:
   nodes:
