@@ -69,7 +69,7 @@
 
 /* A scene that lies across the whole page is long and low. */
 .stage[data-wide] > * {
-  aspect-ratio: 16 / 6;
+  aspect-ratio: 16 / 5.2;
 }
 
 .stage button {

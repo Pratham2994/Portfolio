@@ -584,8 +584,24 @@
     margin-inline: calc(-1 * var(--gutter));
   }
 
+  /* The name and its line share one row, so the whole scene under them is on the first screen. */
   .hero[data-kind='field'] > :first-child {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+    column-gap: var(--space-6);
     padding-inline: var(--gutter);
+  }
+
+  .hero[data-kind='field'] .title {
+    font-size: clamp(2.25rem, calc(50cqw / (var(--chars) * 0.56)), 9rem);
+  }
+
+  .hero[data-kind='field'] .tagline {
+    padding-bottom: 0.2em;
+  }
+
+  .hero[data-kind='field'] .statusBelow {
+    grid-column: 1 / -1;
   }
 
   /* A study leads with its numbers, in one row across the page. */
@@ -820,12 +836,13 @@
 @media (prefers-reduced-motion: no-preference) {
   .third {
     display: flex;
-    animation: third 3.1s cubic-bezier(0.16, 1, 0.3, 1) 0.75s both;
+    /* It is up while the page opens, and gone before anyone starts to read under it. */
+    animation: third 2.1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
   }
 
   /* The name is wiped in a beat after the number, as on television. */
   .third span {
-    animation: third-name 3.1s cubic-bezier(0.16, 1, 0.3, 1) 0.75s both;
+    animation: third-name 2.1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
   }
 }
 

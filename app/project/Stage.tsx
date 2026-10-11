@@ -354,7 +354,8 @@ function Idea() {
 
 // A page of bytes that starts as a Windows program does: with MZ. The same bytes each time.
 const BYTES = Array.from({ length: 96 }, (_, i) => (i === 0 ? '4d' : i === 1 ? '5a' : ((i * 73 + 41) % 256).toString(16).padStart(2, '0')));
-const BAD = new Set([17, 18, 19, 20, 44, 45, 46, 70, 71, 72, 73, 74]);
+// Two runs of bytes, one for each of the two rules that match.
+const BAD = new Set([17, 18, 19, 20, 53, 54, 55]);
 
 /** MalShield: a scan line goes down a page of bytes, and the ones that match a rule light up. */
 function Mal() {
