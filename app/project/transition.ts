@@ -91,10 +91,10 @@ export function openFrom(poster: HTMLElement | null, page: HTMLElement): Promise
       .to(page, { opacity: 1, duration: 0.04, ease: 'none' }, GROW - 0.04)
       // Then that same patch of colour grows to fill the screen, and the wall steps back.
       // It starts at full speed, with no wind-up, so the page answers the click at once.
-      .to(page, { clipPath: FULL, duration: 0.32, ease: 'power3.out' }, GROW)
-      .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.32, ease: 'power3.out' }, GROW)
-      .call(() => resetPoster(poster), [], GROW + 0.3)
-      .to(items, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', stagger: 0.03 }, GROW + 0.08);
+      .to(page, { clipPath: FULL, duration: 0.42, ease: 'power3.out' }, GROW)
+      .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.42, ease: 'power3.out' }, GROW)
+      .call(() => resetPoster(poster), [], GROW + 0.36)
+      .to(items, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', stagger: 0.03 }, GROW + 0.12);
   });
 }
 
