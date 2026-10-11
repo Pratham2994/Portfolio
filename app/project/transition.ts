@@ -29,6 +29,8 @@ const RECEDE = { scale: 0.92, opacity: 0.25 };
 const PEELED = 0.34;
 // The peel waits this long, while the new page is built and painted. Matches its delay in the CSS.
 const WAIT = 0.02;
+// The curl is past the whole sheet a little before its animation ends. The page starts to grow then.
+const GROW = WAIT + PEELED - 0.08;
 
 /** Puts a peeled sheet back on the wall, whole. */
 function resetPoster(poster: HTMLElement): void {
@@ -86,13 +88,13 @@ export function openFrom(poster: HTMLElement | null, page: HTMLElement): Promise
       // One move in two parts. First the printed sheet peels off from its corner, all the way,
       // and what is under it is the page, in the same colour. Nothing is left half done.
       // The page is put exactly where the sheet was, so the eye sees no change.
-      .to(page, { opacity: 1, duration: 0.04, ease: 'none' }, WAIT + PEELED - 0.04)
+      .to(page, { opacity: 1, duration: 0.04, ease: 'none' }, GROW - 0.04)
       // Then that same patch of colour grows to fill the screen, and the wall steps back.
       // It starts at full speed, with no wind-up, so the page answers the click at once.
-      .to(page, { clipPath: FULL, duration: 0.5, ease: 'power3.out' }, WAIT + PEELED)
-      .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.5, ease: 'power3.out' }, WAIT + PEELED)
-      .call(() => resetPoster(poster), [], WAIT + PEELED + 0.4)
-      .to(items, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', stagger: 0.035 }, WAIT + PEELED + 0.16);
+      .to(page, { clipPath: FULL, duration: 0.32, ease: 'power3.out' }, GROW)
+      .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.32, ease: 'power3.out' }, GROW)
+      .call(() => resetPoster(poster), [], GROW + 0.3)
+      .to(items, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', stagger: 0.03 }, GROW + 0.08);
   });
 }
 
