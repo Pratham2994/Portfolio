@@ -718,14 +718,18 @@
  * The scroll then goes through the three steps: the one it is on is open, the others wait.
  */
 @media (min-width: 1000px) and (min-height: 620px) and (prefers-reduced-motion: no-preference) {
+  /*
+   * The part is longer than what is in it, and that extra length is the scroll that goes through
+   * the steps. What is in it is only as tall as itself, and it is held near the middle of the
+   * screen. So there is no empty screen before the steps or after them.
+   */
   .how {
-    height: 240vh;
+    height: calc(100vh + 34rem);
   }
 
   .pin {
     position: sticky;
-    top: 4.25rem;
-    height: calc(100vh - 4.25rem);
+    top: max(5.5rem, 50vh - 15rem);
   }
 
   .steps li {

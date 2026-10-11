@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactElement, typ
 import { track } from '~/lib/analytics';
 import { prefersReducedMotion } from '~/lib/motion';
 
-import { HOME, SAID, STORED, YEARS } from './data';
+import { ASKS, FLOATS, HOME, SAID, STORED, YEARS } from './data';
 import s from './Demo.module.css';
 
 /* One small working part per project. Each shows the idea of the project in a few seconds. */
@@ -332,40 +332,6 @@ function Neat() {
   );
 }
 
-// Four questions, and what really happens to each. Three go the whole way. One is stopped at the gate.
-type Ask = { q: string; picks?: string; plots?: string; sql?: string; rows?: string; a: string; values?: number[] };
-const ASKS: Ask[] = [
-  {
-    q: 'How warm was the Arabian Sea this year?',
-    picks: 'timeseries_line',
-    plots: 'generate_time_series',
-    sql: "SELECT date_trunc('month', p.juld_time) AS time, avg(l.temp) AS avg_temp FROM profiles p JOIN levels_core l ON l.profile_id = p.id WHERE l.pres < 10 AND p.latitude BETWEEN 8 AND 25 AND p.longitude BETWEEN 55 AND 75 GROUP BY 1 ORDER BY 1",
-    rows: '12 rows',
-    a: 'Warmest in May, near 30 °C at the surface. Coolest in January.',
-    values: [22, 26, 34, 46, 58, 52, 44, 40, 42, 38, 30, 24],
-  },
-  {
-    q: 'Where is the water saltiest?',
-    picks: 'heatmap_grid',
-    plots: 'generate_heatmap',
-    sql: 'SELECT round(p.latitude) AS lat, round(p.longitude) AS lon, avg(l.psal) AS value FROM profiles p JOIN levels_core l ON l.profile_id = p.id WHERE l.pres < 10 GROUP BY 1, 2',
-    rows: '50 cells',
-    a: 'The north of the Arabian Sea. It gets fresher toward the Bay of Bengal.',
-  },
-  {
-    q: 'Show me the floats near India.',
-    picks: 'map_points',
-    plots: 'generate_map_points',
-    sql: 'SELECT p.latitude AS lat, p.longitude AS lon FROM profiles p WHERE p.latitude BETWEEN 5 AND 25 AND p.longitude BETWEEN 55 AND 95',
-    rows: '26 points',
-    a: 'Each dot is one float that reported in. Most are west of the coast.',
-  },
-  // Not about the ocean. The first model call says so, and nothing after it runs.
-  { q: 'Best pizza in Pune?', a: 'Your query is irrelevant or off-topic. Please ask a relevant question about ARGO float data.' },
-];
-
-// A fixed scatter of floats, and a fixed salt field, so the pictures are the same on every visit.
-const FLOATS = Array.from({ length: 26 }, (_, i) => ({ x: 18 + ((i * 97) % 150) + (i % 3) * 6, y: 14 + ((i * 53) % 68) }));
 const SALT = Array.from({ length: 50 }, (_, i) => {
   const column = i % 10;
   const row = Math.floor(i / 10);

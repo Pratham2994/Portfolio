@@ -3,7 +3,7 @@ import { useEffect, useState, type CSSProperties, type ReactElement } from 'reac
 import { track } from '~/lib/analytics';
 import { prefersReducedMotion } from '~/lib/motion';
 
-import { CODE, DECK, HOME, MODELS, NATIVE, RUN, SAID, SAYS, STORED, type Press } from './data';
+import { ASKS, CODE, DECK, FLOATS, HOME, MODELS, NATIVE, RUN, SAID, SAYS, STORED, type Press } from './data';
 import s from './Stage.module.css';
 
 /**
@@ -303,51 +303,80 @@ function Neat() {
   );
 }
 
-/** FloatChat: the sea, cut through. A float sinks to 2,000 m, comes back up, and draws what it measured. */
+// The two questions that come back as a picture: a line through the year, and a map of the floats.
+const ASKED = [ASKS[0], ASKS[2]];
+
+/** FloatChat: one question, start to end. It is asked, the model picks a tool, and a picture comes back. */
 function Float() {
+  const tick = useTick(1500, 2);
+  const ask = ASKED[Math.floor(tick / 5) % ASKED.length];
+  // Asked, then the tool, then the answer, which stays up for two beats.
+  const step = tick % 5;
+  const line = ask.values?.map((value, i) => `${12 + i * 16},${92 - value * 1.35}`).join(' ');
+
   return (
-    <div className={s.float} role="img" aria-label="A float sinks through the sea to 2,000 metres and comes back up. The temperature it measured is drawn beside it.">
-      <div className={s.sea} aria-hidden="true">
-        <span>surface</span>
-        <span>1,000 m</span>
-        <span>2,000 m</span>
-        <i className={s.buoy} />
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-          {/* Warm at the top, cold below: the shape every profile has. */}
-          <path className={s.profile} pathLength={100} d="M92 4 C 88 20, 60 24, 44 34 C 30 44, 24 62, 20 96" />
-        </svg>
-      </div>
-      <p className={s.asked} aria-hidden="true">
+    <div className={s.float} role="img" aria-label="A question about the sea is asked in plain words. The model picks a tool, the tool runs a real query, and a chart or a map comes back.">
+      <p className={s.ask} aria-hidden="true" key={ask.q}>
         <span>You ask</span>
-        <strong>How warm was the Arabian Sea last March?</strong>
-        <em>It answers from what the floats measured, with the map.</em>
+        <strong>{ask.q}</strong>
       </p>
+      <p className={s.pick} aria-hidden="true" data-on={step >= 1 || undefined}>
+        <span>It picks a tool</span>
+        <code>{ask.picks}</code>
+        <em>{ask.rows}, from the float data</em>
+      </p>
+      <div className={s.answer} aria-hidden="true" data-on={step >= 2 || undefined}>
+        <span>You get</span>
+        <svg viewBox="0 0 200 96">
+          {line ? (
+            <polyline className={s.trace} points={line} pathLength={100} />
+          ) : (
+            FLOATS.map((float, i) => <circle key={i} className={s.spot} cx={float.x} cy={float.y} r="2.6" style={at({ '--i': i })} />)
+          )}
+        </svg>
+        <em>{ask.a}</em>
+      </div>
     </div>
   );
 }
 
 const DESK_FOR: Record<string, string> = { Video: 'Grievance', Voice: 'Loans', Typed: 'Operations' };
 
-/** iDEA: say it one of three ways, and it lands on the right desk. */
+/** iDEA: one visit, in three steps. A face at the door, the thing said, and the desk it lands on. */
 function Idea() {
-  const tick = useTick(3000);
-  const said = SAID[tick % SAID.length];
+  const tick = useTick(1400, 3);
+  const said = SAID[Math.floor(tick / 5) % SAID.length];
+  const step = tick % 5;
+
   return (
-    <div className={s.idea} role="img" aria-label="A message is typed, spoken or recorded, and it goes to the right department of the bank.">
-      <p className={s.ways} aria-hidden="true">
-        {SAID.map((item) => (
-          <span key={item.how} data-on={item === said || undefined}>
-            {item.how}
-          </span>
-        ))}
-      </p>
-      <p className={s.words} aria-hidden="true" key={said.how}>
-        {said.text}
-      </p>
-      <p className={s.goes} aria-hidden="true">
-        <span>goes to</span>
+    <div className={s.idea} role="img" aria-label="A customer logs in with a face check, says what is wrong by video, voice or typing, and it goes to the right department of the bank.">
+      <div className={s.door} aria-hidden="true">
+        <span>1. Log in</span>
+        {/* A face in a frame, with the line of a scan going down it. */}
+        <svg viewBox="0 0 100 100" key={said.how}>
+          <path className={s.corners} d="M8 26 V8 H26 M74 8 H92 V26 M92 74 V92 H74 M26 92 H8 V74" />
+          <circle className={s.head} cx="50" cy="40" r="15" />
+          <path className={s.head} d="M22 84 C 24 62, 76 62, 78 84 Z" />
+          <path className={s.sweep} d="M12 20 H88" />
+        </svg>
+        <em>a password, then your face</em>
+      </div>
+      <div className={s.say} aria-hidden="true" data-on={step >= 1 || undefined}>
+        <span>2. Say it your way</span>
+        <p>
+          {SAID.map((item) => (
+            <b key={item.how} data-on={item === said || undefined}>
+              {item.how}
+            </b>
+          ))}
+        </p>
+        <strong key={said.how}>{said.text}</strong>
+      </div>
+      <div className={s.lands} aria-hidden="true" data-on={step >= 2 || undefined}>
+        <span>3. It lands</span>
         <strong key={said.how}>{DESK_FOR[said.how]}</strong>
-      </p>
+        <em>a place in the queue, or a booked slot</em>
+      </div>
     </div>
   );
 }
@@ -453,8 +482,8 @@ const STAGES: Record<string, { kind: Kind; scene: () => ReactElement; clue: stri
   'prats-deck': { kind: 'hardware', scene: Deck, clue: 'The real screens of the deck.', try: 'Tap an app to open it.' },
   scrub: { kind: 'tool', scene: Scrub, clue: 'A trim: two handles on your frames, and one command.' },
   neat: { kind: 'hardware', scene: Neat, clue: 'What Neat does to a Downloads folder.' },
-  floatchat: { kind: 'field', scene: Float, clue: 'One float, one dive. This is where the answers come from.' },
-  'idea-hackathon': { kind: 'hardware', scene: Idea, clue: 'Three ways to say what is wrong, and where each one lands.' },
+  floatchat: { kind: 'field', scene: Float, clue: 'A question in plain words, the tool the model picks, and what comes back.' },
+  'idea-hackathon': { kind: 'hardware', scene: Idea, clue: 'A visit to the desk: you log in, you say it your way, and it lands with the right people.' },
   malshield: { kind: 'field', scene: Mal, clue: 'A file being read, without being run.' },
   chronicle: { kind: 'study', scene: Chronicle, clue: 'When I listen, from my own 104,329 plays.' },
   algomotion: { kind: 'tool', scene: Algo, clue: 'A bubble sort, run once and played back.' },

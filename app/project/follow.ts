@@ -16,10 +16,13 @@ export function follow(page: HTMLElement): () => void {
     page.dataset.sector = String(Math.min(Math.floor(done * 3 + 0.002), 3));
 
     if (!how) return;
-    // The part is taller than the screen, and its content is pinned while the rest of it goes by.
+    // The part is taller than its content, and the content is pinned while the rest of it goes by.
+    // It is pinned from when the part reaches the pin's place to when its end reaches the pin's end.
+    const pin = how.firstElementChild as HTMLElement;
+    const held = parseFloat(getComputedStyle(pin).top) || 0;
     const box = how.getBoundingClientRect();
-    const travel = box.height - window.innerHeight;
-    const through = travel > 0 ? Math.min(Math.max(-box.top / travel, 0), 0.999) : 0;
+    const travel = box.height - pin.offsetHeight;
+    const through = travel > 1 ? Math.min(Math.max((held - box.top) / travel, 0), 0.999) : 0;
     how.dataset.at = String(Math.floor(through * 3));
   };
 

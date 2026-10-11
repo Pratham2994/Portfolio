@@ -91,9 +91,12 @@ function Code() {
 function Device() {
   return (
     <div className={s.device}>
-      {times(6, (i) => (
-        <i key={i} style={{ animationDelay: `${i * 600}ms` }} />
+      {/* The bar with the clock, the fifteen apps, and the lead out of the case. */}
+      <b />
+      {times(15, (i) => (
+        <i key={i} style={{ animationDelay: `${((i * 7) % 15) * 240}ms` }} />
       ))}
+      <u />
     </div>
   );
 }
