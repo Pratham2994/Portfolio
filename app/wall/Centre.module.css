@@ -16,9 +16,13 @@
   min-height: 0;
 }
 
+/* One panel of the board: two cards side by side, with the seam of a split flap across them. */
 .panel {
-  display: grid;
-  place-items: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.02em;
   overflow: hidden;
   border-radius: 2px;
   background: var(--panel);
@@ -38,10 +42,58 @@
   transition: translate var(--dur-base) var(--ease-out);
 }
 
+.panel::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto;
+  height: max(2px, 0.5cqw);
+  background: var(--wall);
+  opacity: 0.6;
+  translate: 0 -50%;
+}
+
 .line {
+  /* Two lines of room, so the board does not move when the line under it changes. */
+  min-height: 2.5em;
   font-size: clamp(0.8125rem, 2.5cqw, 1.25rem);
   line-height: 1.25;
   text-wrap: balance;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* A card that is still falling: it tips in from the top, again and again, until it stops. */
+  .letters[data-moving] {
+    animation: card-fall 60ms linear infinite;
+    transform-origin: 50% 0;
+  }
+
+  /* The new line comes up as the last card stops. */
+  .line {
+    animation: line-in 0.5s var(--ease-out) backwards;
+  }
+}
+
+@keyframes card-fall {
+  from {
+    transform: perspective(3em) rotateX(-60deg);
+    filter: brightness(0.65);
+  }
+
+  to {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes line-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+    translate: 0 0.4em;
+  }
+
+  to {
+    clip-path: inset(-10%);
+  }
 }
 
 .name {

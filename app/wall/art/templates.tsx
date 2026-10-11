@@ -75,13 +75,14 @@ function Bars({ motif }: ArtProps) {
 }
 
 function Code() {
-  const widths = [70, 92, 54, 84, 62, 40];
   return (
     <div className={s.code}>
-      <u />
-      <b />
-      {widths.map((width, i) => (
-        <i key={i} style={vars({ '--w': `${width}%` })} />
+      {/* The line the debugger is on, with its breakpoint. It steps from one language to the next. */}
+      <u>
+        <b />
+      </u>
+      {['Python', 'JavaScript', 'Java', 'C++', 'Go'].map((name) => (
+        <i key={name}>{name}</i>
       ))}
     </div>
   );

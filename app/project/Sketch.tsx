@@ -178,17 +178,17 @@ const Tape = () => (
 function Fork() {
   return (
     <svg viewBox="0 0 360 190">
-      <path className={s.wire} d="M112 95 H150" />
+      <path className={s.wire} d="M124 95 H150" />
       <path className={s.wire} d="M210 95 C 236 95, 236 46, 262 46" />
       <path className={s.wire} d="M210 95 C 236 95, 236 144, 262 144" />
       <circle className={s.dot} r="5" style={{ ...at(0), offsetPath: "path('M60 95 H180 C 236 95, 236 46, 262 46')" }} />
       <circle className={s.dot} r="5" style={{ ...at(2), offsetPath: "path('M60 95 H180 C 236 95, 236 144, 262 144')" }} />
       <g data-part>
-        <rect className={s.box} x="12" y="70" width="100" height="50" rx="3" />
-        <text className={s.name} x="62" y="93">
+        <rect className={s.box} x="2" y="70" width="122" height="50" rx="3" />
+        <text className={s.name} x="63" y="93">
           A NEW FILE
         </text>
-        <text className={s.note} x="62" y="108">
+        <text className={s.note} x="63" y="108">
           lands in Downloads
         </text>
       </g>
