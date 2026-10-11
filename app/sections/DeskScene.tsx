@@ -4,7 +4,16 @@ import type { DeskId } from '~/content/schema';
 
 import s from './Desk.module.css';
 
-type Props = { active: DeskId | null; onPick: (id: DeskId) => void; children?: ReactNode };
+type Props = {
+  active: DeskId | null;
+  /** The thing under the pointer, or the one whose name has the focus. */
+  hot: DeskId | null;
+  onPick: (id: DeskId) => void;
+  onHot: (id: DeskId | null) => void;
+  /** A press on the room itself, not on a thing: put back what is picked up. */
+  onBack: () => void;
+  children?: ReactNode;
+};
 
 /** The hour and minute in Pune, as angles for the clock hands. */
 export function usePuneTime() {
@@ -31,20 +40,25 @@ const CLOCK_COLOURS = ['#2f6bff', '#ffc21a', '#ff3b3b', '#3ddc84', '#ff7a1a', '#
  * with yellow keys, the orange mouse, the headset, the laptop on its stand, the small
  * figures, and the tower with its fans on the floor.
  */
-export function DeskScene({ active, onPick, children }: Props) {
+export function DeskScene({ active, hot, onPick, onHot, onBack, children }: Props) {
   const time = usePuneTime();
   const part = (id: DeskId) => ({
     className: s.object,
     'data-object': id,
     'data-active': active === id || undefined,
+    'data-hot': hot === id || undefined,
     onClick: () => onPick(id),
+    onPointerEnter: () => onHot(id),
+    onPointerLeave: () => onHot(null),
   });
   const hourAngle = time ? ((time.hour % 12) + time.minute / 60) * 30 : 300;
   const minuteAngle = time ? time.minute * 6 : 60;
 
   return (
     <div className={s.scene} data-scene>
-      <svg viewBox="0 0 1000 600" aria-hidden="true">
+      <svg viewBox="0 0 1000 600" aria-hidden="true" onClick={(event) => event.target === event.currentTarget && onBack()}>
+        {/* the floor */}
+        <path className={s.floor} d="M0 578 H1000" />
         {/* wall clock, showing the time in Pune */}
         <g className={s.clock}>
           <circle cx="900" cy="74" r="52" className={s.clockRim} />

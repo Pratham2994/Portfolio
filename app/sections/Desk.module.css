@@ -103,8 +103,29 @@
 }
 
 .scene svg {
+  display: block;
   width: 100%;
   height: auto;
+}
+
+.floor {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+/* The lamp over the desk: a soft light in the colour of the room, from the top of the wall. */
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 80% at 50% 0%, color-mix(in srgb, var(--lamp) 16%, transparent), transparent 70%);
+  pointer-events: none;
+  transition: background-color var(--dur-slow) var(--ease-out);
+}
+
+.hint {
+  display: none;
 }
 
 .time {
@@ -345,8 +366,13 @@
   }
 }
 
-.object[data-active] {
+.object[data-active],
+.object[data-hot] {
   translate: 0 -6px;
+}
+
+.object[data-hot] :is(.bezel, .tower) {
+  stroke: var(--bone);
 }
 
 .object[data-active] :is(.bezel, .tower) {
@@ -827,12 +853,20 @@
     overflow: hidden;
   }
 
-  /* As wide as it can be with the whole desk still on one screen. */
+  /*
+   * As wide as it can be with the whole desk still on one screen. The box is exactly the
+   * drawing, so a place in the drawing is the same place in the box.
+   */
   .scene {
     width: min(100%, 74vh * 1000 / 600);
+    aspect-ratio: 1000 / 600;
     margin-inline: auto;
     transform-origin: calc(var(--x, 50) * 1%) calc(var(--y, 50) * 1%);
-    transition: transform 0.9s var(--ease-in-out);
+    transition: transform 0.85s cubic-bezier(0.65, 0, 0.3, 1);
+  }
+
+  .scene svg {
+    height: 100%;
   }
 
   .room[data-open] .scene {
@@ -846,34 +880,92 @@
     pointer-events: none;
   }
 
+  /* A name is tied to a point on the edge of its thing, by a short line. */
   .tabs button {
+    --gap: 0.8rem;
     position: absolute;
     top: calc(var(--y) * 1%);
     left: calc(var(--x) * 1%);
     padding: 0.4em 0.7em;
+    border-color: var(--bone);
     background: var(--wall-shade);
     color: var(--bone);
     white-space: nowrap;
-    translate: -50% -100%;
+    translate: -50% calc(-100% - var(--gap));
+    transform-origin: 50% calc(100% + var(--gap));
     pointer-events: auto;
     box-shadow: 0 0.4rem 0.8rem -0.3rem rgb(0 0 0 / 0.8);
+    transition:
+      background-color var(--dur-fast) linear,
+      color var(--dur-fast) linear,
+      opacity var(--dur-base) linear,
+      scale 0.85s cubic-bezier(0.65, 0, 0.3, 1);
   }
 
-  /* A short line from the name down to the thing. */
+  /* Close up, the view is larger. The names are made smaller by as much, so they stay the size they were. */
+  .room[data-open] .tabs button {
+    scale: 0.69;
+  }
+
   .tabs button::after {
     content: '';
     position: absolute;
     top: 100%;
     left: 50%;
     width: 1px;
-    height: 0.7rem;
+    height: var(--gap);
     background: var(--bone);
   }
 
-  /* Close up, the names are as large as before: the view grew, the type did not. */
-  .room[data-open] .tabs button {
-    scale: 0.7;
-    transform-origin: 50% 100%;
+  .tabs button[data-side='below'] {
+    translate: -50% var(--gap);
+    transform-origin: 50% calc(0% - var(--gap));
+  }
+
+  .tabs button[data-side='below']::after {
+    top: auto;
+    bottom: 100%;
+  }
+
+  .tabs button[data-side='left'] {
+    translate: calc(-100% - var(--gap)) -50%;
+    transform-origin: calc(100% + var(--gap)) 50%;
+  }
+
+  .tabs button[data-side='left']::after {
+    top: 50%;
+    left: 100%;
+    width: var(--gap);
+    height: 1px;
+  }
+
+  .tabs button[data-hot],
+  .tabs button[aria-expanded='true'] {
+    background: var(--bone);
+    color: var(--wall-shade);
+  }
+
+  /* With one thing picked up, the other names step back. */
+  .room[data-open] .tabs button:not([aria-expanded='true'], [data-hot], :focus-visible) {
+    opacity: 0.45;
+  }
+
+  /* What to do, said once, in the corner. It goes when something is picked up. */
+  .hint {
+    position: absolute;
+    bottom: var(--space-3);
+    left: var(--space-3);
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bone);
+    transition: opacity var(--dur-base) linear;
+  }
+
+  .room[data-open] .hint {
+    opacity: 0;
   }
 
   .side {
@@ -894,8 +986,9 @@
 }
 
 @media (min-width: 1000px) and (prefers-reduced-motion: no-preference) {
+  /* The card opens as the view arrives, not before it. */
   :global(html[data-ready]) .card[data-open] {
-    animation: card-slide 0.6s var(--ease-out) both;
+    animation: card-slide 0.6s var(--ease-out) 0.18s both;
   }
 }
 

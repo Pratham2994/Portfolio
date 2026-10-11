@@ -13,15 +13,22 @@ const ROOMS = ['white', 'purple', 'red', 'cyan', 'green', 'amber'] as const;
 
 const ORDER: DeskId[] = ['sports', 'games', 'anime', 'music', 'pc', 'cube', 'now'];
 
-// Where each thing is in the drawing, and where its name is pinned, as parts of a hundred.
-const SPOT: Record<DeskId, { at: [number, number]; tag: [number, number] }> = {
-  sports: { at: [17.8, 41], tag: [17.8, 17] },
-  games: { at: [42.5, 45], tag: [42.5, 27] },
-  anime: { at: [6.9, 60], tag: [8, 53] },
-  music: { at: [64.4, 55], tag: [64.4, 46] },
-  pc: { at: [93.2, 84], tag: [93.2, 70] },
-  cube: { at: [67.9, 63], tag: [70, 73] },
-  now: { at: [83.6, 57], tag: [83.6, 47] },
+/**
+ * Where each thing is in the drawing, as parts of a hundred of its width and height. `at` is its
+ * middle, for the close view. `tag` is the point on its edge that its name is tied to, and `side`
+ * is the side of that point the name sits on. The numbers come from the drawing itself, so a
+ * name is always on its thing, at any size.
+ */
+const SPOT: Record<DeskId, { at: [number, number]; tag: [number, number]; side: 'above' | 'below' | 'left' }> = {
+  sports: { at: [17.8, 41.2], tag: [17.8, 19.67], side: 'above' },
+  games: { at: [42.5, 45], tag: [42.5, 29.33], side: 'above' },
+  anime: { at: [6.9, 61], tag: [6.9, 57.33], side: 'above' },
+  music: { at: [64.4, 56], tag: [64.4, 46.67], side: 'above' },
+  now: { at: [83.6, 54], tag: [83.6, 45.33], side: 'above' },
+  // The cube is small, with the headset over it. Its name hangs under the desk top.
+  cube: { at: [67.9, 62.8], tag: [67.9, 66.67], side: 'below' },
+  // The tower stands under the desk, so its name is beside it.
+  pc: { at: [93.2, 84.7], tag: [88.4, 84.67], side: 'left' },
 };
 
 /** A scoreboard: the sport, and whose side he is on. */
@@ -220,6 +227,16 @@ export function Desk() {
     if (active !== id) track('desk_card', { card: id });
   };
   const step = (by: number) => pick(ORDER[(ORDER.indexOf(active!) + by + ORDER.length) % ORDER.length]);
+  // A thing and its name light up together, whichever one the pointer is on.
+  const [hot, setHot] = useState<DeskId | null>(null);
+
+  // Escape puts back what is picked up.
+  useEffect(() => {
+    if (!active) return;
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setActive(null);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [active]);
   const room = ROOMS[light];
 
   const cards: Record<DeskId, { note?: string; body: ReactNode }> = {
@@ -254,7 +271,7 @@ export function Desk() {
         style={active ? ({ '--x': SPOT[active].at[0], '--y': SPOT[active].at[1] } as CSSProperties) : undefined}
       >
         <div className={s.stage}>
-          <DeskScene active={active} onPick={pick}>
+          <DeskScene active={active} hot={hot} onPick={pick} onHot={setHot} onBack={() => setActive(null)}>
             <div className={s.tabs} role="group" aria-label="Things on the desk">
               {ORDER.map((id) => (
                 <button
@@ -263,6 +280,12 @@ export function Desk() {
                   aria-expanded={active === id}
                   aria-controls={`desk-${id}`}
                   onClick={() => pick(id)}
+                  onPointerEnter={() => setHot(id)}
+                  onPointerLeave={() => setHot(null)}
+                  onFocus={() => setHot(id)}
+                  onBlur={() => setHot(null)}
+                  data-side={SPOT[id].side}
+                  data-hot={hot === id || undefined}
                   style={{ '--x': SPOT[id].tag[0], '--y': SPOT[id].tag[1] } as CSSProperties}
                 >
                   {desk[id].title}
@@ -270,6 +293,9 @@ export function Desk() {
               ))}
             </div>
           </DeskScene>
+          <p className={s.hint} aria-hidden="true">
+            Click a thing to pick it up
+          </p>
         </div>
 
         <div className={s.side} data-lenis-prevent>
