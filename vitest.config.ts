@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitest/config';
 
-import { content } from './content.plugin.ts';
+import { content } from './scripts/content-plugin.ts';
 
 export default defineConfig({
   plugins: [content()],

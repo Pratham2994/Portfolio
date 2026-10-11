@@ -2,7 +2,7 @@ import data from 'virtual:content';
 
 import type { Project } from './schema';
 
-// Parsed and checked at build time by content.plugin.ts.
+// Parsed and checked at build time by scripts/content-plugin.ts.
 export const projects: Project[] = data.projects.filter((p) => !p.hidden).sort((a, b) => a.order - b.order);
 
 export function getProject(slug: string): Project | undefined {

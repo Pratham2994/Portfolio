@@ -1,12 +1,16 @@
+import { fileURLToPath } from 'node:url';
+
 import { defineConfig } from '@playwright/test';
 
 // A second build that includes tests/fixtures/projects, for content edge cases.
 export default defineConfig({
-  testDir: 'tests/e2e-fixtures',
+  testDir: './e2e-fixtures',
   reporter: [['list']],
   use: { baseURL: 'http://localhost:4174' },
   webServer: {
     command: 'npm run build && npm run preview',
+    // The build runs from the root of the project, one folder up from this file.
+    cwd: fileURLToPath(new URL('..', import.meta.url)),
     url: 'http://localhost:4174',
     reuseExistingServer: false,
     timeout: 180_000,

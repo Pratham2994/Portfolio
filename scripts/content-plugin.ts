@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import type { Plugin } from 'vite';
 
-import { parseDesk, parsePieces, parseProject, parseTimeline, parseYou } from './app/content/schema.ts';
+import { parseDesk, parsePieces, parseProject, parseTimeline, parseYou } from '../app/content/schema.ts';
 
 const ID = 'virtual:content';
 const RESOLVED = '\0' + ID;
