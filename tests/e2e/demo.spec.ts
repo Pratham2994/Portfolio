@@ -169,13 +169,14 @@ test('the deck stage opens an app from its home page and goes back', async ({ pa
   await expect(stage.locator('[data-screen]')).toHaveAttribute('data-screen', 'home');
 });
 
-test('iDEA sorts what the customer says, and a new message goes to a new department', async ({ page }) => {
+test('iDEA sorts three set messages, each to its own department, and takes no typing', async ({ page }) => {
   await open(page, '/work/idea-hackathon');
   const demo = page.locator('[data-demo="idea-hackathon"]');
   await expect(demo.locator('[data-stamp]')).toHaveText('Grievance');
-  await demo.locator('[data-said]').fill('Please reset my password, the login gives an error');
+  await demo.getByRole('button', { name: 'Typed' }).click();
+  await expect(demo.locator('[data-said]')).toContainText('password');
   await expect(demo.locator('[data-stamp]')).toHaveText('Operations');
-  // A message with none of the words falls back to the first department, as the real code does.
-  await demo.locator('[data-said]').fill('hello');
+  await demo.getByRole('button', { name: 'Voice' }).click();
   await expect(demo.locator('[data-stamp]')).toHaveText('Loans');
+  await expect(demo.locator('textarea, input')).toHaveCount(0);
 });

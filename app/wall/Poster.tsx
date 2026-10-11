@@ -22,11 +22,6 @@ function age(made?: string): number {
   return at === null || NEWEST === OLDEST ? 0 : (NEWEST - at) / (NEWEST - OLDEST);
 }
 
-// How a sheet is held up. No two next to each other are the same.
-const FIXES = ['tape', 'pin', 'corners'] as const;
-// What time has done to some of them.
-const MARKS: Record<string, 'ring' | 'prize'> = { scrub: 'ring', 'idea-hackathon': 'prize' };
-
 // A small fixed tilt per poster, as if pinned by hand.
 const tilt = (index: number) => (((index * 37) % 7) - 3) * 0.28;
 
@@ -67,14 +62,6 @@ export function Poster({ project, index }: { project: Project; index: number }) 
       {fresh && (
         <b className={styles.fresh} aria-hidden="true">
           New
-        </b>
-      )}
-      {/* What holds the sheet up: a strip of tape, a pin, or tape on two corners. */}
-      <i className={styles.fix} data-fix={FIXES[index % FIXES.length]} aria-hidden="true" />
-      {MARKS[project.slug] === 'ring' && <i className={styles.ring} aria-hidden="true" />}
-      {MARKS[project.slug] === 'prize' && (
-        <b className={styles.prize} aria-hidden="true">
-          {project.status}
         </b>
       )}
       <span className={styles.caption}>

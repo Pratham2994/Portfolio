@@ -68,7 +68,7 @@ export function Contact() {
           <i className={s.pin} aria-hidden="true" />
           <span>Pune, right now</span>
           <strong>{time?.text ?? '--:--'}</strong>
-          <small>I answer in my day, not in yours.</small>
+          <small>Indian Standard Time</small>
         </p>
         <p className={s.memo} data-memo="cat">
           <i className={s.pin} aria-hidden="true" />

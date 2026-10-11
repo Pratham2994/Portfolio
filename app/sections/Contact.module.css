@@ -233,17 +233,23 @@
 .strips li {
   display: grid;
   border-left: 1px dashed var(--ink);
+  /* Under every strip is the cork of the board. It shows only when the strip is gone. */
+  background: #5b3f28;
+  box-shadow: inset 0 0.5rem 0.5rem -0.4rem rgb(0 0 0 / 0.9);
 }
 
 .strips li:first-child {
   border-left: 0;
 }
 
+/* The strip itself: the paper of the flyer, cut on both sides and joined only at the top. */
 .strips :is(button, a) {
   display: grid;
   place-items: center;
   height: 15.5rem;
   padding: 0.6rem 0;
+  background: var(--paper) url('/textures/paper.webp');
+  background-blend-mode: multiply;
   color: inherit;
   text-decoration: none;
   transform-origin: 50% 0;
@@ -258,12 +264,7 @@
   white-space: nowrap;
 }
 
-/* A strip that was taken leaves a gap, with the cork of the board behind it. */
-.strips li[data-gone] {
-  background: #5b3f28;
-  box-shadow: inset 0 0.5rem 0.5rem -0.4rem rgb(0 0 0 / 0.9);
-}
-
+/* A strip that is gone cannot be pulled again. */
 .strips li[data-gone] :is(button, a) {
   visibility: hidden;
   cursor: default;
@@ -282,6 +283,15 @@
   .strips :is(button, a):hover {
     rotate: 2.5deg;
     translate: 0 0.15rem;
+    box-shadow: 0.2rem 0.3rem 0.5rem -0.2rem rgb(0 0 0 / 0.6);
+  }
+
+  /* Held down, it is pulled tight: it stretches, and the tear at the top starts. */
+  .strips :is(button, a):active {
+    rotate: 0deg;
+    scale: 1 1.05;
+    translate: 0 0.35rem;
+    cursor: grabbing;
   }
 }
 
@@ -292,15 +302,12 @@
       translate var(--dur-fast) var(--ease-out);
   }
 
-  /* Torn off: it twists, drops and is gone. Only then does its place go dark. */
+  /* Torn off: the paper is pulled down, comes away at the top, twists, and falls off the board. */
   .strips li[data-gone] :is(button, a) {
     visibility: visible;
-    animation: tear 620ms cubic-bezier(0.5, 0, 0.9, 0.4) forwards;
+    z-index: 1;
+    animation: tear 900ms cubic-bezier(0.4, 0, 0.7, 0.3) forwards;
     pointer-events: none;
-  }
-
-  .strips li[data-gone] {
-    animation: gap 620ms steps(1, end) backwards;
   }
 
   /* The sheet swings once on its pin when it comes into view. */
@@ -310,24 +317,35 @@
 }
 
 @keyframes tear {
-  30% {
-    rotate: -7deg;
-    translate: 0 0.5rem;
-    opacity: 1;
+  /* Pulled tight. */
+  0% {
+    rotate: 0deg;
+    scale: 1 1;
+    translate: 0 0;
   }
 
+  22% {
+    rotate: -1.5deg;
+    scale: 1 1.09;
+    translate: 0 0.5rem;
+  }
+
+  /* It gives. */
+  34% {
+    rotate: 5deg;
+    scale: 1 1;
+    translate: 0.1rem 1.2rem;
+    opacity: 1;
+    box-shadow: 0.4rem 0.8rem 1rem -0.3rem rgb(0 0 0 / 0.7);
+  }
+
+  /* And falls. */
   100% {
-    rotate: 16deg;
-    translate: 1.5rem 16rem;
+    rotate: 24deg;
+    scale: 1 1;
+    translate: 2.2rem 22rem;
     opacity: 0;
     visibility: hidden;
-  }
-}
-
-@keyframes gap {
-  from {
-    background: transparent;
-    box-shadow: none;
   }
 }
 

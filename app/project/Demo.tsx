@@ -537,18 +537,11 @@ function Idea() {
           </button>
         ))}
       </div>
-      <label className={s.said}>
-        <span>What the customer says. Change it and see where it goes.</span>
-        <textarea
-          rows={2}
-          value={text}
-          onChange={(event) => {
-            setText(event.target.value);
-            setHow('Typed');
-          }}
-          data-said
-        />
-      </label>
+      {/* What was said is shown, not typed: these are three set messages, not a live service. */}
+      <p className={s.said}>
+        <span>What the customer says</span>
+        <q data-said>{text}</q>
+      </p>
       <button type="button" className={s.action} onClick={run}>
         Raise it
       </button>
