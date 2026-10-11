@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Link } from 'react-router';
 
 import { you } from '~/content';
 import { track } from '~/lib/analytics';
@@ -6,6 +7,7 @@ import { ANALYTICS } from '~/lib/analytics.config';
 import { SITE } from '~/lib/meta';
 
 import s from './Contact.module.css';
+import { usePuneTime } from './DeskScene';
 
 const short = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 
@@ -51,9 +53,29 @@ export function Contact() {
   };
 
   const left = STRIPS.filter((strip) => strip && !taken.includes(strip.key)).length;
+  const time = usePuneTime();
 
   return (
     <footer id="contact" className={s.contact} aria-labelledby="contact-title">
+      {/* A notice board: the flyer in the middle, and small notes pinned around it. */}
+      <div className={s.board}>
+        <Link to="/brief" className={s.memo} data-memo="brief">
+          <i className={s.pin} aria-hidden="true" />
+          <span>In a hurry?</span>
+          <strong>All of this, on one page</strong>
+        </Link>
+        <p className={s.memo} data-memo="time">
+          <i className={s.pin} aria-hidden="true" />
+          <span>Pune, right now</span>
+          <strong>{time?.text ?? '--:--'}</strong>
+          <small>I answer in my day, not in yours.</small>
+        </p>
+        <p className={s.memo} data-memo="cat">
+          <i className={s.pin} aria-hidden="true" />
+          <span>Found</span>
+          <strong>One cat</strong>
+          <small>She lives on the wall, at the top of this page. Type meow.</small>
+        </p>
       <div className={s.flyer} data-reveal data-flyer>
         <i className={s.pin} aria-hidden="true" />
         <p className={s.kicker}>Take one</p>
@@ -99,6 +121,7 @@ export function Contact() {
             );
           })}
         </ul>
+      </div>
       </div>
       <p className={s.small}>
         Pratham Panchal, 2026.

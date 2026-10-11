@@ -104,7 +104,9 @@ const stack = z.object({
   languages: z.array(z.object({ name: text, first: z.boolean().default(false), used: z.array(text).min(1) })),
   groups: z.array(z.object({ name: text, items: z.array(text).min(1) })),
 });
-const you = z.object({ portraitAlt: z.string().min(1), quiet: text, email: z.email(), github: z.url(), linkedin: z.url(), resume: text.optional(), stack });
+// The card under the photo, as on a sticker of a player: the name, the position, the club, and two towns.
+const card = z.object({ name: text, role: text, club: text, based: text, from: text });
+const you = z.object({ portraitAlt: z.string().min(1), quiet: text, email: z.email(), github: z.url(), linkedin: z.url(), resume: text.optional(), card: card.optional(), stack });
 
 // Small personal pieces on the wall that are not projects.
 const pieces = z.object({

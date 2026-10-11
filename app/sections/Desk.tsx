@@ -13,6 +13,17 @@ const ROOMS = ['white', 'purple', 'red', 'cyan', 'green', 'amber'] as const;
 
 const ORDER: DeskId[] = ['sports', 'games', 'anime', 'music', 'pc', 'cube', 'now'];
 
+// Where each thing is in the drawing, and where its name is pinned, as parts of a hundred.
+const SPOT: Record<DeskId, { at: [number, number]; tag: [number, number] }> = {
+  sports: { at: [17.8, 41], tag: [17.8, 17] },
+  games: { at: [42.5, 45], tag: [42.5, 27] },
+  anime: { at: [6.9, 60], tag: [8, 53] },
+  music: { at: [64.4, 55], tag: [64.4, 46] },
+  pc: { at: [93.2, 84], tag: [93.2, 70] },
+  cube: { at: [67.9, 63], tag: [70, 73] },
+  now: { at: [83.6, 57], tag: [83.6, 47] },
+};
+
 /** A scoreboard: the sport, and whose side he is on. */
 function Sports() {
   return (
@@ -201,12 +212,14 @@ function Now() {
 }
 
 export function Desk() {
-  const [active, setActive] = useState<DeskId>('sports');
+  // Nothing is picked up at the start: the whole desk is in view. A second press puts a thing back.
+  const [active, setActive] = useState<DeskId | null>(null);
   const [light, setLight] = useState(0);
   const pick = (id: DeskId) => {
-    setActive(id);
-    track('desk_card', { card: id });
+    setActive(active === id ? null : id);
+    if (active !== id) track('desk_card', { card: id });
   };
+  const step = (by: number) => pick(ORDER[(ORDER.indexOf(active!) + by + ORDER.length) % ORDER.length]);
   const room = ROOMS[light];
 
   const cards: Record<DeskId, { note?: string; body: ReactNode }> = {
@@ -233,26 +246,52 @@ export function Desk() {
         </button>
       </header>
 
-      <div className={s.stage} data-reveal>
-        <DeskScene active={active} onPick={pick} />
-      </div>
-
-      <div className={s.side} data-reveal>
-        <div className={s.tabs} role="group" aria-label="Things on the desk">
-          {ORDER.map((id) => (
-            <button key={id} type="button" aria-expanded={active === id} aria-controls={`desk-${id}`} onClick={() => pick(id)}>
-              {desk[id].title}
-            </button>
-          ))}
+      {/* The drawing is the whole section. A thing that is picked up comes close, and its card opens beside it. */}
+      <div
+        className={s.room}
+        data-open={active ?? undefined}
+        data-reveal
+        style={active ? ({ '--x': SPOT[active].at[0], '--y': SPOT[active].at[1] } as CSSProperties) : undefined}
+      >
+        <div className={s.stage}>
+          <DeskScene active={active} onPick={pick}>
+            <div className={s.tabs} role="group" aria-label="Things on the desk">
+              {ORDER.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-expanded={active === id}
+                  aria-controls={`desk-${id}`}
+                  onClick={() => pick(id)}
+                  style={{ '--x': SPOT[id].tag[0], '--y': SPOT[id].tag[1] } as CSSProperties}
+                >
+                  {desk[id].title}
+                </button>
+              ))}
+            </div>
+          </DeskScene>
         </div>
 
-        {ORDER.map((id) => (
-          <div key={id} id={`desk-${id}`} className={s.card} role="region" aria-label={desk[id].title} data-card={id} data-open={active === id || undefined}>
-            <h3>{desk[id].title}</h3>
-            {cards[id].body}
-            {cards[id].note && <p className={s.note}>{cards[id].note}</p>}
-          </div>
-        ))}
+        <div className={s.side} data-lenis-prevent>
+          {ORDER.map((id) => (
+            <div key={id} id={`desk-${id}`} className={s.card} role="region" aria-label={desk[id].title} data-card={id} data-open={active === id || undefined}>
+              <p className={s.cardBar}>
+                <button type="button" onClick={() => step(-1)} aria-label="The thing before this one">
+                  &larr;
+                </button>
+                <button type="button" onClick={() => step(1)} aria-label="The next thing">
+                  &rarr;
+                </button>
+                <button type="button" onClick={() => setActive(null)} data-put-back>
+                  Put it back
+                </button>
+              </p>
+              <h3>{desk[id].title}</h3>
+              {cards[id].body}
+              {cards[id].note && <p className={s.note}>{cards[id].note}</p>}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

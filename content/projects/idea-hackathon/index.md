@@ -20,7 +20,7 @@ sectors:
   - title: Wait, or book
     body: Take a live turn and see your place in the queue, or book a half-hour slot in the next seven days. The staff side shows the queue, most urgent first.
 stack: [Python, FastAPI, Whisper, DeepFace, Node, PostgreSQL, React, Twilio]
-role: "A team project. I built the frontend, and worked on the ML side: the face matching with ArcFace, the models and the LLM calls, and getting Whisper to hear people right."
+role: "A team project. I worked on the ML side: the face matching with ArcFace, the model and LLM calls, and Whisper. I also built the interface."
 links: { repo: 'https://github.com/AmaanSyed2004/ideahack-DebugDynasty' }
 flow:
   nodes:

@@ -42,6 +42,27 @@ export function You() {
               decoding="async"
             />
           </div>
+          {/* The plate of a player card: who, what position, which club, and where. */}
+          {you.card && (
+            <figcaption className={s.plate} data-card>
+              <strong>{you.card.name}</strong>
+              <span>{you.card.role}</span>
+              <dl>
+                <div>
+                  <dt>Club</dt>
+                  <dd>{you.card.club}</dd>
+                </div>
+                <div>
+                  <dt>Based</dt>
+                  <dd>{you.card.based}</dd>
+                </div>
+                <div>
+                  <dt>From</dt>
+                  <dd>{you.card.from}</dd>
+                </div>
+              </dl>
+            </figcaption>
+          )}
         </figure>
 
         <div className={s.stack} data-reveal data-stack>

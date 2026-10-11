@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import type { DeskId } from '~/content/schema';
 
 import s from './Desk.module.css';
 
-type Props = { active: DeskId; onPick: (id: DeskId) => void };
+type Props = { active: DeskId | null; onPick: (id: DeskId) => void; children?: ReactNode };
 
 /** The hour and minute in Pune, as angles for the clock hands. */
-function usePuneTime() {
+export function usePuneTime() {
   const [time, setTime] = useState<{ hour: number; minute: number; text: string } | null>(null);
   useEffect(() => {
     const read = () => {
@@ -31,7 +31,7 @@ const CLOCK_COLOURS = ['#2f6bff', '#ffc21a', '#ff3b3b', '#3ddc84', '#ff7a1a', '#
  * with yellow keys, the orange mouse, the headset, the laptop on its stand, the small
  * figures, and the tower with its fans on the floor.
  */
-export function DeskScene({ active, onPick }: Props) {
+export function DeskScene({ active, onPick, children }: Props) {
   const time = usePuneTime();
   const part = (id: DeskId) => ({
     className: s.object,
@@ -43,7 +43,7 @@ export function DeskScene({ active, onPick }: Props) {
   const minuteAngle = time ? time.minute * 6 : 60;
 
   return (
-    <div className={s.scene}>
+    <div className={s.scene} data-scene>
       <svg viewBox="0 0 1000 600" aria-hidden="true">
         {/* wall clock, showing the time in Pune */}
         <g className={s.clock}>
@@ -162,6 +162,8 @@ export function DeskScene({ active, onPick }: Props) {
       <p className={s.time}>
         Pune, <span data-time>{time?.text ?? '--:--'}</span>
       </p>
+      {/* The names of the things, pinned on them. They move with the drawing. */}
+      {children}
     </div>
   );
 }

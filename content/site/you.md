@@ -5,6 +5,7 @@ email: prathampanchal02994@gmail.com
 github: 'https://github.com/Pratham2994'
 linkedin: 'https://www.linkedin.com/in/pratham-panchal-abcd2994/'
 resume: /Pratham-Panchal-Resume.pdf
+card: { name: Pratham Panchal, role: Software Engineer, club: Barclays, based: Pune, from: Mumbai }
 stack:
   note: Orange is what I reach for first. The number is how many projects on the wall use it.
   languages:

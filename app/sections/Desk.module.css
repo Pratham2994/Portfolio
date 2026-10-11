@@ -784,19 +784,129 @@
   }
 }
 
-@media (min-width: 1000px) {
-  .desk {
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-    align-items: start;
-  }
+.room {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
 
-  .head {
-    grid-column: 1 / -1;
+/* The arrows and the way back, at the top of a card. */
+.cardBar {
+  display: flex;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cardBar button {
+  padding: 0.4em 0.7em;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.cardBar button:last-child {
+  margin-left: auto;
+}
+
+/*
+ * On a wide screen the drawing fills the section. The name of each thing is pinned on it.
+ * Picking one up moves the view in on it, and its card opens over the right of the drawing.
+ */
+@media (min-width: 1000px) {
+  .room {
+    position: relative;
+    display: block;
   }
 
   .stage {
-    position: sticky;
-    top: var(--space-5);
+    overflow: hidden;
+  }
+
+  /* As wide as it can be with the whole desk still on one screen. */
+  .scene {
+    width: min(100%, 74vh * 1000 / 600);
+    margin-inline: auto;
+    transform-origin: calc(var(--x, 50) * 1%) calc(var(--y, 50) * 1%);
+    transition: transform 0.9s var(--ease-in-out);
+  }
+
+  .room[data-open] .scene {
+    transform: translate(calc((27 - var(--x)) * 1%), calc((48 - var(--y)) * 1%)) scale(1.45);
+  }
+
+  .tabs {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+  }
+
+  .tabs button {
+    position: absolute;
+    top: calc(var(--y) * 1%);
+    left: calc(var(--x) * 1%);
+    padding: 0.4em 0.7em;
+    background: var(--wall-shade);
+    color: var(--bone);
+    white-space: nowrap;
+    translate: -50% -100%;
+    pointer-events: auto;
+    box-shadow: 0 0.4rem 0.8rem -0.3rem rgb(0 0 0 / 0.8);
+  }
+
+  /* A short line from the name down to the thing. */
+  .tabs button::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    width: 1px;
+    height: 0.7rem;
+    background: var(--bone);
+  }
+
+  /* Close up, the names are as large as before: the view grew, the type did not. */
+  .room[data-open] .tabs button {
+    scale: 0.7;
+    transform-origin: 50% 100%;
+  }
+
+  .side {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: min(46%, 38rem);
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+    pointer-events: none;
+  }
+
+  .card {
+    min-height: 100%;
+    align-content: start;
+    pointer-events: auto;
+    box-shadow: -1.6rem 0 2.4rem -1rem rgb(0 0 0 / 0.8);
+  }
+}
+
+@media (min-width: 1000px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-ready]) .card[data-open] {
+    animation: card-slide 0.6s var(--ease-out) both;
+  }
+}
+
+/* The card is uncovered from its left edge. It does not move, so it is never past the edge of the page. */
+@keyframes card-slide {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+
+  to {
+    clip-path: inset(0 0 0 -3rem);
   }
 }
 
@@ -825,8 +935,7 @@
     perspective: 1600px;
   }
 
-  .stage,
-  .side {
+  .room {
     transform: rotateX(calc((1 - var(--scroll, 1)) * -26deg)) translateY(calc((1 - var(--scroll, 1)) * 8vh));
     transform-origin: 50% 0;
   }

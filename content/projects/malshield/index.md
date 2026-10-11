@@ -20,7 +20,7 @@ sectors:
   - title: By running it
     body: The file is run inside a sealed Docker container while everything it touches is recorded. We wrote this part ourselves. It is not in the public repo.
 stack: [Python, FastAPI, LightGBM, YARA, Docker, Gemini]
-role: "A team project, and all of us worked across it. I built the whole frontend, trained the model on the EMBER data, and wrote YARA rules and much of the backend. I also tested it hard against real malware."
+role: "A team project, and all of us worked across it. My main parts were the model, trained on the EMBER data, YARA rules, much of the backend, and testing against real malware. I also built the interface."
 links: { repo: 'https://github.com/VarnikaBajpai4/ctrl_alt_elite_hack8' }
 flow:
   nodes:

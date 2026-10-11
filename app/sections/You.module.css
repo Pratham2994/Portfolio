@@ -451,3 +451,114 @@
   background: #c8281e;
 }
 
+/* The plate under the photo: the photo and the plate together are one card. */
+.plate {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.9rem 0.6rem 0.5rem;
+  color: #14161c;
+}
+
+.plate strong {
+  font-family: var(--font-display);
+  font-size: var(--step-4);
+  font-weight: 900;
+  line-height: 0.85;
+  text-transform: uppercase;
+}
+
+.plate > span {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a8320f;
+}
+
+.plate dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0.7rem 0 0;
+  border-top: 2px solid #14161c;
+}
+
+.plate dl div {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.5rem 0.5rem 0 0;
+}
+
+.plate dl div + div {
+  padding-left: 0.6rem;
+  border-left: 1px solid rgb(20 22 28 / 0.3);
+}
+
+.plate dt {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #4d5057;
+}
+
+.plate dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/*
+ * The history hangs on one line down its left side. The line is drawn as the list comes up
+ * the screen, and each move has a mark on it.
+ */
+.history ol {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.history ol::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.3rem;
+  width: 2px;
+  background: var(--signal);
+  transform-origin: 50% 0;
+}
+
+.history li::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--space-3) + 0.35rem);
+  left: calc(-1.2rem - 4px);
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--signal);
+  border-radius: 50%;
+  background: var(--wall);
+}
+
+.history li[data-move='signed']::before {
+  background: var(--signal);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .history ol::before {
+      animation: draw-line linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 55%;
+    }
+  }
+}
+
+@keyframes draw-line {
+  from {
+    scale: 1 0;
+  }
+}

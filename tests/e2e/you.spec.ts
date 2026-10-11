@@ -27,7 +27,8 @@ test('nothing private is on the page', async ({ page }) => {
   expect(text).not.toMatch(/\+?\d[\d\s-]{8,}\d/);
   expect(text).not.toMatch(/\b(kg|cm)\b/i);
   expect(text).not.toMatch(/master'?s|MS in|CISO/i);
-  expect(text.match(/barclays/gi)).toHaveLength(2);
+  // Two rows of the history, and the club on the card. A name only, each time.
+  expect(text.match(/barclays/gi)).toHaveLength(3);
 });
 
 test('the portrait has a text alternative', async ({ page }) => {

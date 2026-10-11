@@ -2,10 +2,134 @@
   display: grid;
   justify-items: center;
   gap: var(--space-4);
-  max-width: 84rem;
+  max-width: 100rem;
   margin-inline: auto;
   padding: var(--space-7) var(--gutter) var(--space-6);
-  border-top: 1px solid var(--line);
+}
+
+/* The board: cork, in a wooden frame. It is as wide as the page, and the flyer hangs in the middle. */
+.board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: var(--space-5);
+  width: 100%;
+  padding: clamp(1.5rem, 5vw, 4rem) clamp(1rem, 4vw, 3rem);
+  /* A note hangs crooked, and its corner must not make the page wider. */
+  overflow: clip;
+  border: 0.7rem solid #2b1d13;
+  border-radius: 3px;
+  background:
+    radial-gradient(rgb(0 0 0 / 0.28) 1px, transparent 1.6px) 0 0 / 9px 9px,
+    radial-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1.6px) 4px 5px / 13px 13px,
+    #6b4a30;
+  box-shadow:
+    inset 0 0 3rem rgb(0 0 0 / 0.55),
+    0 1.6rem 2.4rem -1.2rem rgb(0 0 0 / 0.9);
+}
+
+/* A small note, with a pin of its own. */
+.memo {
+  --ink: #14161c;
+  position: relative;
+  display: grid;
+  gap: 0.25rem;
+  width: min(100%, 15rem);
+  padding: 1.6rem 1rem 1rem;
+  border-radius: 2px;
+  background: #ffc21a;
+  color: var(--ink);
+  text-decoration: none;
+  rotate: 2deg;
+  box-shadow: 0 0.8rem 1.2rem -0.6rem rgb(0 0 0 / 0.8);
+}
+
+.memo[data-memo='time'] {
+  background: #ece8df;
+  rotate: -2.4deg;
+}
+
+.memo[data-memo='cat'] {
+  background: #c9f7da;
+  rotate: 1.4deg;
+}
+
+.memo span {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.memo strong {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 900;
+  line-height: 0.92;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.memo small {
+  font-size: var(--step--1);
+  line-height: 1.3;
+}
+
+.memo:focus-visible {
+  outline-color: #fff;
+}
+
+/* On a narrow board the flyer comes first, and the notes hang under it. */
+@media (max-width: 999px) {
+  .flyer {
+    order: -1;
+  }
+}
+
+/* On a wide board the notes hang at the sides of the flyer, at different heights. */
+@media (min-width: 1000px) {
+  .board {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: start;
+    column-gap: var(--space-6);
+  }
+
+  .flyer {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .memo[data-memo='brief'] {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+    margin-top: 2rem;
+  }
+
+  .memo[data-memo='time'] {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: start;
+    margin-top: 5rem;
+  }
+
+  .memo[data-memo='cat'] {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: center;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  a.memo {
+    transition: rotate var(--dur-fast) var(--ease-out);
+  }
+
+  a.memo:hover {
+    rotate: -1deg;
+  }
 }
 
 /* A flyer on a notice board: one sheet, one pin, and the address cut into strips to take. */
@@ -134,9 +258,9 @@
   white-space: nowrap;
 }
 
-/* A strip that was taken leaves a gap with the wall behind it. */
+/* A strip that was taken leaves a gap, with the cork of the board behind it. */
 .strips li[data-gone] {
-  background: var(--wall);
+  background: #5b3f28;
   box-shadow: inset 0 0.5rem 0.5rem -0.4rem rgb(0 0 0 / 0.9);
 }
 
