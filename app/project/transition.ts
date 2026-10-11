@@ -26,9 +26,9 @@ const FULL = 'inset(0px 0px 0px 0px)';
 const RECEDE = { scale: 0.92, opacity: 0.25 };
 // How long the sheet takes to peel off the wall, from its corner, before the page opens.
 // Must match the length of the `peel` animation in Poster.module.css.
-const PEELED = 0.6;
+const PEELED = 0.34;
 // The peel waits this long, while the new page is built and painted. Matches its delay in the CSS.
-const WAIT = 0.07;
+const WAIT = 0.02;
 
 /** Puts a peeled sheet back on the wall, whole. */
 function resetPoster(poster: HTMLElement): void {
@@ -88,10 +88,11 @@ export function openFrom(poster: HTMLElement | null, page: HTMLElement): Promise
       // The page is put exactly where the sheet was, so the eye sees no change.
       .to(page, { opacity: 1, duration: 0.04, ease: 'none' }, WAIT + PEELED - 0.04)
       // Then that same patch of colour grows to fill the screen, and the wall steps back.
-      .to(page, { clipPath: FULL, duration: 0.75, ease: 'expo.inOut' }, WAIT + PEELED)
-      .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.75, ease: 'expo.inOut' }, WAIT + PEELED)
-      .call(() => resetPoster(poster), [], WAIT + PEELED + 0.5)
-      .to(items, { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out', stagger: 0.05 }, WAIT + PEELED + 0.45);
+      // It starts at full speed, with no wind-up, so the page answers the click at once.
+      .to(page, { clipPath: FULL, duration: 0.5, ease: 'power3.out' }, WAIT + PEELED)
+      .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.5, ease: 'power3.out' }, WAIT + PEELED)
+      .call(() => resetPoster(poster), [], WAIT + PEELED + 0.4)
+      .to(items, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', stagger: 0.035 }, WAIT + PEELED + 0.16);
   });
 }
 
