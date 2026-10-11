@@ -693,7 +693,8 @@
 
 .said q {
   padding: 0.7em 0.9em;
-  border-left: 3px solid var(--ink);
+  border-radius: 2px;
+  background: var(--soft);
   font-family: var(--font-text);
   font-size: var(--step-1);
   line-height: 1.35;
