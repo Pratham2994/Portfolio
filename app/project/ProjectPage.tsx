@@ -6,6 +6,7 @@ import type { Project } from '~/content/schema';
 import { collect } from '~/wall/Album';
 import { Art } from '~/wall/art';
 import { Paragraphs } from '~/lib/Paragraphs';
+import { contrast } from '~/lib/colour';
 import { track } from '~/lib/analytics';
 
 import { Demo } from './Demo';
@@ -20,20 +21,8 @@ import { cancelTransition, closeLive, closeTo, openFrom, riseIn, takeClosed, tak
 const pad = (n: number) => String(n).padStart(2, '0');
 const longestWord = (text: string) => Math.max(...text.split(/\s+/).map((word) => word.length));
 
-// How bright a colour is, from 0 to 1, by the WCAG rule.
-function light(hex: string): number {
-  const [r, g, b] = [1, 3, 5].map((at) => {
-    const c = parseInt(hex.slice(at, at + 2), 16) / 255;
-    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
 /** The accent, if small type in it can be read on the page colour. If not, the text colour. */
-function readable({ bg, fg, accent }: Project['palette']): string {
-  const [a, b] = [light(accent), light(bg)];
-  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) >= 4.5 ? accent : fg;
-}
+const readable = ({ bg, fg, accent }: Project['palette']) => (contrast(accent, bg) >= 4.5 ? accent : fg);
 
 // Arrow keys belong to these when one of them has the focus.
 const USES_ARROWS = 'input, select, textarea, video, audio, [contenteditable], [role="slider"]';

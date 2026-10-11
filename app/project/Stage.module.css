@@ -108,9 +108,6 @@
 .tabs button {
   padding: 2cqw 2.6cqw;
   color: var(--soft);
-  transition:
-    background-color 0.25s linear,
-    color 0.25s linear;
 }
 
 .tabs button[aria-pressed='true'] {
@@ -260,10 +257,6 @@
   border: 0.25cqw solid var(--faint);
   border-radius: 0.4cqw;
   color: var(--soft);
-  transition:
-    background-color 0.3s linear,
-    color 0.3s linear,
-    border-color 0.3s linear;
 }
 
 .by button[aria-pressed='true'] {
@@ -687,9 +680,6 @@
   border: 0.25cqw solid var(--faint);
   border-radius: 0.4cqw;
   color: var(--soft);
-  transition:
-    background-color 0.3s linear,
-    color 0.3s linear;
 }
 
 .ways span[data-on] {

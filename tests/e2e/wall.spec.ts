@@ -102,6 +102,8 @@ test('on a 13 inch laptop no poster art runs into its text', async ({ page }, in
           const title = poster.querySelector('strong')!.getBoundingClientRect();
           // Waves and the big word are drawn behind the text on purpose.
           if (poster.querySelector('[data-art] svg') || art.height > poster.getBoundingClientRect().height * 0.75) return false;
+          // With the name at the head, the picture starts under the whole caption.
+          if (poster.dataset.lay === 'head') return art.top < poster.querySelector('strong')!.parentElement!.getBoundingClientRect().bottom - 2;
           return art.bottom > title.top + 2;
         })
         .map((poster) => poster.dataset.poster),

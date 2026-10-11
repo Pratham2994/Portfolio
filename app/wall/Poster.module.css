@@ -68,11 +68,12 @@
   transition: scale var(--dur-base) var(--ease-out);
 }
 
+/* The name is the poster. It is as large as its longest word lets it be on the sheet. */
 .title {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(1.05rem, 14cqw, 4.5rem);
-  line-height: 0.9;
+  font-size: clamp(1.05rem, min(30cqw, 168cqw / var(--chars, 12)), 12rem);
+  line-height: 0.84;
   text-transform: uppercase;
   text-wrap: balance;
   overflow-wrap: anywhere;
@@ -182,7 +183,17 @@
 
   :global([data-paper='a4']) > .poster[data-size='postcard'] .title,
   :global([data-paper='a3']) > .poster .title {
-    font-size: clamp(1.05rem, 14cqw, 4.5rem);
+    font-size: clamp(1.05rem, min(30cqw, 168cqw / var(--chars, 12)), 12rem);
+  }
+
+  /* On some sheets the name is at the head and the picture is under it. */
+  :global([data-paper]:not([data-paper='a5-wide'])) > .poster[data-lay='head'] {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  :global([data-paper]:not([data-paper='a5-wide'])) > .poster[data-lay='head'] .caption {
+    grid-row: 1;
+    padding: 7cqw 7cqw 0;
   }
 }
 
@@ -334,4 +345,19 @@
   100% {
     rotate: 0deg;
   }
+}
+
+/* The second ink. */
+.poster[data-ink] .title {
+  color: var(--accent);
+}
+
+/* On a phone, an upright sheet can have its name at the head too. */
+.poster[data-size='poster'][data-lay='head'] {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.poster[data-size='poster'][data-lay='head'] .caption {
+  grid-row: 1;
+  padding: 7cqw 7cqw 0;
 }

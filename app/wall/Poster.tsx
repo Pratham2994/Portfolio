@@ -5,6 +5,7 @@ import { projects } from '~/content';
 import type { Project } from '~/content/schema';
 import { markIntent } from '~/project/transition';
 import { track } from '~/lib/analytics';
+import { contrast } from '~/lib/colour';
 
 import { Art } from './art';
 import styles from './Poster.module.css';
@@ -22,6 +23,15 @@ function age(made?: string): number {
   return at === null || NEWEST === OLDEST ? 0 : (NEWEST - at) / (NEWEST - OLDEST);
 }
 
+// A poster is set like a print, not like a card: on some the name is at the head of the sheet.
+const HEAD = new Set(['scrub', 'algomotion', 'floatchat', 'malshield']);
+// The longest word of a name. The name is set as large as that word allows. A name of a few
+// short words is set as if it had one of eight letters, so it takes two lines and not four.
+const longest = (title: string) => {
+  const words = title.split(/\s+/);
+  return Math.max(...words.map((word) => word.length), words.length > 1 ? 8 : 0);
+};
+
 // A small fixed tilt per poster, as if pinned by hand.
 const tilt = (index: number) => (((index * 37) % 7) - 3) * 0.28;
 
@@ -32,6 +42,7 @@ export function Poster({ project, index }: { project: Project; index: number }) 
     '--fg': project.palette.fg,
     '--accent': project.palette.accent,
     '--tilt': `${tilt(index)}deg`,
+    '--chars': longest(project.title),
     '--age': age(project.made).toFixed(2),
   } as CSSProperties;
   const fresh = months(project.made) === NEWEST;
@@ -43,6 +54,9 @@ export function Poster({ project, index }: { project: Project; index: number }) 
       className={styles.poster}
       data-poster={project.slug}
       data-size={project.size}
+      data-lay={HEAD.has(project.slug) ? 'head' : 'foot'}
+      // The second ink: the name is printed in the accent where large type in it can be read.
+      data-ink={contrast(project.palette.accent, project.palette.bg) >= 3 || undefined}
       style={style}
       preventScrollReset
       onClick={() => {
