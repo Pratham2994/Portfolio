@@ -40,6 +40,18 @@ test('the next project waits at the end of the page, and the arrow keys turn the
   await expect(page).toHaveURL(/\/work\/algomotion$/);
 });
 
+test('a project with a stage shows it, and the sectors in the bar fill as the page goes by', async ({ page }) => {
+  for (const slug of ['omnicompiler', 'local-llm-lab', 'prats-deck']) {
+    await open(page, `/work/${slug}`);
+    await expect(page.locator(`[data-stage="${slug}"]`)).toBeVisible();
+    await expect(page.locator('#project-title')).toBeVisible();
+  }
+  const project = page.locator('[data-project]');
+  await expect(project).toHaveAttribute('data-sector', '0');
+  await project.evaluate((el) => el.scrollTo(0, el.scrollHeight));
+  await expect(project).toHaveAttribute('data-sector', '3');
+});
+
 test('unknown slug shows the not-found page with a way home', async ({ page }) => {
   await open(page, '/work/nope');
   await expect(page.getByRole('heading', { name: /not on the wall/i })).toBeVisible();

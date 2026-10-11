@@ -193,12 +193,20 @@ test('a run lights its stages one after the other, to the end', async ({ page })
   await expect(demo.locator('[data-stamp]')).toHaveText('Fits');
 });
 
-test('each of the first five projects has a picture of what runs underneath', async ({ page }) => {
-  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'algomotion', 'chronicle']) {
+test('every project has a picture of what runs underneath', async ({ page }) => {
+  for (const slug of ['scrub', 'neat', 'floatchat', 'idea-hackathon', 'malshield', 'algomotion', 'chronicle']) {
     await open(page, `/work/${slug}`);
     const flow = page.locator('[data-flow]');
     await expect(flow.locator('svg:visible')).toHaveCount(1);
     expect(await flow.locator('svg:visible g[data-kind]').count()).toBeGreaterThanOrEqual(8);
+  }
+  // These three have a small drawing of their own: a few parts and one sentence.
+  for (const slug of ['prats-deck', 'omnicompiler', 'local-llm-lab']) {
+    await open(page, `/work/${slug}`);
+    const sketch = page.locator(`[data-sketch="${slug}"]`);
+    await expect(sketch.locator('svg')).toBeVisible();
+    expect(await sketch.locator('g[data-part]').count()).toBeGreaterThanOrEqual(2);
+    await expect(sketch.locator('figcaption')).not.toBeEmpty();
   }
 });
 

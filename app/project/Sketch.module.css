@@ -1,0 +1,134 @@
+/* The small drawing under a project: a few parts in one shape, with one sentence below it. */
+.sketch {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.sketch svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.sketch figcaption {
+  max-width: 34ch;
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.wire {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1.5;
+}
+
+.box {
+  fill: color-mix(in srgb, var(--fg) 8%, var(--bg));
+  stroke: var(--rule);
+  stroke-width: 1.5;
+}
+
+.fill {
+  fill: color-mix(in srgb, var(--fg) 6%, var(--bg));
+}
+
+/* The part that the others turn around: the page colours, swapped. */
+.core {
+  fill: var(--fg);
+}
+
+.sketch text {
+  text-anchor: middle;
+  font-family: var(--font-mono);
+}
+
+.name {
+  fill: var(--fg);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.core ~ .name {
+  fill: var(--bg);
+}
+
+.core ~ .note {
+  fill: var(--bg);
+}
+
+.note {
+  fill: var(--muted);
+  font-size: 9.5px;
+}
+
+/* What moves through the drawing. Still, and out of sight, when motion is off. */
+.dot {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 1.5;
+  opacity: 0;
+  offset-rotate: 0deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Each dot takes its turn: out along its line and back, then it waits for the others. */
+  .dot {
+    animation: travel 6s linear calc(var(--i) * 1.2s) infinite;
+  }
+}
+
+@keyframes travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 1;
+  }
+
+  9% {
+    offset-distance: 100%;
+  }
+
+  18% {
+    offset-distance: 0%;
+    opacity: 1;
+  }
+
+  18.1%,
+  100% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+}
+
+/* In a funnel and on a lead, things go one way only. */
+[data-sketch='local-llm-lab'] .dot,
+[data-sketch='prats-deck'] .dot {
+  animation-name: one-way;
+}
+
+[data-sketch='prats-deck'] .dot {
+  animation-duration: 3s;
+  animation-delay: calc(var(--i) * 1.5s);
+}
+
+@keyframes one-way {
+  0% {
+    offset-distance: 0%;
+    opacity: 1;
+  }
+
+  40% {
+    offset-distance: 100%;
+    opacity: 1;
+  }
+
+  41%,
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}

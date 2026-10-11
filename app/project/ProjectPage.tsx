@@ -11,7 +11,10 @@ import { track } from '~/lib/analytics';
 import { Demo } from './Demo';
 import { Flap } from './Flap';
 import { Flow } from './Flow';
+import { follow } from './follow';
 import s from './ProjectPage.module.css';
+import { Sketch, hasSketch } from './Sketch';
+import { Stage, kindOf } from './Stage';
 import { cancelTransition, closeLive, closeTo, openFrom, riseIn, takeClosed, takeIntent, takeTurned, turnTo } from './transition';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -60,6 +63,9 @@ export function ProjectPage({ project }: { project: Project }) {
       if (window.location.pathname === '/') void closeTo(poster(), node);
     };
   }, [project.slug]);
+
+  // The bar at the top and the pinned steps both follow the scroll of this page.
+  useEffect(() => follow(page.current!), [project.slug]);
 
   useEffect(() => {
     title.current?.focus({ preventScroll: true });
@@ -140,6 +146,79 @@ export function ProjectPage({ project }: { project: Project }) {
     '--slip-accent': readable(project.palette),
   } as CSSProperties;
 
+  // A project with a stage gets a page of its own kind. The others keep the plain one.
+  const kind = kindOf(project.slug);
+
+  const heading = (
+    <div className={s.heroText}>
+      {/* On a phone the bar has no room for the status, so it sits here. */}
+      <span className={s.statusBelow} data-var={underReview || undefined}>
+        {underReview && <b aria-hidden="true">VAR</b>}
+        {project.status}
+      </span>
+      <h1
+        id="project-title"
+        className={s.title}
+        style={{ '--chars': longestWord(project.title) } as CSSProperties}
+        tabIndex={-1}
+        ref={title}
+        data-in
+      >
+        {project.title}
+      </h1>
+      <p className={s.tagline} data-in>
+        {project.tagline}
+      </p>
+    </div>
+  );
+
+  const why = (
+    <div className={s.why} data-in>
+      <Paragraphs text={project.body} />
+    </div>
+  );
+
+  const stats = (
+    <dl className={s.stats} data-in>
+      {project.stats.map((stat) => (
+        <div key={stat.label}>
+          <dt>{stat.label}</dt>
+          <dd>
+            <Flap text={stat.value} />
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+
+  const steps = project.sectors.map((sector, i) => (
+    <li key={sector.title}>
+      <span className={s.sectorTag}>S{i + 1}</span>
+      <h3>{sector.title}</h3>
+      <p>{sector.body}</p>
+    </li>
+  ));
+
+  // With a small drawing, the three steps are pinned beside it and the scroll goes through them.
+  const how = hasSketch(project.slug) ? (
+    <section className={s.how} data-how data-at="0">
+      <div className={s.pin} data-in>
+        <div>
+          <h2>How it works</h2>
+          <ol className={s.steps}>{steps}</ol>
+        </div>
+        <Sketch slug={project.slug} />
+      </div>
+    </section>
+  ) : (
+    <section className={s.sectors} data-in>
+      <h2>How it works</h2>
+      <ol>{steps}</ol>
+    </section>
+  );
+
+  const demo = <Demo slug={project.slug} />;
+
   return (
     <div
       className={s.page}
@@ -172,73 +251,53 @@ export function ProjectPage({ project }: { project: Project }) {
             {underReview && <b aria-hidden="true">VAR</b>}
             {project.status}
           </span>
+          {/* Three sectors, as on a timing screen. Each one fills as the page goes by. */}
+          <i className={s.laps} aria-hidden="true" data-laps>
+            <b />
+            <b />
+            <b />
+          </i>
         </header>
 
-        {/* Two columns on a wide page: the words on the left, the art and the numbers on the right. */}
-        <div className={s.top}>
-          <div className={s.lead}>
-            <div className={s.heroText}>
-              {/* On a phone the bar has no room for the status, so it sits here. */}
-              <span className={s.statusBelow} data-var={underReview || undefined}>
-                {underReview && <b aria-hidden="true">VAR</b>}
-                {project.status}
-              </span>
-              <h1
-                id="project-title"
-                className={s.title}
-                style={{ '--chars': longestWord(project.title) } as CSSProperties}
-                tabIndex={-1}
-                ref={title}
-                data-in
-              >
-                {project.title}
-              </h1>
-              <p className={s.tagline} data-in>
-                {project.tagline}
-              </p>
+        {kind ? (
+          <>
+            {/* The project at work, large, with its name beside it. */}
+            <div className={s.hero} data-kind={kind}>
+              {heading}
+              <Stage slug={project.slug} />
             </div>
-            <div className={s.why} data-in>
-              <Paragraphs text={project.body} />
+            <div className={s.intro} data-kind={kind}>
+              {why}
+              {stats}
             </div>
-          </div>
-          <div className={s.aside}>
-            {/* The poster's own art, drawn large in swapped colours. */}
-            <div className={s.plate} data-in>
-              <Art art={project.art} />
-            </div>
-            <dl className={s.stats} data-in>
-              {project.stats.map((stat) => (
-                <div key={stat.label}>
-                  <dt>{stat.label}</dt>
-                  <dd>
-                    <Flap text={stat.value} />
-                  </dd>
+            {kind === 'tool' ? demo : how}
+            {kind === 'tool' ? how : demo}
+          </>
+        ) : (
+          <>
+            {/* Two columns on a wide page: the words on the left, the art and the numbers on the right. */}
+            <div className={s.top}>
+              <div className={s.lead}>
+                {heading}
+                {why}
+              </div>
+              <div className={s.aside}>
+                {/* The poster's own art, drawn large in swapped colours. */}
+                <div className={s.plate} data-in>
+                  <Art art={project.art} />
                 </div>
-              ))}
-            </dl>
-          </div>
-        </div>
-
-        <section className={s.sectors} data-in>
-          <h2>How it works</h2>
-          <ol>
-            {project.sectors.map((sector, i) => (
-              <li key={sector.title}>
-                <span className={s.sectorTag}>S{i + 1}</span>
-                <h3>{sector.title}</h3>
-                <p>{sector.body}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <Demo slug={project.slug} />
-
-        {project.flow && (
-          <section className={s.under} data-flow data-in>
-            <h2>Under the hood</h2>
-            <Flow flow={project.flow} title={project.title} />
-          </section>
+                {stats}
+              </div>
+            </div>
+            {how}
+            {demo}
+            {project.flow && (
+              <section className={s.under} data-flow data-in>
+                <h2>Under the hood</h2>
+                <Flow flow={project.flow} title={project.title} />
+              </section>
+            )}
+          </>
         )}
 
         {project.media.length > 0 && (
