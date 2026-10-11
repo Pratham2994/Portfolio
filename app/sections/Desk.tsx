@@ -37,7 +37,7 @@ function Sports() {
 
 /** A game launcher: the one he plays most, the shelf of story games, co-op, and the first install. */
 function Games() {
-  const { main, rank, story, coop, first } = desk.games;
+  const { main, rank, story, coop, first, love } = desk.games;
   return (
     <div className={s.launcher}>
       <p className={s.featured}>
@@ -64,6 +64,11 @@ function Games() {
       <p className={s.first}>
         <span>First install</span> {first}
       </p>
+      {love && (
+        <p className={s.first} data-love>
+          <span>Always love</span> {love}
+        </p>
+      )}
     </div>
   );
 }

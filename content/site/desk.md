@@ -27,6 +27,7 @@ games:
     - Split Fiction
     - It Takes Two
   first: Counter-Strike 1.6
+  love: Minecraft
 anime:
   title: Anime
   note: I have lost count. These are the ones I would make you watch.

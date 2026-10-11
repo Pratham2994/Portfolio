@@ -73,6 +73,7 @@ const desk = z.object({
     story: z.array(text),
     coop: z.array(text),
     first: text,
+    love: text.optional(),
   }),
   anime: z.object({ title: text, note: text, list: z.array(text) }),
   music: z.object({
