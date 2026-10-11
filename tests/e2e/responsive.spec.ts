@@ -3,7 +3,13 @@ import { expect, test, type Page } from '@playwright/test';
 import { open } from './helpers';
 
 const paths = ['/', '/work/scrub', '/work/idea-hackathon'];
-const edges = [320, 599, 600, 899, 900, 1279, 1280];
+// Every page, for the check at each width.
+const all = [
+  '/',
+  ...['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'chronicle', 'algomotion'].map((slug) => `/work/${slug}`),
+];
+// The edges of the layout, then real screens: small and large phones, 13 to 15.6 inch laptops, and 24 and 27 inch monitors.
+const edges = [320, 599, 600, 899, 900, 1279, 1280, 360, 390, 412, 430, 1366, 1440, 1536, 1920, 2560];
 
 async function check(page: Page) {
   const result = await page.evaluate(() => {
@@ -35,16 +41,17 @@ for (const path of paths) {
   });
 }
 
-test('the layout holds at every breakpoint edge', async ({ page }, info) => {
-  test.skip(info.project.name !== 'laptop', 'widths are set by the test itself');
-  for (const path of paths) {
+for (const path of all) {
+  test(`${path} holds its layout at every width, from a small phone to a 27 inch monitor`, async ({ page }, info) => {
+    test.skip(info.project.name !== 'laptop', 'widths are set by the test itself');
+    test.setTimeout(120_000);
     for (const width of edges) {
-      await page.setViewportSize({ width, height: 800 });
+      await page.setViewportSize({ width, height: width < 900 ? 800 : Math.round(width * 0.5625) });
       await open(page, path);
       await check(page);
     }
-  }
-});
+  });
+}
 
 test('body text in the written sections is at least 14px', async ({ page }) => {
   await open(page, '/');

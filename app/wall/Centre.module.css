@@ -1,6 +1,6 @@
 .centre {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto auto;
+  grid-template-rows: minmax(0, 1fr) auto auto auto;
   gap: 0.5rem 0;
   min-width: 0;
   container-type: inline-size;
@@ -53,11 +53,18 @@
 }
 
 .line {
-  /* Two lines of room, so the board does not move when the line under it changes. */
-  min-height: 2.5em;
   font-size: clamp(0.8125rem, 2.5cqw, 1.25rem);
   line-height: 1.25;
   text-wrap: balance;
+}
+
+/* The small line for the word that is up. One line of room, kept even when it is empty. */
+.proof {
+  min-height: 1.3em;
+  font-family: var(--font-mono);
+  font-size: clamp(0.75rem, 1.7cqw, 0.875rem);
+  line-height: 1.3;
+  color: var(--signal);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -67,9 +74,9 @@
     transform-origin: 50% 0;
   }
 
-  /* The new line comes up as the last card stops. */
-  .line {
-    animation: line-in 0.5s var(--ease-out) backwards;
+  /* The small line comes up as the last card stops. */
+  .proof {
+    animation: line-in 0.5s var(--ease-out) 1.4s backwards;
   }
 }
 

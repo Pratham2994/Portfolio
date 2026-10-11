@@ -6,13 +6,14 @@ import { prefersReducedMotion } from '~/lib/motion';
 import styles from './Centre.module.css';
 
 /**
- * What the board says, a word at a time. Each word has six letters, two to a panel, and each
- * comes with the true line behind it. The first one is the one the page is built with.
+ * What the board says, a word at a time. Each word has six letters, two to a panel. The first
+ * is the word of the line under the board, which never changes. The others are what came of
+ * that "almost", each with one small true line of its own.
  */
 const BOARD = [
-  { word: 'ALMOST', line: 'Most of my code exists because a tool almost did what I needed.' },
-  { word: 'FASTER', line: 'The cat on my desk drew at 5 frames a second. Now it draws at 40.' },
-  { word: 'MYSELF', line: 'The benchmarks did not agree, so I measured it myself. 4,101 runs.' },
+  { word: 'ALMOST', proof: '' },
+  { word: 'FASTER', proof: 'So I made it faster: the cat on my desk went from 5 frames a second to 40.' },
+  { word: 'MYSELF', proof: 'So I measured it myself: 4,101 runs, when the benchmarks did not agree.' },
 ];
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -63,7 +64,7 @@ export function Centre({ className }: { className?: string }) {
     };
   }, []);
 
-  const { word, line } = BOARD[at];
+  const { word, proof } = BOARD[at];
   const cards = [...word].map((letter, i) => {
     // Place i stops when the count passes its own mark, so they settle one after the other.
     const turns = left - (5 - i) * LAG;
@@ -85,8 +86,10 @@ export function Centre({ className }: { className?: string }) {
           </span>
         ))}
       </p>
-      <p className={styles.line} key={word} data-line>
-        {line}
+      <p className={styles.line}>Most of my code exists because a tool almost did what I needed.</p>
+      {/* Empty on ALMOST. It keeps its room, so nothing moves when a line comes in. */}
+      <p className={styles.proof} key={word} data-proof>
+        {proof}
       </p>
       <p className={styles.name}>
         Pratham Panchal, software engineer <span className={styles.cue}>About me</span>

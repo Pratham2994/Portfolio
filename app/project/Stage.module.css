@@ -923,11 +923,11 @@
   }
 
   .tabs {
-    font-size: 2.8cqw;
+    font-size: max(0.75rem, 2.8cqw);
   }
 
   .tabs button {
-    padding: 2.8cqw 2.1cqw;
+    padding: 2.8cqw 1.5cqw;
   }
 
   .editor {
@@ -936,7 +936,7 @@
   }
 
   .code {
-    font-size: 3.4cqw;
+    font-size: max(0.75rem, 3.4cqw);
   }
 
   .code li {
@@ -954,11 +954,11 @@
     padding: 2.6cqw 3.4cqw;
     border-top: 0.3cqw solid var(--faint);
     border-left: 0;
-    font-size: 3.2cqw;
+    font-size: max(0.75rem, 3.2cqw);
   }
 
   .seen > span {
-    font-size: 2.5cqw;
+    font-size: max(0.75rem, 2.5cqw);
   }
 
   .seen p {
@@ -974,7 +974,7 @@
     flex-wrap: wrap;
     gap: 1.6cqw;
     padding: 2.6cqw 3.4cqw;
-    font-size: 2.6cqw;
+    font-size: max(0.75rem, 2.6cqw);
   }
 
   .controls button {
@@ -982,7 +982,7 @@
   }
 
   .controls em {
-    font-size: 2.8cqw;
+    font-size: max(0.75rem, 2.8cqw);
   }
 
   .lab {
@@ -991,12 +991,12 @@
   }
 
   .by {
-    font-size: 2.7cqw;
+    font-size: max(0.75rem, 2.7cqw);
   }
 
   .board li {
     grid-template-columns: 5cqw 37cqw minmax(0, 1fr) 15cqw;
-    font-size: 3.3cqw;
+    font-size: max(0.75rem, 3.3cqw);
   }
 
   .board span,
@@ -1005,7 +1005,18 @@
   }
 
   .moral {
-    font-size: 3.7cqw;
+    font-size: max(0.8125rem, 3.7cqw);
+  }
+
+  /* A long name takes two lines here, and does not push the bar off the sheet. */
+  .board strong {
+    white-space: normal;
+    line-height: 1.1;
+  }
+
+  .command code {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .stage > .deck {
@@ -1020,7 +1031,7 @@
   }
 
   .onScreen span {
-    font-size: 2.8cqw;
+    font-size: max(0.75rem, 2.8cqw);
   }
 
   .onScreen strong {
@@ -1029,11 +1040,11 @@
 
   .onScreen em {
     min-height: 2.6em;
-    font-size: 3.8cqw;
+    font-size: max(0.75rem, 3.8cqw);
   }
 
   .onScreen small {
-    font-size: 2.7cqw;
+    font-size: max(0.75rem, 2.7cqw);
   }
 
   .stage[data-wide] > * {
@@ -1042,19 +1053,19 @@
   }
 
   .caption {
-    font-size: 3cqw;
+    font-size: max(0.75rem, 3cqw);
   }
 
   .command span {
-    font-size: 2.7cqw;
+    font-size: max(0.75rem, 2.7cqw);
   }
 
   .command code {
-    font-size: 2.9cqw;
+    font-size: max(0.75rem, 2.9cqw);
   }
 
   .piles {
-    font-size: 2.3cqw;
+    font-size: max(0.75rem, 2.3cqw);
   }
 
   .files li {
@@ -1066,7 +1077,7 @@
   }
 
   .sea span {
-    font-size: 2.7cqw;
+    font-size: max(0.75rem, 2.7cqw);
   }
 
   .buoy {
@@ -1082,7 +1093,7 @@
 
   .asked span,
   .verdict span {
-    font-size: 2.7cqw;
+    font-size: max(0.75rem, 2.7cqw);
   }
 
   .asked strong {
@@ -1090,11 +1101,11 @@
   }
 
   .asked em {
-    font-size: 3.6cqw;
+    font-size: max(0.75rem, 3.6cqw);
   }
 
   .ways {
-    font-size: 2.8cqw;
+    font-size: max(0.75rem, 2.8cqw);
   }
 
   .words {
@@ -1102,7 +1113,7 @@
   }
 
   .goes span {
-    font-size: 2.7cqw;
+    font-size: max(0.75rem, 2.7cqw);
   }
 
   .goes strong {
@@ -1139,11 +1150,11 @@
   }
 
   .dial span {
-    font-size: 2.7cqw;
+    font-size: max(0.75rem, 2.7cqw);
   }
 
   .clock span {
-    font-size: 2.7cqw;
+    font-size: max(0.75rem, 2.7cqw);
   }
 
   .clock strong {
@@ -1151,7 +1162,7 @@
   }
 
   .clock em {
-    font-size: 3.7cqw;
+    font-size: max(0.75rem, 3.7cqw);
   }
 }
 
