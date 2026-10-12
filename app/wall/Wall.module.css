@@ -276,6 +276,20 @@
     border-color var(--dur-fast) linear;
 }
 
+.lever span + span,
+.wall[data-fallen] .lever span:first-of-type {
+  display: none;
+}
+
+.wall[data-fallen] .lever span + span {
+  display: inline;
+}
+
+.wall[data-fallen] .lever {
+  border-color: #c8102e;
+  color: var(--bone);
+}
+
 .lever::before {
   content: '';
   width: 0.8em;

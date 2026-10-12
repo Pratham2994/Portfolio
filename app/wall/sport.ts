@@ -431,10 +431,58 @@ const PLAYS: Record<Play, { ball?: string; play: (scene: Scene, timeline: Timeli
   naruto: { play: naruto },
 };
 
+/**
+ * The film bars. They close in from the top and the bottom as a play starts, and open again
+ * as it ends, so the wall is a screen for as long as the play is on.
+ */
+function film(stage: HTMLElement, timeline: Timeline) {
+  const bars = [0, 1].map(() => {
+    const bar = document.createElement('div');
+    bar.className = 'sport-bar';
+    stage.prepend(bar);
+    return bar;
+  });
+  const end = Math.max(timeline.duration(), 1);
+  timeline
+    .fromTo(bars[0], { yPercent: -100 }, { yPercent: 0, duration: 0.45, ease: 'power3.out' }, 0)
+    .fromTo(bars[1], { yPercent: 100 }, { yPercent: 0, duration: 0.45, ease: 'power3.out' }, 0)
+    .to(bars[0], { yPercent: -100, duration: 0.4, ease: 'power2.in' }, end - 0.4)
+    .to(bars[1], { yPercent: 100, duration: 0.4, ease: 'power2.in' }, end - 0.4);
+}
+
+/**
+ * A landing goes through the wall like a wave. Each sheet is pushed away from the point, the
+ * near ones first and hardest, and springs back. It moves by a share of its own size, which
+ * the plays themselves never use, so the wave and the play do not fight over a sheet.
+ */
+function ripple(timeline: Timeline, sheets: HTMLElement[], at: number, point: Point, strength: number) {
+  for (const sheet of sheets) {
+    const centre = centreOf(sheet);
+    const far = Math.hypot(centre.x - point.x, centre.y - point.y);
+    const push = strength * Math.max(0, 1 - far / 1100) * 9;
+    if (push < 0.4) continue;
+    const reach = at + far / 2600;
+    timeline
+      .to(sheet, { xPercent: ((centre.x - point.x) / (far || 1)) * push, yPercent: ((centre.y - point.y) / (far || 1)) * push, duration: 0.09, ease: 'power2.out' }, reach)
+      .to(sheet, { xPercent: 0, yPercent: 0, duration: 0.7, ease: 'elastic.out(1, 0.32)' }, reach + 0.09);
+  }
+}
+
+/** Sparks, thrown out from the point of the biggest landing. */
+function sparks(prop: Scene['prop'], point: Point) {
+  for (let i = 0; i < 18; i++) {
+    const spark = prop('sport-spark', point.x, point.y);
+    const turn = (i / 18) * Math.PI * 2 + gsap.utils.random(-0.2, 0.2);
+    const far = gsap.utils.random(90, 300);
+    gsap.to(spark, { x: point.x + Math.cos(turn) * far, y: point.y + Math.sin(turn) * far, opacity: 0, scale: 0.2, duration: gsap.utils.random(0.5, 0.9), ease: 'power3.out' });
+  }
+}
+
 /** Plays one short moment across the wall, then leaves the wall as it was. */
 export function playSport(name: Play, wall: HTMLElement, done: () => void): void {
   const sheets = gsap.utils.toArray<HTMLElement>('[data-poster], [data-piece]', wall);
   const grid = wall.querySelector<HTMLElement>(':scope > div')!;
+  const gridBox = grid.getBoundingClientRect();
 
   const stage = document.createElement('div');
   stage.className = 'sport';
@@ -447,12 +495,17 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
   const sayLine = stage.querySelector<HTMLElement>('.sport-say')!;
   const call = stage.querySelector<HTMLElement>('.sport-call')!;
 
+  // Every place something lands, in the order the play was written.
+  const landings: { at: number; point: Point }[] = [];
+  let slow: gsap.core.Timeline | null = null;
+
   const finish = () => {
     if (!stage.isConnected) return;
     clearTimeout(guard);
+    slow?.kill();
     timeline.kill();
     stage.remove();
-    gsap.set([...sheets, wall, wall.querySelector('[data-centre]')], { clearProps: 'transform,x,y,rotation,scale,filter' });
+    gsap.set([...sheets, wall, grid, wall.querySelector('[data-centre]')], { clearProps: 'transform,x,y,rotation,scale,filter' });
     // The cat is free to go back to what she was doing.
     window.dispatchEvent(new CustomEvent('wall:cat', { detail: null }));
     done();
@@ -461,6 +514,11 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
   const guard = setTimeout(finish, 12000);
   const frames: (() => void)[] = [];
   const timeline = gsap.timeline({ onComplete: finish, onUpdate: () => frames.forEach((run) => run()) });
+
+  // The light of a flash, over everything. It is dark until a call asks for it.
+  const flash = document.createElement('div');
+  flash.className = 'sport-flash';
+  stage.append(flash);
 
   const prop: Scene['prop'] = (className, x, y, tag = 'div') => {
     const node = document.createElement(tag);
@@ -491,22 +549,65 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
           if (!at || Math.hypot(now.x - at.x, now.y - at.y) > 14) at = now;
         });
       },
-      impact: (tl, at, point) => void tl.call(() => void prop('sport-impact', point.x, point.y), undefined, at),
+      impact: (tl, at, point) => {
+        landings.push({ at, point });
+        tl.call(() => void prop('sport-impact', point.x, point.y), undefined, at);
+      },
       say: (text) => void (sayLine.textContent = text),
       shout: (tl, at, word, line) => {
         tl.call(
           () => {
-            call.children[0].textContent = word;
+            // The word is set a letter at a time, so each letter can come up on its own.
+            const letters = [...word].map((letter) => {
+              const one = document.createElement('i');
+              one.textContent = letter === ' ' ? '\u00a0' : letter;
+              return one;
+            });
+            call.children[0].replaceChildren(...letters);
             call.children[1].textContent = line;
+            gsap.fromTo(
+              letters,
+              { yPercent: 115, rotation: 9 },
+              { yPercent: 0, rotation: 0, duration: 0.55, ease: 'back.out(2.4)', stagger: 0.035 },
+            );
           },
           undefined,
           at,
         )
+          // A flash, as from the stands, and the room goes dark behind the word.
+          .fromTo(flash, { opacity: 0.55 }, { opacity: 0, duration: 0.5, ease: 'power2.out', immediateRender: false }, at)
           .fromTo(call, { opacity: 0 }, { opacity: 1, duration: 0.2 }, at)
-          .fromTo(call.children, { scale: 1.6 }, { scale: 1, duration: 0.35, ease: 'power4.out' }, at)
+          .fromTo(call.children[1], { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', immediateRender: false }, at + 0.45)
           .to(call, { opacity: 0, duration: 0.4 }, at + 2);
       },
     },
     timeline,
   );
+
+  film(stage, timeline);
+  // The wall feels every landing. The last one is the big one: time slows, the view pushes in, and sparks fly.
+  landings.sort((one, other) => one.at - other.at);
+  landings.forEach(({ at, point }, i) => {
+    const last = i === landings.length - 1;
+    ripple(timeline, sheets, at, point, last ? 1 : 0.4);
+    if (!last) return;
+    timeline
+      .call(
+        () => {
+          sparks(prop, point);
+          slow = gsap
+            .timeline()
+            .to(timeline, { timeScale: 0.12, duration: 0.05, ease: 'none' })
+            .to(timeline, { timeScale: 1, duration: 0.32, ease: 'power2.in' }, 0.3);
+        },
+        undefined,
+        at,
+      )
+      .fromTo(
+        grid,
+        { scale: 1 },
+        { scale: 1.05, transformOrigin: `${point.x - gridBox.left}px ${point.y - gridBox.top}px`, duration: 0.16, ease: 'power2.out', yoyo: true, repeat: 1, immediateRender: false },
+        at,
+      );
+  });
 }

@@ -156,7 +156,9 @@ export function Wall() {
           track('lever_pressed');
           if (wall.current) dropWall(wall.current);
         }} data-lever>
-        Do not press
+        <span>Do not press</span>
+        {/* While the wall is down, the same button hangs it back. */}
+        <span>Hang it back up</span>
       </button>
     </section>
   );
