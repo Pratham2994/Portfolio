@@ -6,15 +6,22 @@ let live: gsap.core.Timeline | null = null;
 
 // When the sheets start to go back up, in seconds. Until then the bare wall is there to be read.
 const RETURN = 7.5;
-const HANG = 0.34; // the flight up
-const LAND = 0.3; // the last stretch onto the wall
+const LIFT = 1.1; // how long one sheet takes to go back up
+const GAP = 0.08; // between one sheet and the next
 
-/** What the bare wall has written on it: true things about how this site is made. */
+/**
+ * What the bare wall has written on it: true things about how this site is made. A different
+ * handful shows on each press.
+ */
 const FACTS: [number: string, what: string][] = [
   ['750+', 'tests, each one in a real browser'],
   ['16', 'screen widths checked, from a phone to a 27 inch monitor'],
   ['0', 'cookies'],
   ['1', 'cat'],
+  ['11', 'secret words. You have found the button'],
+  ['13', 'sheets on this wall, each hung by hand'],
+  ['12', 'pages, built to plain HTML before you asked'],
+  ['3', 'typefaces'],
 ];
 
 /** The word the board in the middle turns to, and the line under it, while the wall is down. */
@@ -37,7 +44,8 @@ function marks(wall: HTMLElement, sheets: HTMLElement[]): HTMLElement {
   // Only in the top row: the pile on the floor hides the places lower down.
   const top = Math.min(...sheets.map((sheet) => sheet.getBoundingClientRect().top));
   const high = sheets.filter((sheet) => 'poster' in sheet.dataset && sheet.getBoundingClientRect().top - top < 60);
-  const told = new Map(gsap.utils.shuffle(high).map((sheet, i) => [sheet, FACTS[i]]));
+  const facts = gsap.utils.shuffle(FACTS.slice());
+  const told = new Map(gsap.utils.shuffle(high).map((sheet, i) => [sheet, facts[i]]));
 
   for (const sheet of sheets) {
     const box = sheet.getBoundingClientRect();
@@ -56,7 +64,7 @@ function marks(wall: HTMLElement, sheets: HTMLElement[]): HTMLElement {
  * Everything falls off the wall, and the wall is left bare. On it are the pencil marks of the
  * person who hung it, and a few true numbers about how the site is made. The board in the
  * middle says you were warned. After a while, or on a second press, each sheet is thrown back
- * up: it spins through the air, slaps onto its place, and the wall takes a knock for every hit.
+ * up: lifted, carried to its place in one easy move, and set down.
  */
 export function dropWall(wall: HTMLElement): void {
   // A second press, while the wall is bare, hangs it back now.
@@ -109,25 +117,16 @@ export function dropWall(wall: HTMLElement): void {
     // They go as the first sheet is picked up.
     .to(layer, { opacity: 0, duration: 0.35, ease: 'none' }, RETURN - 0.1);
 
-  // The throw back, in a mixed order, the way a pile gets picked up.
-  gsap.utils.shuffle(pile).forEach(({ sheet, x, y }, i) => {
-    const at = RETURN + i * 0.11;
-    const spin = gsap.utils.random([-1, 1]) * gsap.utils.random(300, 420);
+  // Hung back, in a mixed order, the way a pile gets picked up. Each sheet is lifted off the
+  // floor, carried up in one easy move as it turns straight, and set down on its place.
+  gsap.utils.shuffle(pile).forEach(({ sheet }, i) => {
+    const at = RETURN + i * GAP;
     timeline
-      // Up and out toward the viewer, spinning.
-      .to(sheet, { x: x * 0.3, y: y * 0.25 - 60, scale: 1.45, rotation: spin, duration: HANG, ease: 'power2.out' }, at)
-      // Then flat onto its place.
-      .to(sheet, { x: 0, y: 0, scale: 1, rotation: spin > 0 ? 360 : -360, duration: LAND, ease: 'power3.in' }, at + HANG)
-      .set(sheet, { rotation: 0 }, at + HANG + LAND)
-      // The hit: the sheet gives a little, and the wall takes the knock.
-      .fromTo(sheet, { scale: 0.93 }, { scale: 1, duration: 0.35, ease: 'back.out(3.5)', immediateRender: false }, at + HANG + LAND)
-      .fromTo(
-        wall,
-        { x: gsap.utils.random(-6, 6), y: gsap.utils.random(-4, 4) },
-        { x: 0, y: 0, duration: 0.18, ease: 'power2.out', immediateRender: false },
-        at + HANG + LAND,
-      );
+      .to(sheet, { x: 0, y: 0, rotation: 0, duration: LIFT, ease: 'power3.inOut' }, at)
+      // It comes a little toward you on the way, and goes back to the wall as it arrives.
+      .to(sheet, { scale: 1.07, duration: LIFT * 0.5, ease: 'sine.out' }, at)
+      .to(sheet, { scale: 1, duration: LIFT * 0.5, ease: 'sine.in' }, at + LIFT * 0.5);
   });
   // The centre piece straightens last, once everything is back.
-  if (centre) timeline.to(centre, { rotation: 0, duration: 0.7, ease: 'elastic.out(1, 0.4)' }, RETURN + pile.length * 0.11 + 0.3);
+  if (centre) timeline.to(centre, { rotation: 0, duration: 0.9, ease: 'power3.inOut' }, RETURN + pile.length * GAP + 0.2);
 }

@@ -234,7 +234,7 @@ function rcb({ sheets, box, prop, shout }: Scene, timeline: Timeline) {
 
 /** Wrong player. Nothing happens, and the wall says why. */
 function siuu({ say }: Scene, timeline: Timeline) {
-  const line = pick('siuu', ['Wrong wall.', 'Wrong wall. Try the other number 10.', 'Not here. This wall is taken.']);
+  const line = pick('siuu', ['Wrong wall.', 'Wrong wall. This one belongs to the number 10.', 'Not here. This wall is taken.']);
   timeline
     .call(() => say(line), undefined, 0.9)
     .to({}, { duration: 2.2 }, 0.9)
@@ -435,14 +435,22 @@ const PLAYS: Record<Play, { ball?: string; play: (scene: Scene, timeline: Timeli
  * The film bars. They close in from the top and the bottom as a play starts, and open again
  * as it ends, so the wall is a screen for as long as the play is on.
  */
-function film(stage: HTMLElement, timeline: Timeline) {
+function film(stage: HTMLElement, timeline: Timeline, sheets: HTMLElement[], dim: boolean) {
+  const end = Math.max(timeline.duration(), 1);
+  // Where the cats are the play, bars would cover them: they are up on the top edge. There the
+  // sheets go dim, and the cats are what is left in the light.
+  if (dim) {
+    timeline
+      .to(sheets, { filter: 'brightness(0.42) saturate(0.7)', duration: 0.5, ease: 'power2.out' }, 0)
+      .to(sheets, { filter: 'brightness(1) saturate(1)', duration: 0.5, ease: 'power2.in' }, end - 0.5);
+    return;
+  }
   const bars = [0, 1].map(() => {
     const bar = document.createElement('div');
     bar.className = 'sport-bar';
     stage.prepend(bar);
     return bar;
   });
-  const end = Math.max(timeline.duration(), 1);
   timeline
     .fromTo(bars[0], { yPercent: -100 }, { yPercent: 0, duration: 0.45, ease: 'power3.out' }, 0)
     .fromTo(bars[1], { yPercent: 100 }, { yPercent: 0, duration: 0.45, ease: 'power3.out' }, 0)
@@ -584,7 +592,7 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
     timeline,
   );
 
-  film(stage, timeline);
+  film(stage, timeline, sheets, name === 'naruto');
   // The wall feels every landing. The last one is the big one: time slows, the view pushes in, and sparks fly.
   landings.sort((one, other) => one.at - other.at);
   landings.forEach(({ at, point }, i) => {
