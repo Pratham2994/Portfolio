@@ -12,7 +12,7 @@ import styles from './Centre.module.css';
  */
 const BOARD = [
   { word: 'ALMOST', proof: '' },
-  { word: 'FASTER', proof: 'So I made it faster: the cat on my desk went from 5 frames a second to 40.' },
+  { word: 'FASTER', proof: 'So I made Prats-Deck faster: its screen now draws 40 frames a second, not 5.' },
   { word: 'MYSELF', proof: 'So I measured it myself: 4,101 runs, when the benchmarks did not agree.' },
 ];
 
