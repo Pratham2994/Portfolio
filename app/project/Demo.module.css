@@ -282,6 +282,255 @@
   }
 }
 
+/*
+ * ---- The run and its result, in the form that fits each project. The parts are the same
+ * (a list of steps, and a result), but no two demos lay them out the same way.
+ */
+.bench[data-look] .steps span {
+  text-align: left;
+}
+
+/* Scrub: an encode is one bar that fills, part by part, from the left. */
+.bench[data-look='bar'],
+.bench[data-look='steps'],
+.bench[data-look='pills'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.bench[data-look='bar'] .steps {
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: var(--space-3) 0.3rem;
+}
+
+.bench[data-look='bar'] .steps li {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 0.3em;
+  padding-top: 0.6em;
+  border-top: 0.55rem solid var(--rule);
+}
+
+.bench[data-look='bar'] .steps li[data-state='done'] {
+  border-top-color: var(--ink);
+}
+
+.bench[data-look='bar'] .steps li[data-state='now'] {
+  border-top-color: var(--accent);
+}
+
+.bench[data-look='bar'] .steps i,
+.bench[data-look='chat'] .steps i,
+.bench[data-look='pills'] .steps i,
+.bench[data-look='tiles'] .steps i,
+.bench[data-look='report'] .steps i {
+  display: none;
+}
+
+/* The result lies across, under the bar: the word, then what backs it up. */
+.bench[data-look='bar'] .stub,
+.bench[data-look='steps'] .stub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  min-height: 0;
+  border-top: 1px solid var(--rule);
+  border-left: 0;
+}
+
+.bench[data-look='bar'] .stub > .label,
+.bench[data-look='steps'] .stub > .label {
+  flex-basis: 100%;
+}
+
+.bench[data-look='bar'] .stub > .meter {
+  flex: 1 1 14rem;
+}
+
+/* Neat: a list that is ticked off, one line at a time. */
+.bench[data-look='list'] .steps li {
+  grid-template-columns: auto auto minmax(1rem, 1fr) auto;
+}
+
+.bench[data-look='list'] .steps li::before {
+  content: '';
+  display: grid;
+  place-items: center;
+  width: 1.05em;
+  height: 1.05em;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  font-size: 0.95em;
+  line-height: 1;
+  translate: 0 0.12em;
+}
+
+.bench[data-look='list'] .steps li[data-state='done']::before {
+  content: '\2713';
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* FloatChat: a conversation. What the model did is on the left, a line at a time. The answer is on the right. */
+.bench[data-look='chat'] {
+  gap: var(--space-3) var(--space-5);
+  background: none;
+}
+
+.bench[data-look='chat'] .printed {
+  padding: 0;
+}
+
+.bench[data-look='chat'] .steps {
+  justify-items: start;
+  gap: 0.45em;
+}
+
+.bench[data-look='chat'] .steps li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2em 0.7em;
+  max-width: 100%;
+  padding: 0.55em 0.9em;
+  border-radius: 1.1em 1.1em 1.1em 0.2em;
+  background: var(--soft);
+}
+
+.bench[data-look='chat'] .stub {
+  align-self: end;
+  border: 0;
+  border-radius: 1.1em 1.1em 0.2em 1.1em;
+  background: var(--soft);
+}
+
+/* iDEA: a visit goes through numbered steps, joined by a line, and ends with a token. */
+.bench[data-look='steps'] .steps {
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: var(--space-4) 0;
+  counter-reset: step;
+}
+
+.bench[data-look='steps'] .steps li {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 0.25em;
+  padding: 2.7em 0.8em 0 0;
+  counter-increment: step;
+}
+
+.bench[data-look='steps'] .steps li::before {
+  content: counter(step);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2em;
+  height: 2em;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--soft);
+  font-weight: 700;
+}
+
+.bench[data-look='steps'] .steps li[data-state='done']::before {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* The row of dots is the line from one step to the next. */
+.bench[data-look='steps'] .steps i {
+  position: absolute;
+  top: 1em;
+  right: 0;
+  left: 2em;
+  border-bottom: 2px solid var(--rule);
+  translate: none;
+}
+
+.bench[data-look='steps'] .steps li[data-state='done'] i {
+  border-bottom-color: var(--ink);
+}
+
+/* The token you leave with: the desk, in a box with a cut edge. */
+.bench[data-look='steps'] .verdict {
+  padding: 0.12em 0.35em;
+  border: 0.06em dashed currentColor;
+}
+
+/* Chronicle: the charts are the result. The steps are only a row of small tags under it. */
+.bench[data-look='pills'] {
+  background: none;
+}
+
+.bench[data-look='pills'] .printed {
+  order: 2;
+  padding: 0;
+}
+
+.bench[data-look='pills'] .steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+}
+
+.bench[data-look='pills'] .steps li {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.2em 0.6em;
+  padding: 0.3em 0.75em;
+  border: 1px solid var(--rule);
+  border-radius: 99px;
+}
+
+.bench[data-look='pills'] .stub {
+  min-height: 0;
+  padding: 0 0 var(--space-3);
+  border: 0;
+}
+
+/* Algomotion: three counters, like the readouts of the visualiser itself. */
+.bench[data-look='tiles'] .steps {
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.5rem;
+}
+
+.bench[data-look='tiles'] .steps li {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 0.35em;
+  padding: 0.8em 0.9em;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
+}
+
+.bench[data-look='tiles'] .steps span {
+  font-weight: 700;
+}
+
+/* MalShield: a lab report. One ruled row for each test, and the verdict stamped on it. */
+.bench[data-look='report'] .steps {
+  gap: 0;
+  border-top: 2px solid var(--ink);
+}
+
+.bench[data-look='report'] .steps li {
+  grid-template-columns: minmax(5.5rem, 0.36fr) minmax(0, 1fr);
+  padding: 0.55em 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.bench[data-look='report'] .verdict {
+  justify-self: start;
+  padding: 0.12em 0.3em 0.06em;
+  border: 0.1em solid currentColor;
+  border-radius: 0.08em;
+  rotate: -3deg;
+}
+
 /* What goes on underneath: a row of stages that light up one after the other. */
 .stages {
   display: grid;

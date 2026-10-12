@@ -145,7 +145,7 @@ function Scrub() {
       <button type="button" className={s.action} onClick={run}>
         Run it
       </button>
-      <div className={s.bench}>
+      <div className={s.bench} data-look="bar">
         <Console kind="film" steps={steps} at={at} />
         <Report ready={at >= steps.length} wait="Encoding" stamp="Fits">
           <p className={s.result} data-result>
@@ -256,7 +256,7 @@ function Neat() {
 
   return (
     <div className={s.neat}>
-      <div className={s.bench}>
+      <div className={s.bench} data-look="list">
         <Console kind="folder" steps={steps} at={at} />
         <Report ready={at >= steps.length} wait="Scanning" stamp={left ? `${open.length} to decide` : 'Tidy'}>
           <p className={s.result} data-result>
@@ -373,7 +373,7 @@ function Float() {
           </button>
         ))}
       </div>
-      <div className={s.bench}>
+      <div className={s.bench} data-look="chat">
         <Console kind="wave" steps={steps} at={reach} halted={refused && at > 0} />
         <Report ready={ready} wait="Working on it" stamp={refused ? 'Refused' : 'Answered'} tone={refused ? 'bad' : 'good'}>
           <p className={s.reply} data-answer data-refused={refused || undefined}>
@@ -511,7 +511,7 @@ function Idea() {
       <button type="button" className={s.action} onClick={run}>
         Raise it
       </button>
-      <div className={s.bench}>
+      <div className={s.bench} data-look="steps">
         <Console kind="wave" steps={steps} at={at} />
         <Report ready={at >= steps.length} wait="Working on it" stamp={sorted.desk.short}>
           <p className={s.reply} data-desk>
@@ -600,7 +600,7 @@ function Chronicle() {
         <span>noon</span>
         <span>midnight</span>
       </p>
-      <div className={s.bench}>
+      <div className={s.bench} data-look="pills">
         <Console kind="clock" steps={steps} at={at} />
         <Report ready={at >= steps.length} wait="Reading the history" stamp={hourName(peak)} tone={off ? 'bad' : 'good'}>
           <Meter share={night / total} label={`${Math.round((night / total) * 100)}% of the hours fall between 11 pm and 5 am`} />
@@ -866,7 +866,7 @@ function Algo() {
       <p className={s.count} data-count>
         Cells looked at: <b>{looked}</b>
       </p>
-      <div className={s.bench}>
+      <div className={s.bench} data-look="tiles">
         <Console kind="maze" steps={steps} at={done ? 3 : 1} />
         <Report ready={done} wait={playing ? 'Playing it back' : 'Press Search'} stamp={`${run.looked} cells`}>
           <Meter share={run.looked / open} label={`${run.looked} of the ${open} open cells`} />
@@ -966,7 +966,7 @@ function Mal() {
           </button>
         ))}
       </div>
-      <div className={s.bench}>
+      <div className={s.bench} data-look="report">
         <Console kind="file" steps={sample.steps} at={at} />
         <Report ready={at >= sample.steps.length} wait="Checking it" stamp={sample.bad ? 'Do not open' : 'Clean'} tone={sample.bad ? 'bad' : 'good'}>
           <Meter share={sample.share} label={`${Math.round(sample.share * 100)}% likely to be malware`} />
