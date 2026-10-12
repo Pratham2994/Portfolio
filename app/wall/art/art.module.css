@@ -255,13 +255,14 @@
   animation: tap 3.6s steps(1) infinite;
 }
 
-/* The lead goes down and off the sheet. */
+/* The lead: a short length out of the case. It ends in the picture, clear of the name under it. */
 .device u {
   position: absolute;
   top: 98%;
   left: 20%;
   width: 2cqw;
-  height: 60cqw;
+  height: 9cqw;
+  border-radius: 0 0 1cqw 1cqw;
   background: var(--fg);
 }
 

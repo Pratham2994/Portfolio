@@ -1114,6 +1114,14 @@
     border-left: 0;
   }
 
+  /* Stacked, a part that waits would be a tall empty box. Here every part shows from the start. */
+  .pick:not([data-on]) > :not(span),
+  .answer:not([data-on]) > :not(span),
+  .say:not([data-on]) > :not(span),
+  .lands:not([data-on]) > :not(span) {
+    visibility: visible;
+  }
+
   .float span,
   .idea span {
     font-size: max(0.75rem, 2.7cqw);

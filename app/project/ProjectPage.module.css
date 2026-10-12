@@ -481,7 +481,7 @@
 .aside .stats > div,
 .intro .stats > div {
   flex-direction: row-reverse;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: baseline;
   gap: var(--space-4);
   padding: var(--space-3) 0;
@@ -494,8 +494,8 @@
 
 .aside .stats dt,
 .intro .stats dt {
-  text-align: right;
-  max-width: 16ch;
+  text-align: left;
+  max-width: 22ch;
 }
 
 /* On a wide page each side stacks on its own. */
