@@ -7,6 +7,9 @@
   "assets": {
     "directory": "./build/client",
     "binding": "ASSETS",
+    // One address for each page, with no slash at the end: /work/neat is served, and /work/neat/
+    // is sent to it. This is the address the sitemap and the canonical tags give.
+    "html_handling": "drop-trailing-slash",
     // Unknown addresses get 404.html with a real 404 status. The app then shows its own page.
     "not_found_handling": "404-page",
     // Everything is served as a file with no Worker run, except the analytics path.
