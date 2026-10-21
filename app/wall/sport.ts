@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 
-export type Play = 'messi' | 'kohli' | 'federer' | 'rcb' | 'siuu' | 'smash' | 'ace' | 'boxbox' | 'naruto';
+export type Play = 'messi' | 'kohli' | 'federer' | 'rcb' | 'siuu' | 'smash' | 'ace' | 'boxbox' | 'naruto' | 'creeper' | 'domain' | 'titan' | 'geass';
 
 type Timeline = gsap.core.Timeline;
 type Point = { x: number; y: number };
@@ -20,6 +20,8 @@ type Scene = {
   impact: (timeline: Timeline, at: number, point: Point) => void;
   /** Runs on every frame of the play. */
   onFrame: (run: () => void) => void;
+  /** Runs once when the play is over, however it ends. */
+  onEnd: (run: () => void) => void;
   /** A small line of commentary while the play is on. */
   say: (text: string) => void;
   /** The big call at the end, with one line under it. */
@@ -419,6 +421,228 @@ function naruto({ wall, box, prop, say, onFrame }: Scene, timeline: Timeline) {
     .call(() => say(''));
 }
 
+// The creeper, drawn in its own pixels: a face of eight by eight, a body, and its feet.
+const CREEPER_FACE = ['........', '.##..##.', '.##..##.', '...##...', '..####..', '..####..', '..#..#..', '........'];
+function creeperSvg(): string {
+  const greens = ['#5aa33f', '#4c8f34', '#6dbb4c', '#3f7d2b', '#7bc95a'];
+  const cells: string[] = [];
+  const cell = (x: number, y: number, fill: string) => cells.push(`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${fill}"/>`);
+  const green = () => greens[Math.floor(Math.random() * greens.length)];
+  CREEPER_FACE.forEach((row, y) => [...row].forEach((dot, x) => cell(x, y, dot === '#' ? '#111' : green())));
+  for (let y = 8; y < 18; y++) for (let x = 2; x < 6; x++) cell(x, y, green());
+  for (let y = 18; y < 22; y++) for (let x = 0; x < 8; x++) if (x !== 3 && x !== 4) cell(x, y, green());
+  return `<svg viewBox="0 0 8 22" shape-rendering="crispEdges">${cells.join('')}</svg>`;
+}
+
+/** Minecraft: a creeper steps out from behind a sheet, hisses, swells, and goes off. */
+function creeper({ wall, sheets, prop, say, shout, impact }: Scene, timeline: Timeline) {
+  // A poster well up the screen, so it is not under the bars or off the bottom.
+  const posters = sheets.filter((sheet) => {
+    const box = sheet.getBoundingClientRect();
+    return 'poster' in sheet.dataset && box.top > 0 && box.bottom < window.innerHeight * 0.72;
+  });
+  const sheet = pick('creeper', posters.length ? posters : sheets);
+  const rect = sheet.getBoundingClientRect();
+  // It comes out on the side with room for it.
+  const side = rect.right < window.innerWidth - 140 ? 1 : -1;
+  const edge = side > 0 ? rect.right : rect.left;
+  const width = 56;
+  const height = 154;
+  const feet = Math.min(rect.bottom, window.innerHeight - 30);
+  const mob = prop('sport-creeper', edge, feet - height / 2);
+  mob.innerHTML = creeperSvg();
+  const point = { x: edge + side * (width / 2 + 6), y: feet - height / 2 };
+
+  // The cat wants none of it: she goes to the sheet furthest away.
+  const away = sheets.slice().sort((a, b) => Math.hypot(centreOf(b).x - point.x, centreOf(b).y - point.y) - Math.hypot(centreOf(a).x - point.x, centreOf(a).y - point.y))[0];
+  window.dispatchEvent(new CustomEvent('wall:cat', { detail: away }));
+
+  // Out from behind the sheet: the part still behind it is cut away as it moves.
+  const out = { x: edge - side * (width / 2) };
+  const place = () => {
+    const left = out.x - width / 2;
+    const behind = side > 0 ? Math.min(Math.max(edge - left, 0), width) : Math.min(Math.max(left + width - edge, 0), width);
+    gsap.set(mob, { x: out.x, clipPath: side > 0 ? `inset(0 0 0 ${behind}px)` : `inset(0 ${behind}px 0 0)` });
+  };
+  place();
+  timeline
+    .to(out, { x: point.x, duration: 0.9, ease: 'power1.inOut', onUpdate: place }, 0.3)
+    .call(() => say('Sssssss...'), undefined, 1.25)
+    .call(() => void (mob.dataset.hiss = ''), undefined, 1.25)
+    // It swells as the fuse runs.
+    .to(mob, { scale: 1.28, duration: 1.15, ease: 'power2.in' }, 1.25)
+    .set(mob, { opacity: 0 }, 2.4)
+    .call(() => say(''), undefined, 2.4)
+    .call(
+      () => {
+        // The blast: blocks of it, thrown out and falling.
+        const blocks = ['#5aa33f', '#3f7d2b', '#7bc95a', '#8b8b8b', '#5a5a5a', '#111'];
+        for (let i = 0; i < 28; i++) {
+          const block = prop('sport-block', point.x, point.y);
+          block.style.background = blocks[i % blocks.length];
+          const turn = gsap.utils.random(0, Math.PI * 2);
+          const far = gsap.utils.random(80, 340);
+          gsap.to(block, {
+            x: point.x + Math.cos(turn) * far,
+            y: point.y + Math.sin(turn) * far * 0.7 + 120,
+            rotation: gsap.utils.random(-360, 360),
+            opacity: 0,
+            duration: gsap.utils.random(0.7, 1.2),
+            ease: 'power2.out',
+          });
+        }
+      },
+      undefined,
+      2.4,
+    );
+  hit(timeline, wall, sheet, 2.4);
+  impact(timeline, 2.4, point);
+  shout(timeline, 2.5, 'Boom', 'It was a creeper. It is always a creeper.');
+}
+
+/**
+ * Jujutsu Kaisen: a domain. The wall goes into the void, every sheet floats into a slow ring
+ * round the board, the name of the domain is called, and then the wall comes back.
+ */
+function domain({ wall, sheets, box, prop, say, shout, onEnd }: Scene, timeline: Timeline) {
+  const board = wall.querySelector('[data-centre]');
+  const middle = board ? centreOf(board) : { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  // The void goes on the wall itself, under the sheets, so they float in it and stay in sight.
+  const empty = document.createElement('div');
+  empty.className = 'sport-void';
+  empty.setAttribute('aria-hidden', 'true');
+  const light = wall.querySelector('[data-light]');
+  if (light) light.after(empty);
+  else wall.prepend(empty);
+  onEnd(() => empty.remove());
+  // Stars in the void, a few hundred points of light that do not move.
+  empty.innerHTML = Array.from({ length: 90 }, () => `<i style="left:${gsap.utils.random(0, 100)}%;top:${gsap.utils.random(0, 100)}%;opacity:${gsap.utils.random(0.2, 0.9).toFixed(2)}"></i>`).join('');
+
+  const from = sheets.map(centreOf);
+  const across = Math.min(box.width * 0.42, 640);
+  const down = Math.min(box.height * 0.38, 320);
+  const ring = { turn: 0, gather: 0 };
+  // Each sheet's place on the ring, as the ring turns. Gathered 0 is home, 1 is on the ring.
+  const place = () =>
+    sheets.forEach((sheet, i) => {
+      const angle = (i / sheets.length + ring.turn) * Math.PI * 2 - Math.PI / 2;
+      gsap.set(sheet, {
+        x: (middle.x + Math.cos(angle) * across - from[i].x) * ring.gather,
+        y: (middle.y + Math.sin(angle) * down - from[i].y) * ring.gather,
+        scale: 1 - 0.35 * ring.gather,
+      });
+    });
+
+  timeline
+    .call(() => say('Ryōiki tenkai.'), undefined, 0.15)
+    .fromTo(empty, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.inOut' }, 0.45)
+    .to(ring, { gather: 1, duration: 1.2, ease: 'power3.inOut', onUpdate: place }, 0.7)
+    .to(ring, { turn: 0.2, duration: 3.3, ease: 'none', onUpdate: place }, 0.7)
+    .call(() => say(''), undefined, 1.5);
+  // The domain opens: rings go out from the board, one after another.
+  [0.55, 0.9, 1.25, 1.6].forEach((at) => timeline.call(() => void prop('sport-ring', middle.x, middle.y), undefined, at));
+  // The board steps back while the name is called, so the name is the only word in the middle.
+  if (board) {
+    onEnd(() => gsap.set(board, { clearProps: 'opacity' }));
+    timeline.to(board, { opacity: 0.12, duration: 0.4, ease: 'power2.out' }, 1.4).to(board, { opacity: 1, duration: 0.6, ease: 'power2.inOut' }, 3.7);
+  }
+  shout(timeline, 1.6, '領域展開', 'Ryōiki tenkai. Muryōkūsho.');
+  timeline
+    .call(() => say('Throughout heaven and earth, this wall alone is the honoured one.'), undefined, 3.7)
+    .to(ring, { gather: 0, duration: 1.1, ease: 'power3.inOut', onUpdate: place }, 4)
+    .to(empty, { opacity: 0, duration: 0.9, ease: 'power2.inOut' }, 4.2)
+    .call(() => say(''), undefined, 5.3);
+}
+
+// The Colossal Titan's face: the head without its skin, the teeth, and the eyes.
+const TITAN = `<svg viewBox="0 0 200 230">
+  <path d="M100 6 C152 6 184 44 184 100 C184 150 168 196 132 222 L68 222 C32 196 16 150 16 100 C16 44 48 6 100 6 Z" fill="#7a1a12"/>
+  <path d="M60 30 C70 70 66 110 72 150 M100 14 C100 60 98 100 100 140 M140 30 C130 70 134 110 128 150 M36 90 C52 110 54 140 60 170 M164 90 C148 110 146 140 140 170" stroke="#a8301f" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <ellipse cx="68" cy="104" rx="20" ry="12" fill="#2a0806"/><ellipse cx="132" cy="104" rx="20" ry="12" fill="#2a0806"/>
+  <circle class="eye" cx="68" cy="104" r="5" fill="#f3e2c0"/><circle class="eye" cx="132" cy="104" r="5" fill="#f3e2c0"/>
+  <path d="M92 128 L100 150 L108 128" stroke="#3a0b07" stroke-width="5" fill="none"/>
+  <rect x="50" y="168" width="100" height="34" rx="6" fill="#2a0806"/>
+  <g fill="#efe4cc">${Array.from({ length: 10 }, (_, i) => `<rect x="${53 + i * 9.6}" y="170" width="8" height="13" rx="1.5"/><rect x="${53 + i * 9.6}" y="187" width="8" height="13" rx="1.5"/>`).join('')}</g>
+</svg>`;
+
+/**
+ * Attack on Titan: the site is a wall, so something looks over it. The wall sinks, a flash,
+ * the Colossal Titan rises behind it in a cloud of steam, looks, and goes down again.
+ */
+function titan({ wall, box, prop, say, shout }: Scene, timeline: Timeline) {
+  const grid = wall.querySelector<HTMLElement>(':scope > div')!;
+  const drop = window.innerHeight * 0.42;
+  // Everything above the top of the wall, once it has sunk: the titan shows only there.
+  const sky = prop('sport-sky', 0, 0);
+  sky.style.height = `${Math.max(box.top + drop, 0)}px`;
+  const head = document.createElement('div');
+  head.className = 'sport-titan';
+  head.innerHTML = TITAN;
+  sky.append(head);
+  const light = prop('sport-bolt', 0, 0);
+  const steam = (at: number) =>
+    [0.3, 0.5, 0.7].forEach((share, i) =>
+      timeline.call(() => void prop('sport-steam', box.left + box.width * share, box.top + drop - 20), undefined, at + i * 0.12),
+    );
+
+  timeline
+    .call(() => say('That day, the wall was not tall enough.'), undefined, 0.2)
+    .to(grid, { y: drop, duration: 1.1, ease: 'power3.inOut' }, 0.3)
+    // The flash of a titan's coming.
+    .fromTo(light, { opacity: 0 }, { keyframes: [{ opacity: 0.85, duration: 0.06 }, { opacity: 0.1, duration: 0.1 }, { opacity: 0.7, duration: 0.05 }, { opacity: 0, duration: 0.5 }] }, 1.2)
+    .fromTo(head, { yPercent: 100 }, { yPercent: 8, duration: 1.6, ease: 'power2.out' }, 1.3);
+  steam(1.4);
+  steam(2.4);
+  timeline
+    .to(head, { yPercent: 12, duration: 0.5, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 2.9)
+    .call(() => say(''), undefined, 3.4)
+    .to(head, { yPercent: 100, duration: 1, ease: 'power2.in' }, 3.9)
+    .to(grid, { y: 0, duration: 1, ease: 'power3.inOut' }, 4.5);
+  steam(4.1);
+  shout(timeline, 5.4, 'Tatakae', 'Keep moving forward.');
+}
+
+// The sigil of the Geass: a bird with its wings spread, in red.
+const SIGIL = `<svg viewBox="0 0 120 80">
+  <path d="M60 52 C46 34 26 22 4 18 C22 30 34 40 44 54 C34 50 24 50 14 52 C30 56 44 62 54 72 Z" fill="currentColor"/>
+  <path d="M60 52 C74 34 94 22 116 18 C98 30 86 40 76 54 C86 50 96 50 106 52 C90 56 76 62 66 72 Z" fill="currentColor"/>
+  <path d="M60 30 L66 52 L60 76 L54 52 Z" fill="currentColor"/>
+</svg>`;
+
+/**
+ * Code Geass: an order no one can refuse. The sigil lights up over the board, and every sheet,
+ * however it was hung, hangs perfectly straight. The order holds for a moment, then wears off.
+ */
+function geass({ wall, sheets, box, prop, say, shout, onEnd }: Scene, timeline: Timeline) {
+  // However the play ends, no sheet stays under the order.
+  onEnd(() => sheets.forEach((sheet) => sheet.style.removeProperty('--nudge')));
+  const board = wall.querySelector('[data-centre]');
+  const middle = board ? centreOf(board) : { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  const sigil = prop('sport-sigil', middle.x, middle.y);
+  sigil.innerHTML = SIGIL;
+  // The ones nearest the board obey first.
+  const order = sheets.slice().sort((a, b) => Math.hypot(centreOf(a).x - middle.x, centreOf(a).y - middle.y) - Math.hypot(centreOf(b).x - middle.x, centreOf(b).y - middle.y));
+
+  timeline
+    .call(() => say('Lelouch vi Britannia commands you.'), undefined, 0.2)
+    .fromTo(sigil, { opacity: 0, scale: 0.4, rotation: -25 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.7, ease: 'power3.out' }, 0.7);
+  [0.9, 1.2].forEach((at) => timeline.call(() => void prop('sport-ring', middle.x, middle.y).classList.add('sport-ring-red'), undefined, at));
+  order.forEach((sheet, i) => {
+    timeline
+      // Straight: its tilt taken away, as the cat does when she bumps one.
+      .call(() => sheet.style.setProperty('--nudge', 'calc(var(--tilt) * -1)'), undefined, 1.1 + i * 0.05)
+      .fromTo(sheet, { filter: 'drop-shadow(0 0 0 #ff1a3c)' }, { filter: 'drop-shadow(0 0 14px #ff1a3c)', duration: 0.25, yoyo: true, repeat: 1, ease: 'power2.out' }, 1.1 + i * 0.05)
+      .call(() => sheet.style.removeProperty('--nudge'), undefined, 4.3 + i * 0.03);
+  });
+  shout(timeline, 1.9, 'Obey', 'All of you. Perfectly straight.');
+  timeline
+    .to(sigil, { opacity: 0, scale: 1.3, duration: 0.6, ease: 'power2.in' }, 3.8)
+    .call(() => say('A Geass only works once.'), undefined, 4.2)
+    .call(() => say(''), undefined, 5.4)
+    // The last of the order wearing off, and the sheets settling back.
+    .to({}, { duration: 0.6 }, 5.4);
+}
+
 const PLAYS: Record<Play, { ball?: string; play: (scene: Scene, timeline: Timeline) => void }> = {
   messi: { ball: 'football', play: messi },
   kohli: { ball: 'cricket', play: kohli },
@@ -429,6 +653,10 @@ const PLAYS: Record<Play, { ball?: string; play: (scene: Scene, timeline: Timeli
   ace: { play: ace },
   boxbox: { play: boxbox },
   naruto: { play: naruto },
+  creeper: { play: creeper },
+  domain: { play: domain },
+  titan: { play: titan },
+  geass: { play: geass },
 };
 
 /**
@@ -513,6 +741,7 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
     slow?.kill();
     timeline.kill();
     stage.remove();
+    for (const run of ends) run();
     gsap.set([...sheets, wall, grid, wall.querySelector('[data-centre]')], { clearProps: 'transform,x,y,rotation,scale,filter' });
     // The cat is free to go back to what she was doing.
     window.dispatchEvent(new CustomEvent('wall:cat', { detail: null }));
@@ -521,6 +750,7 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
   // If frames stop (a hidden tab, a stalled page), the wall is still left clean.
   const guard = setTimeout(finish, 12000);
   const frames: (() => void)[] = [];
+  const ends: (() => void)[] = [];
   const timeline = gsap.timeline({ onComplete: finish, onUpdate: () => frames.forEach((run) => run()) });
 
   // The light of a flash, over everything. It is dark until a call asks for it.
@@ -546,6 +776,7 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
       spin,
       prop,
       onFrame: (run) => void frames.push(run),
+      onEnd: (run) => void ends.push(run),
       trail: (node, colour) => {
         let at: Point | null = null;
         frames.push(() => {

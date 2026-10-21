@@ -624,6 +624,194 @@ html[data-project-open] {
   }
 }
 
+/* Minecraft: the creeper, in pixels. While it hisses it flashes white, faster and faster. */
+.sport-creeper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 154px;
+  margin: -77px 0 0 -28px;
+  transform-origin: 50% 100%;
+}
+
+.sport-creeper svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sport-creeper[data-hiss] svg {
+  animation: sport-hiss 1.15s linear forwards;
+}
+
+@keyframes sport-hiss {
+  0%, 18%, 40%, 58%, 72%, 84%, 92%, 100% {
+    filter: none;
+  }
+
+  9%, 30%, 50%, 66%, 79%, 89%, 96% {
+    filter: brightness(2.6) saturate(0.2);
+  }
+}
+
+.sport-block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+}
+
+.sport[data-sport='creeper'] {
+  --side-a: #5aa33f;
+  --side-b: #8b8b8b;
+}
+
+/* Jujutsu Kaisen: the void of a domain, with its stars, and the rings it opens with. */
+.sport-void {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, #1a1440 0%, #07061a 55%, #000 100%);
+  opacity: 0;
+}
+
+.sport-void i {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px #b9b2ff;
+}
+
+.sport-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10rem;
+  height: 10rem;
+  margin: -5rem 0 0 -5rem;
+  border: 2px solid #b9b2ff;
+  border-radius: 50%;
+  box-shadow: 0 0 1.5rem #7b5cff, inset 0 0 1.5rem #7b5cff;
+  animation: sport-ring 1.6s var(--ease-out) forwards;
+}
+
+.sport-ring.sport-ring-red {
+  border-color: #ff1a3c;
+  box-shadow: 0 0 1.5rem #ff1a3c, inset 0 0 1.5rem #ff1a3c;
+}
+
+@keyframes sport-ring {
+  from {
+    opacity: 1;
+    scale: 0.2;
+  }
+
+  to {
+    opacity: 0;
+    scale: 9;
+  }
+}
+
+.sport[data-sport='domain'] {
+  --side-a: #7b5cff;
+  --side-b: #e6e2ff;
+}
+
+/* In a domain the sheets are the show: the call has no dark room behind it, so the ring stays in sight. */
+.sport[data-sport='domain'] .sport-call {
+  background: none;
+}
+
+/* Attack on Titan: the sky over the wall, where the titan shows, and the steam around it. */
+.sport-sky {
+  position: absolute;
+  inset: 0 0 auto;
+  overflow: hidden;
+}
+
+.sport-titan {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: min(34rem, 48vw);
+  translate: -50% 0;
+  filter: drop-shadow(0 0 2.5rem rgb(255 120 60 / 0.35));
+}
+
+.sport-titan svg {
+  display: block;
+  width: 100%;
+}
+
+.sport-titan .eye {
+  filter: drop-shadow(0 0 4px #fff3d0);
+}
+
+.sport-steam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14rem;
+  height: 9rem;
+  margin: -4.5rem 0 0 -7rem;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(236 232 223 / 0.75), rgb(236 232 223 / 0.25) 60%, transparent);
+  filter: blur(6px);
+  animation: sport-steam 2.2s var(--ease-out) forwards;
+}
+
+@keyframes sport-steam {
+  from {
+    opacity: 0.9;
+    scale: 0.4;
+    translate: 0 1rem;
+  }
+
+  to {
+    opacity: 0;
+    scale: 1.8;
+    translate: 0 -5rem;
+  }
+}
+
+.sport-bolt {
+  position: absolute;
+  inset: 0;
+  background: #fff6c8;
+  opacity: 0;
+}
+
+.sport[data-sport='titan'] {
+  --side-a: #7a1a12;
+  --side-b: #c9b38a;
+}
+
+/* Code Geass: the sigil, in the red of the eye that gives the order. */
+.sport-sigil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 15rem;
+  margin: -6rem 0 0 -7.5rem;
+  color: #ff1a3c;
+  filter: drop-shadow(0 0 1.2rem #ff1a3c) drop-shadow(0 0 3rem rgb(255 26 60 / 0.6));
+}
+
+.sport-sigil svg {
+  display: block;
+  width: 100%;
+}
+
+.sport[data-sport='geass'] {
+  --side-a: #ff1a3c;
+  --side-b: #2a0a4a;
+}
+
 .sport[data-sport='rcb'] {
   --side-a: #d1171b;
   --side-b: #d4a12a;
