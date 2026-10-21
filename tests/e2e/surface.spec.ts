@@ -60,12 +60,12 @@ test('the wall dims at once under the pointer and stays dim across the gaps', as
   await open(page, '/');
   const grid = page.locator('[data-wall] > div');
   const box = async (slug: string) => (await page.locator(`[data-poster="${slug}"]`).boundingBox())!;
-  const neat = await box('neat');
+  const sand = await box('sandglass');
   const deck = await box('prats-deck');
-  await page.mouse.move(neat.x + neat.width / 2, neat.y + neat.height / 2);
+  await page.mouse.move(sand.x + sand.width / 2, sand.y + sand.height / 2);
   await expect(grid).toHaveAttribute('data-dim', '', { timeout: 150 });
   // The gap between two posters: the wall must not light up there.
-  await page.mouse.move((neat.x + neat.width + deck.x) / 2, neat.y + neat.height / 2);
+  await page.mouse.move((sand.x + sand.width + deck.x) / 2, sand.y + sand.height / 2);
   await page.waitForTimeout(120);
   await expect(grid).toHaveAttribute('data-dim', '');
   await page.mouse.move(deck.x + deck.width / 2, deck.y + deck.height / 2);

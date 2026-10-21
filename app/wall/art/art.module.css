@@ -71,6 +71,15 @@
   background: var(--accent);
 }
 
+/* On a postcard the rows are narrower, so the name under them has its room. */
+@media (max-width: 899.98px), (orientation: portrait) {
+  [data-size='postcard'] > .art > .grid {
+    width: 56%;
+    gap: 2cqw;
+    margin-top: 0;
+  }
+}
+
 @keyframes tidy {
   0%,
   30%,
@@ -83,17 +92,15 @@
   }
 }
 
-/* bars: equaliser, sort and rank */
-.eq,
-.sort {
+/* bars: equaliser and rank */
+.eq {
   display: flex;
   align-items: flex-end;
   gap: 1.8cqw;
   height: 46cqw;
 }
 
-.eq i,
-.sort i {
+.eq i {
   flex: 1;
   background: var(--fg);
 }
@@ -110,27 +117,6 @@
   }
   to {
     transform: scaleY(1);
-  }
-}
-
-.sort i {
-  height: var(--a);
-  animation: sort 5s var(--ease-in-out) infinite;
-}
-
-.sort i:nth-child(4n) {
-  background: var(--accent);
-}
-
-@keyframes sort {
-  0%,
-  25%,
-  100% {
-    height: var(--a);
-  }
-  50%,
-  85% {
-    height: var(--b);
   }
 }
 
@@ -223,6 +209,94 @@
 
   80% {
     transform: translateY(400%);
+  }
+}
+
+/* sand: a pixel world. A heap under a falling stream, and lava that lights the air over it. */
+.sand {
+  display: grid;
+  place-items: end center;
+  height: 70cqw;
+}
+
+.sand svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.g0 {
+  fill: var(--fg);
+}
+
+.g1 {
+  fill: color-mix(in srgb, var(--fg) 80%, var(--accent));
+}
+
+.g2 {
+  fill: color-mix(in srgb, var(--fg) 72%, var(--bg));
+}
+
+.stone {
+  fill: color-mix(in srgb, var(--fg) 26%, var(--bg));
+}
+
+.l0 {
+  fill: color-mix(in srgb, var(--accent) 45%, var(--fg));
+}
+
+.l1 {
+  fill: var(--accent);
+}
+
+.l2 {
+  fill: color-mix(in srgb, var(--accent) 72%, var(--bg));
+}
+
+.glow {
+  fill: var(--accent);
+  opacity: 0.75;
+  animation: glow 2.6s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  to {
+    opacity: 0.45;
+  }
+}
+
+/* The stream comes down one cell at a time, the way the grid moves it. */
+.fall {
+  animation: fall 0.9s steps(4) infinite;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(4px);
+  }
+}
+
+.steam {
+  fill: color-mix(in srgb, var(--fg) 55%, var(--bg));
+  animation: steam 2.2s steps(6) infinite;
+}
+
+@keyframes steam {
+  to {
+    transform: translate(1px, -9px);
+    opacity: 0;
+  }
+}
+
+.spark {
+  fill: color-mix(in srgb, var(--accent) 40%, var(--fg));
+  animation: spark 1.4s steps(4) infinite;
+}
+
+@keyframes spark {
+  to {
+    transform: translate(-1px, -6px);
+    opacity: 0;
   }
 }
 
@@ -409,7 +483,7 @@
   padding: 8cqw 8cqw 6cqw;
 }
 
-[data-size='poster'] > .art > :is(.frames, .eq, .sort, .hex) {
+[data-size='poster'] > .art > :is(.frames, .eq, .hex, .sand) {
   height: auto;
   min-height: 0;
 }
@@ -458,7 +532,7 @@
     padding: 8cqw 8cqw 6cqw;
   }
 
-  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > :is(.frames, .eq, .sort, .hex) {
+  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > :is(.frames, .eq, .hex, .sand) {
     height: auto;
     min-height: 0;
   }

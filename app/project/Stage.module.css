@@ -912,35 +912,133 @@
   line-height: 1.3;
 }
 
-/* ---- Algomotion: bars that are sorted, one swap at a time. */
-.algo {
-  grid-template-rows: 1fr auto;
-  gap: 2.4cqw;
-  padding: 5cqw;
+/* ---- Sandglass: a small box of sand, water and lava, and the controls beside it. */
+.sandbox {
+  grid-template-columns: minmax(0, 1fr) 24cqw;
 }
 
-.bars {
+.tank {
   position: relative;
+  margin: 3cqw 0 3cqw 3cqw;
+  overflow: hidden;
+  border-radius: 0.8cqw;
+  background: #0b0c0f;
 }
 
-.bars li {
+.tank canvas {
   position: absolute;
-  bottom: 0;
-  left: calc(var(--at) * 100% / 12);
-  width: calc(100% / 12 - 1cqw);
-  height: calc(var(--tall) * 100%);
-  background: var(--bar);
-  transition:
-    left 0.22s var(--ease-out),
-    background-color 0.3s linear;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  cursor: crosshair;
 }
 
-.bars li[data-on] {
-  background: var(--accent);
+/* The light of the lava: the same cells, blurred and laid over the scene. */
+.tank .lamp {
+  filter: blur(1.1cqw);
+  mix-blend-mode: screen;
+  opacity: 0.8;
+  pointer-events: none;
 }
 
-.bars[data-sorted] li {
+/* A small sign in the corner while the world goes back. */
+.tag {
+  position: absolute;
+  top: 2cqw;
+  left: 2cqw;
+  padding: 0.6cqw 1.2cqw;
+  border-radius: 0.5cqw;
+  background: var(--bg);
+  font-size: max(0.75rem, 1.9cqw);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  visibility: hidden;
+}
+
+.sandbox[data-rewinding] .tag {
+  visibility: visible;
+}
+
+.pour {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4cqw;
+  padding: 3cqw;
+  font-size: max(0.75rem, 2.1cqw);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pour [role='group'] {
+  display: grid;
+  gap: 1cqw;
+}
+
+.pour button {
+  display: flex;
+  align-items: center;
+  gap: 1.2cqw;
+  padding: 1.3cqw 1.5cqw;
+  border: 0.25cqw solid var(--faint);
+  border-radius: 0.5cqw;
+  background: none;
+  text-align: left;
+}
+
+.pour button[aria-pressed='true'] {
+  border-color: var(--fg);
   background: var(--fg);
+  color: var(--bg);
+}
+
+.swatch {
+  flex: none;
+  width: 2.2cqw;
+  height: 2.2cqw;
+  border-radius: 0.3cqw;
+}
+
+.swatch[data-matter='sand'] {
+  background: #debe80;
+}
+
+.swatch[data-matter='water'] {
+  background: #3480d6;
+}
+
+.swatch[data-matter='lava'] {
+  background: #ff6a1f;
+}
+
+.swatch[data-matter='stone'] {
+  background: #68635e;
+}
+
+/* Rewind is the button that matters. It holds a bar: the past the box still keeps. */
+.pour .hold {
+  position: relative;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1cqw;
+  margin-top: auto;
+  border-color: var(--fg);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.past {
+  height: 0.7cqw;
+  background: linear-gradient(to right, var(--accent) calc(var(--kept, 0) * 100%), var(--faint) 0);
+}
+
+.pour .wipe {
+  justify-content: center;
+  border-color: transparent;
+  color: var(--soft);
 }
 
 /*
@@ -950,6 +1048,43 @@
 @container (max-width: 34rem) {
   .stage > * {
     aspect-ratio: 1 / 1.05;
+  }
+
+  .sandbox {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .tank {
+    margin: 3cqw 3cqw 0;
+  }
+
+  .pour {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2cqw;
+    padding: 3cqw;
+    font-size: max(0.75rem, 3cqw);
+  }
+
+  .pour [role='group'] {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.5cqw;
+  }
+
+  .pour button {
+    gap: 1.6cqw;
+    padding: 2cqw;
+  }
+
+  .swatch {
+    width: 3cqw;
+    height: 3cqw;
+  }
+
+  .past {
+    height: 1cqw;
   }
 
   .tabs {
@@ -1233,7 +1368,7 @@
 
   /* The button that was pressed goes dark for a moment. */
   .controls button[data-on] {
-    animation: press 0.5s linear;
+    animation: press 0.5s steps(1);
   }
 
   .controls em b,
@@ -1300,6 +1435,7 @@
   }
 }
 
+/* Lit for the press, then back at once: a slow fade would pass through colours that are hard to read. */
 @keyframes press {
   0%,
   55% {

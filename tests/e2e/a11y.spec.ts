@@ -11,7 +11,7 @@ const slugs = [
   'floatchat',
   'idea-hackathon',
   'chronicle',
-  'algomotion',
+  'sandglass',
   'malshield',
   'local-llm-lab',
 ];

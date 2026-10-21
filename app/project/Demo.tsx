@@ -30,10 +30,10 @@ function useRun(count: number, pace = 520) {
   return { at, run, over: at >= count };
 }
 
-type Kind = 'film' | 'folder' | 'device' | 'wave' | 'file' | 'model' | 'maze' | 'clock';
+type Kind = 'film' | 'folder' | 'device' | 'wave' | 'file' | 'model' | 'clock';
 
 // What is printed at the head of the slip, for each kind of job.
-const JOBS: Record<Kind, string> = { film: 'Encode job', folder: 'Folder scan', device: 'One tap', wave: 'One question', file: 'One file', model: 'One model', maze: 'One search', clock: 'One history' };
+const JOBS: Record<Kind, string> = { film: 'Encode job', folder: 'Folder scan', device: 'One tap', wave: 'One question', file: 'One file', model: 'One model', clock: 'One history' };
 
 type Step = { name: string; value: string; live?: boolean };
 
@@ -662,228 +662,6 @@ function Chronicle() {
   );
 }
 
-const ROWS = 11;
-const COLS = 23;
-const FROM = COLS + 1;
-const TO = (ROWS - 2) * COLS + COLS - 2;
-
-/** A maze from a seed: the same seed gives the same maze, as in the project. True is a wall. */
-function maze(seed: number) {
-  const walls = new Array<boolean>(ROWS * COLS).fill(true);
-  let t = seed * 7919 + 13;
-  const random = (n: number) => {
-    t = (t * 1664525 + 1013904223) >>> 0;
-    return t % n;
-  };
-  const stack = [FROM];
-  walls[FROM] = false;
-  while (stack.length) {
-    const cur = stack[stack.length - 1];
-    const ways = [2 * COLS, 2, -2 * COLS, -2].filter((d) => {
-      const next = cur + d;
-      const col = next % COLS;
-      return next > COLS && next < walls.length - COLS && col > 0 && col < COLS - 1 && Math.abs(col - (cur % COLS)) <= 2 && walls[next];
-    });
-    if (!ways.length) {
-      stack.pop();
-      continue;
-    }
-    const d = ways[random(ways.length)];
-    walls[cur + d / 2] = false;
-    walls[cur + d] = false;
-    stack.push(cur + d);
-  }
-  // A few extra openings, so there is more than one way round
-  for (let i = COLS + 1; i < walls.length - COLS - 1; i++) {
-    const col = i % COLS;
-    if (!walls[i] || col === 0 || col === COLS - 1) continue;
-    const across = !walls[i - 1] && !walls[i + 1] && walls[i - COLS] && walls[i + COLS];
-    const down = !walls[i - COLS] && !walls[i + COLS] && walls[i - 1] && walls[i + 1];
-    if ((across || down) && random(100) < 14) walls[i] = false;
-  }
-  return walls;
-}
-
-type Trace = { kind: 'wait' | 'seen' | 'path'; at: number };
-const SEARCHES: Record<string, string> = {
-  BFS: 'It spreads out evenly, so the first path it finds is the shortest',
-  'A*': 'Like BFS, but it tries the cells nearer the goal first',
-  Greedy: 'It runs straight at the goal. Fast, and not always the shortest',
-  DFS: 'It follows one corridor to its end before it tries another',
-};
-
-/**
- * The project's own method: the search runs to the end first, at full speed, and writes down
- * every cell it puts in line and every cell it looks at. The page then plays that list.
- */
-function search(walls: boolean[], how: string) {
-  const guess = (i: number) => Math.abs(Math.floor(i / COLS) - (ROWS - 2)) + Math.abs((i % COLS) - (COLS - 2));
-  const cost = new Map<number, number>([[FROM, 0]]);
-  const from = new Map<number, number>();
-  const line = [FROM];
-  const seen = new Set<number>();
-  const trace: Trace[] = [];
-  const rank = (i: number) => (how === 'A*' ? cost.get(i)! : 0) + guess(i);
-
-  while (line.length) {
-    let pick = how === 'DFS' ? line.length - 1 : 0;
-    if (how === 'A*' || how === 'Greedy') {
-      for (let k = 1; k < line.length; k++) {
-        if (rank(line[k]) < rank(line[pick]) || (rank(line[k]) === rank(line[pick]) && guess(line[k]) < guess(line[pick]))) pick = k;
-      }
-    }
-    const cur = line.splice(pick, 1)[0];
-    if (seen.has(cur)) continue;
-    seen.add(cur);
-    trace.push({ kind: 'seen', at: cur });
-    if (cur === TO) break;
-    for (const d of [COLS, 1, -COLS, -1]) {
-      const next = cur + d;
-      if (walls[next] || seen.has(next)) continue;
-      const far = cost.get(cur)! + 1;
-      if (how === 'A*' ? far < (cost.get(next) ?? Infinity) : !cost.has(next)) {
-        cost.set(next, far);
-        from.set(next, cur);
-        line.push(next);
-        trace.push({ kind: 'wait', at: next });
-      }
-    }
-  }
-
-  let path = 0;
-  if (seen.has(TO)) {
-    for (let at = TO; at !== FROM; at = from.get(at)!) {
-      trace.push({ kind: 'path', at });
-      path++;
-    }
-    trace.push({ kind: 'path', at: FROM });
-  }
-  return { trace, looked: seen.size, path };
-}
-
-/** Algomotion: a real search on a maze, recorded first, then played. Drag the bar to go back. */
-function Algo() {
-  const [how, setHow] = useState('BFS');
-  const [seed, setSeed] = useState(1);
-  // The cells you flipped, kept only for the maze they were flipped on
-  const [flips, setFlips] = useState<{ seed: number; cells: number[] }>({ seed: 1, cells: [] });
-  const [played, setPlayed] = useState(0);
-  const [playing, setPlaying] = useState(false);
-
-  const walls = maze(seed);
-  if (flips.seed === seed) for (const i of flips.cells) walls[i] = !walls[i];
-  const run = search(walls, how);
-  const best = how === 'BFS' ? run : search(walls, 'BFS');
-  const total = run.trace.length;
-  const open = walls.filter((wall) => !wall).length;
-
-  useEffect(() => {
-    if (!playing) return;
-    const timer = setInterval(() => {
-      setPlayed((now) => {
-        if (now + 2 >= total) setPlaying(false);
-        return Math.min(now + 2, total);
-      });
-    }, 30);
-    return () => clearInterval(timer);
-  }, [playing, total]);
-
-  // The grid comes from the maze and the steps played so far, so it can go back as well as on.
-  const cells = new Map<number, Trace['kind']>();
-  let looked = 0;
-  for (const step of run.trace.slice(0, played)) {
-    cells.set(step.at, step.kind);
-    if (step.kind === 'seen') looked++;
-  }
-  const done = played >= total;
-  const reset = (next: () => void) => {
-    next();
-    setPlayed(0);
-    setPlaying(false);
-  };
-  const steps: Step[] = [
-    { name: 'Record', value: `ran to the end: ${total} steps written down` },
-    { name: 'Play', value: `step ${played} of ${total}`, live: true },
-    { name: 'Count', value: run.path ? `${run.looked} cells looked at, a path of ${run.path}` : `${run.looked} cells looked at, no way out` },
-  ];
-
-  return (
-    <div className={s.algo}>
-      <div className={s.choices} role="group" aria-label="Algorithm">
-        {Object.keys(SEARCHES).map((item) => (
-          <button key={item} type="button" aria-pressed={how === item} onClick={() => reset(() => setHow(item))}>
-            {item}
-          </button>
-        ))}
-      </div>
-      <div
-        className={s.maze}
-        style={{ '--cols': COLS } as CSSProperties}
-        data-maze
-        onClick={(event) => {
-          const at = Number((event.target as HTMLElement).dataset.at);
-          if (!at || at === FROM || at === TO || at % COLS === 0 || at % COLS === COLS - 1 || at < COLS || at >= walls.length - COLS) return;
-          const before = flips.seed === seed ? flips.cells : [];
-          reset(() => setFlips({ seed, cells: before.includes(at) ? before.filter((i) => i !== at) : [...before, at] }));
-        }}
-      >
-        {walls.map((wall, i) => (
-          <i key={i} data-at={i} data-cell={i === FROM || i === TO ? 'end' : wall ? 'wall' : cells.get(i)} />
-        ))}
-      </div>
-      <div className={s.choices}>
-        <button
-          type="button"
-          className={s.action}
-          disabled={playing}
-          onClick={() => {
-            // With reduced motion there is no playback: it goes to the last step.
-            if (prefersReducedMotion()) return setPlayed(total);
-            if (done) setPlayed(0);
-            setPlaying(true);
-          }}
-        >
-          Search
-        </button>
-        <button type="button" onClick={() => reset(() => setSeed(seed + 1))}>
-          New maze
-        </button>
-        <label className={s.seek}>
-          <span>Drag to go back</span>
-          <input
-            type="range"
-            min={0}
-            max={total}
-            value={played}
-            data-seek
-            onChange={(event) => {
-              setPlaying(false);
-              setPlayed(Number(event.target.value));
-            }}
-          />
-        </label>
-      </div>
-      <p className={s.count} data-count>
-        Cells looked at: <b>{looked}</b>
-      </p>
-      <div className={s.bench} data-look="tiles">
-        <Console kind="maze" steps={steps} at={done ? 3 : 1} />
-        <Report ready={done} wait={playing ? 'Playing it back' : 'Press Search'} stamp={`${run.looked} cells`}>
-          <Meter share={run.looked / open} label={`${run.looked} of the ${open} open cells`} />
-          <ul className={s.points}>
-            <li data-path>
-              {run.path ? `Path: ${run.path} moves${run.path === best.path ? ', the shortest there is' : `. The shortest is ${best.path}`}` : 'There is no way out of this one'}
-            </li>
-            {how !== 'BFS' && <li>BFS looks at {best.looked} on this maze</li>}
-            <li>{SEARCHES[how]}</li>
-          </ul>
-        </Report>
-      </div>
-      <p className={s.small}>A real search. It ran to the end before the first cell lit up. What you watch is the recording. Click a cell to add or remove a wall.</p>
-    </div>
-  );
-}
-
 // Three made-up files, and what each step of the real pipeline would say about them.
 // A program and a document go down different roads after the type is known.
 type Sample = {
@@ -1001,7 +779,6 @@ const DEMOS: Record<string, { title: string; body: () => ReactElement }> = {
   floatchat: { title: 'Ask it', body: Float },
   'idea-hackathon': { title: 'Raise a query', body: Idea },
   chronicle: { title: 'My own history', body: Chronicle },
-  algomotion: { title: 'Find the way out', body: Algo },
   malshield: { title: 'Check a file', body: Mal },
 };
 

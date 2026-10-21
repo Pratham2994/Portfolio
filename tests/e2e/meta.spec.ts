@@ -14,7 +14,7 @@ const paths = [
     'floatchat',
     'idea-hackathon',
     'chronicle',
-    'algomotion',
+    'sandglass',
     'malshield',
     'local-llm-lab',
   ].map((slug) => `/work/${slug}`),

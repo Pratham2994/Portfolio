@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import { open } from './helpers';
 
 // The projects that still have a demo under the drawing. The other three are driven on their stage.
-const slugs = ['scrub', 'neat', 'floatchat', 'idea-hackathon', 'chronicle', 'algomotion', 'malshield'];
+const slugs = ['scrub', 'neat', 'floatchat', 'idea-hackathon', 'chronicle', 'malshield'];
 
 // Playwright needs the first argument to be a destructuring pattern.
 // eslint-disable-next-line no-empty-pattern
@@ -32,21 +32,34 @@ test('Scrub works out the bitrate from the size limit and the clip length', asyn
   await expect(result).toHaveText('3,285');
 });
 
-test('Algomotion really searches, and the recording goes back', async ({ page }) => {
-  await open(page, '/work/algomotion');
-  const demo = page.locator('[data-demo="algomotion"]');
-  await demo.getByRole('button', { name: 'Search' }).click();
-  await expect(demo.locator('[data-path]')).toContainText('the shortest there is', { timeout: 20000 });
-  const bfs = Number(await demo.locator('[data-count] b').textContent());
-  expect(bfs).toBeGreaterThan(0);
-  // The bar takes the recording back to a step in the middle.
-  await demo.locator('[data-seek]').fill('20');
-  expect(Number(await demo.locator('[data-count] b').textContent())).toBeLessThan(bfs);
-  // Another algorithm, on the same maze, looks at fewer cells.
-  await demo.getByRole('button', { name: 'A*' }).click();
-  await demo.getByRole('button', { name: 'Search' }).click();
-  await expect(demo.locator('[data-path]')).toContainText('the shortest there is', { timeout: 20000 });
-  expect(Number(await demo.locator('[data-count] b').textContent())).toBeLessThanOrEqual(bfs);
+test('the Sandglass box takes what you draw, and Rewind takes it back', async ({ page }) => {
+  await open(page, '/work/sandglass');
+  const stage = page.locator('[data-stage="sandglass"]');
+  const canvas = stage.locator('canvas').first();
+  // Lava-coloured cells in the picture.
+  const lava = () =>
+    canvas.evaluate((c: HTMLCanvasElement) => {
+      const d = c.getContext('2d')!.getImageData(0, 0, c.width, c.height).data;
+      let n = 0;
+      for (let i = 0; i < d.length; i += 4) if (d[i] > 200 && d[i + 1] < 150 && d[i + 2] < 90) n++;
+      return n;
+    });
+  await stage.getByRole('button', { name: 'Lava' }).click();
+  await expect(stage.getByRole('button', { name: 'Lava' })).toHaveAttribute('aria-pressed', 'true');
+  const box = (await canvas.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 3);
+  await page.mouse.down();
+  await page.waitForTimeout(700);
+  await page.mouse.up();
+  await expect.poll(lava).toBeGreaterThan(5);
+  // Held, Rewind goes back to before the lava was drawn.
+  const hold = (await stage.locator('[data-rewind]').boundingBox())!;
+  await page.mouse.move(hold.x + hold.width / 2, hold.y + hold.height / 2);
+  await page.mouse.down();
+  await expect(stage.locator('[data-rewinding]')).toHaveCount(1);
+  await expect.poll(lava, { timeout: 8000 }).toBe(0);
+  await page.mouse.up();
+  await expect(stage.locator('[data-rewinding]')).toHaveCount(0);
 });
 
 test('Chronicle reads the same plays on three clocks', async ({ page }) => {
@@ -124,7 +137,7 @@ test('a run lights its stages one after the other, to the end', async ({ page })
 });
 
 test('every project has a small drawing of what runs underneath, with one sentence', async ({ page }) => {
-  for (const slug of [...slugs, 'prats-deck', 'omnicompiler', 'local-llm-lab']) {
+  for (const slug of [...slugs, 'prats-deck', 'omnicompiler', 'local-llm-lab', 'sandglass']) {
     await open(page, `/work/${slug}`);
     const sketch = page.locator(`[data-sketch="${slug}"]`);
     await expect(sketch.locator('svg')).toBeVisible();

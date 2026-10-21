@@ -24,7 +24,7 @@ function age(made?: string): number {
 }
 
 // A poster is set like a print, not like a card: on some the name is at the head of the sheet.
-const HEAD = new Set(['scrub', 'algomotion', 'floatchat', 'malshield']);
+const HEAD = new Set(['scrub', 'floatchat', 'malshield']);
 // The longest word of a name. The name is set as large as that word allows. A name of a few
 // short words is set as if it had one of eight letters, so it takes two lines and not four.
 const longest = (title: string) => {

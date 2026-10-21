@@ -163,13 +163,13 @@ const Cut = () => (
   />
 );
 
-/** Algomotion: the run comes first, and the page only plays it back. */
-const Tape = () => (
+/** Sandglass: general rules are compiled once, into a table that the world reads on every step. */
+const Rules = () => (
   <Row
     parts={[
-      ['RUN IT ONCE', 'at full speed'],
-      ['STEP LIST', 'every swap, written'],
-      ['PLAYER', 'pause, back, drag'],
+      ['RULES', 'acids, fuels, solvents'],
+      ['COMPILER', 'once, as it loads'],
+      ['PAIR TABLE', 'what meets what, and why'],
     ]}
   />
 );
@@ -403,10 +403,10 @@ const SKETCHES: Record<string, { draw: () => ReactElement; says: string; label: 
     says: 'The files of your export become one table, on your own PC. Nothing is uploaded.',
     label: 'The files of an export become one table, which is read on your own clock.',
   },
-  algomotion: {
-    draw: Tape,
-    says: 'No algorithm is slowed down. Each one runs at full speed, and the page plays what it wrote.',
-    label: 'An algorithm runs once, writes a list of steps, and a player shows the list.',
+  sandglass: {
+    draw: Rules,
+    says: 'Most reactions are not written by hand. The rules meet the properties, and the table writes itself.',
+    label: 'General rules go into a compiler when the page loads, and it writes the table of what happens when two elements meet.',
   },
   'prats-deck': {
     draw: Lead,

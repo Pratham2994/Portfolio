@@ -21,15 +21,15 @@ test('direct load shows the page, and close leads home', async ({ page }) => {
 });
 
 test('next and previous walk the wall in order and wrap', async ({ page }) => {
-  await open(page, '/work/algomotion');
+  await open(page, '/work/neat');
   await page.locator('[data-next]').click();
   await expect(page).toHaveURL(/\/work\/scrub$/);
   await page.locator('[data-prev]').click();
-  await expect(page).toHaveURL(/\/work\/algomotion$/);
+  await expect(page).toHaveURL(/\/work\/neat$/);
 });
 
 test('the next project waits at the end of the page, and the arrow keys turn the pages', async ({ page }) => {
-  await open(page, '/work/algomotion');
+  await open(page, '/work/neat');
   await expect(page.locator('[data-next]')).toContainText('Scrub');
   await page.keyboard.press('ArrowRight');
   await expect(page).toHaveURL(/\/work\/scrub$/);
@@ -37,11 +37,11 @@ test('the next project waits at the end of the page, and the arrow keys turn the
   // The sheet that covered the turn is gone once the new page is in.
   await expect(page.locator('[data-ghost]')).toHaveCount(0);
   await page.keyboard.press('ArrowLeft');
-  await expect(page).toHaveURL(/\/work\/algomotion$/);
+  await expect(page).toHaveURL(/\/work\/neat$/);
 });
 
 test('a project with a stage shows it, and the sectors in the bar fill as the page goes by', async ({ page }) => {
-  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'chronicle', 'algomotion']) {
+  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'chronicle', 'sandglass']) {
     await open(page, `/work/${slug}`);
     await expect(page.locator(`[data-stage="${slug}"]`)).toBeVisible();
     await expect(page.locator('#project-title')).toBeVisible();

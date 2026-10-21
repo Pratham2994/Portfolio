@@ -110,7 +110,7 @@
 }
 
 /* One thing on one line: it sets off again soon after it has arrived. */
-:is([data-sketch='scrub'], [data-sketch='algomotion'], [data-sketch='floatchat'], [data-sketch='malshield']) .dot {
+:is([data-sketch='scrub'], [data-sketch='sandglass'], [data-sketch='floatchat'], [data-sketch='malshield']) .dot {
   animation-duration: 3.4s;
 }
 

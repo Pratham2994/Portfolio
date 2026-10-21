@@ -54,22 +54,83 @@ function Bars({ motif }: ArtProps) {
       </div>
     );
   }
-  if (motif === 'sort') {
-    const start = series(11, 12, 14, 100);
-    return (
-      <div className={s.sort}>
-        {start.map((height, i) => (
-          <i key={i} style={vars({ '--a': `${height}%`, '--b': `${Math.round(((i + 1) / 12) * 100)}%` })} />
-        ))}
-      </div>
-    );
-  }
   const speeds = series(13, 13, 600, 1500);
   return (
     <div className={s.eq}>
       {speeds.map((ms, i) => (
         <i key={i} style={{ animationDuration: `${ms}ms`, animationDelay: `-${(i * 137) % 900}ms` }} />
       ))}
+    </div>
+  );
+}
+
+// The sand world, one unit to a cell, 48 across and 40 down. Worked out once, so the
+// pre-rendered page and the client draw the same grains.
+const SAND_W = 48;
+const SAND_H = 40;
+const FLOOR = SAND_H - 1;
+type Cell = [x: number, y: number, tone: string];
+const SAND = (() => {
+  const jitter = series(17, SAND_W, -1, 1);
+  const tone = series(19, 600, 0, 9);
+  let n = 0;
+  const pick = (tones: string[]) => tones[tone[n++ % tone.length] % tones.length];
+  const pile: Cell[] = [];
+  // A heap under a falling stream: highest under the stream, and a little rough on its slopes.
+  for (let x = 1; x <= 31; x++) {
+    const tall = Math.max(0, Math.round(15 - Math.abs(x - 16) + (x === 16 ? 0 : jitter[x])));
+    for (let y = FLOOR - tall; y < FLOOR; y++) pile.push([x, y, pick(['g0', 'g0', 'g1', 'g2'])]);
+  }
+  // A pool of lava in a stone basin: hottest at the top, where it meets the air.
+  const lava: Cell[] = [];
+  for (let y = 32; y < FLOOR; y++) {
+    for (let x = 34; x <= 46; x++) lava.push([x, y, y === 32 ? pick(['l0', 'l0', 'l1']) : y > 36 ? pick(['l1', 'l2']) : pick(['l1', 'l1', 'l0'])]);
+  }
+  const stream = [-4, 0, 4, 8, 12, 16, 20].map((y, i): Cell => [16 + (i % 3 === 1 ? 1 : 0), y, i % 2 ? 'g1' : 'g0']);
+  return { pile, lava, stream, top: FLOOR - 15 };
+})();
+
+/** Sandglass: a heap under a falling stream, and a pool of lava that lights the air above it. */
+function Sand() {
+  return (
+    <div className={s.sand}>
+      <svg viewBox={`1 ${SAND_H - 33} ${SAND_W - 1} 33`} preserveAspectRatio="xMidYMax meet" shapeRendering="crispEdges">
+        <defs>
+          <filter id="sand-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2.4" />
+          </filter>
+          <clipPath id="sand-fall">
+            <rect x="0" y="0" width={SAND_W} height={SAND.top} />
+          </clipPath>
+        </defs>
+        {/* The light, drawn first: the pool again, blurred, so it glows on the air over it. */}
+        <g className={s.glow} filter="url(#sand-glow)">
+          <rect x="34" y="31" width="13" height="8" />
+        </g>
+        <rect className={s.stone} x="0" y={FLOOR} width={SAND_W} height="1" />
+        <rect className={s.stone} x="33" y="28" width="1" height="11" />
+        <rect className={s.stone} x="47" y="28" width="1" height="11" />
+        {SAND.pile.map(([x, y, tone]) => (
+          <rect key={`p${x}-${y}`} className={s[tone]} x={x} y={y} width="1" height="1" />
+        ))}
+        {SAND.lava.map(([x, y, tone]) => (
+          <rect key={`l${x}-${y}`} className={s[tone]} x={x} y={y} width="1" height="1" />
+        ))}
+        <g clipPath="url(#sand-fall)">
+          <g className={s.fall}>
+            {SAND.stream.map(([x, y, tone]) => (
+              <rect key={y} className={s[tone]} x={x} y={y} width="1" height="1" />
+            ))}
+          </g>
+        </g>
+        {/* Steam off the lava, and a few sparks. */}
+        {[35, 38, 41, 44].map((x, i) => (
+          <rect key={x} className={s.steam} x={x} y="30" width="1" height="1" style={{ animationDelay: `${i * -0.55}s` }} />
+        ))}
+        {[37, 43].map((x, i) => (
+          <rect key={x} className={s.spark} x={x} y="29" width="1" height="1" style={{ animationDelay: `${i * -0.7}s` }} />
+        ))}
+      </svg>
     </div>
   );
 }
@@ -141,4 +202,5 @@ export const ART: Record<ArtTemplate, (props: ArtProps) => ReactElement> = {
   waves: Waves,
   type: Type,
   hex: Hex,
+  sand: Sand,
 };

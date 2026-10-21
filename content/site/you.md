@@ -11,8 +11,8 @@ stack:
   languages:
     - { name: Python, first: true, used: [floatchat, malshield, local-llm-lab, chronicle, omnicompiler, idea-hackathon, prats-deck] }
     - { name: C++, first: true, used: [prats-deck] }
-    - { name: JavaScript, first: true, used: [floatchat, idea-hackathon, omnicompiler, chronicle, algomotion] }
-    - { name: TypeScript, used: [scrub, neat] }
+    - { name: JavaScript, first: true, used: [floatchat, idea-hackathon, omnicompiler, chronicle] }
+    - { name: TypeScript, used: [scrub, neat, sandglass] }
     - { name: Rust, used: [neat] }
     - { name: SQL, used: [floatchat, idea-hackathon, chronicle, neat] }
   groups:

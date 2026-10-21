@@ -1,9 +1,10 @@
-import { useEffect, useState, type CSSProperties, type ReactElement } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactElement } from 'react';
 
 import { track } from '~/lib/analytics';
 import { prefersReducedMotion } from '~/lib/motion';
 
 import { ASKS, CODE, DECK, FLOATS, HOME, MODELS, NATIVE, RUN, SAID, SAYS, STORED, type Press } from './data';
+import * as sand from './sand';
 import s from './Stage.module.css';
 
 /**
@@ -442,34 +443,215 @@ function Chronicle() {
   );
 }
 
-// One run of a bubble sort on a fixed list, written down first: each entry is the list after a swap.
-const SORT = (() => {
-  const list = [7, 3, 9, 1, 6, 12, 4, 10, 2, 8, 11, 5];
-  const steps: { list: number[]; pair: [number, number] }[] = [{ list: [...list], pair: [-1, -1] }];
-  for (let end = list.length - 1; end > 0; end--) {
-    for (let i = 0; i < end; i++) {
-      if (list[i] <= list[i + 1]) continue;
-      [list[i], list[i + 1]] = [list[i + 1], list[i]];
-      steps.push({ list: [...list], pair: [list[i], list[i + 1]] });
-    }
-  }
-  return steps;
-})();
+const POURS = [
+  { name: 'Sand', what: sand.SAND },
+  { name: 'Water', what: sand.WATER },
+  { name: 'Lava', what: sand.LAVA },
+  { name: 'Stone', what: sand.STONE },
+];
+// What the stage pours by itself until the visitor takes over: from step, to step, what, and
+// where along the top, as a share of the width. Then it goes back in time, and on from there.
+const SCRIPT: [from: number, to: number, what: number, x: number][] = [
+  [0, 160, sand.SAND, 0.3],
+  [100, 240, sand.WATER, 0.7],
+  [210, 300, sand.LAVA, 0.5],
+];
+const AUTO_BACK = 420; // the step at which it rewinds by itself
+const AUTO_BACK_FOR = 75; // frames of rewinding, two steps back each
+const AUTO_END = 620; // then the box is emptied and it starts again
+const STEP_MS = 1000 / 30;
 
-/** Algomotion: a sort that was run once and written down, played back one swap at a time. */
-function Algo() {
-  const tick = useTick(260, SORT.length - 1) % (SORT.length + 8);
-  const step = SORT[Math.min(tick, SORT.length - 1)];
+/**
+ * Sandglass: a small box of sand, water and lava, run on a grid. It pours by itself and then
+ * rewinds. Pick something and draw, and it is yours: hold Rewind to take it back.
+ */
+function Sandbox() {
+  const box = useRef<HTMLDivElement>(null);
+  const screen = useRef<HTMLCanvasElement>(null);
+  const glow = useRef<HTMLCanvasElement>(null);
+  const world = useRef<sand.World | null>(null);
+  // What the loop needs to know from the controls. Set in the handlers, read in the loop.
+  const hand = useRef({ what: sand.SAND, mine: false, rewinding: false, at: null as { x: number; y: number } | null, restart: false });
+  const [what, setWhat] = useState(sand.SAND);
+  const [mine, setMine] = useState(false);
+
+  useEffect(() => {
+    const canvas = screen.current!;
+    const light = glow.current!;
+    // The grid takes the shape of the box, at about 120 cells across.
+    const w = 120;
+    const h = Math.min(Math.max(Math.round((w * canvas.clientHeight) / Math.max(canvas.clientWidth, 1)), 50), 150);
+    canvas.width = light.width = w;
+    canvas.height = light.height = h;
+    const live = sand.makeWorld(w, h);
+    world.current = live;
+    const pen = canvas.getContext('2d')!;
+    const pen2 = light.getContext('2d')!;
+    const scene = pen.createImageData(w, h);
+    const lit = pen2.createImageData(w, h);
+    let flicker = 0;
+    const draw = () => {
+      sand.paint(live, scene, lit, (flicker += 3));
+      pen.putImageData(scene, 0, 0);
+      pen2.putImageData(lit, 0, 0);
+      box.current!.style.setProperty('--kept', String(sand.kept(live) / 10));
+    };
+
+    let t = 0;
+    let backing = 0;
+    // One step of the show the stage puts on by itself.
+    const script = () => {
+      for (const [from, to, matter, x] of SCRIPT) if (t >= from && t < to) sand.pour(live, w * x, 2, 1.6, matter, 0.4);
+      t += 1;
+      if (t === AUTO_BACK) backing = AUTO_BACK_FOR;
+      if (t >= AUTO_END) {
+        sand.clear(live);
+        t = 0;
+      }
+    };
+    const advance = () => {
+      const now = hand.current;
+      if (now.restart) {
+        now.restart = false;
+        t = 0;
+        backing = 0;
+      }
+      const rewinding = now.rewinding || backing > 0;
+      box.current!.toggleAttribute('data-rewinding', rewinding);
+      if (rewinding) {
+        sand.back(live);
+        sand.back(live);
+        if (backing > 0) backing -= 1;
+        return;
+      }
+      if (!now.mine) script();
+      else if (now.at) sand.pour(live, now.at.x, now.at.y, 2.5, now.what, now.what === sand.STONE ? 1 : 0.6);
+      // Two steps to a frame, as fast as the real thing, and one record of them.
+      sand.step(live, false);
+      sand.step(live);
+    };
+
+    const still = prefersReducedMotion();
+    if (still) {
+      // A still picture: the show, run to a good moment, and drawn once.
+      for (let i = 0; i < 330; i++) advance();
+      draw();
+    }
+
+    let seen = true;
+    const watch = new IntersectionObserver(([entry]) => (seen = entry.isIntersecting));
+    watch.observe(canvas);
+    let frame = 0;
+    let last = performance.now();
+    let owed = 0;
+    const loop = (now: number) => {
+      frame = requestAnimationFrame(loop);
+      const spent = Math.min(now - last, 100);
+      last = now;
+      // Off screen, in a tab in the background, or still until the visitor draws: no work.
+      if (!seen || document.hidden || (still && !hand.current.mine)) return;
+      owed += spent;
+      while (owed >= STEP_MS) {
+        owed -= STEP_MS;
+        advance();
+      }
+      draw();
+    };
+    frame = requestAnimationFrame(loop);
+    return () => {
+      cancelAnimationFrame(frame);
+      watch.disconnect();
+    };
+  }, []);
+
+  const takeOver = () => {
+    if (hand.current.mine) return;
+    hand.current.mine = true;
+    setMine(true);
+    track('stage_used', { project: 'sandglass' });
+  };
+  const choose = (next: number) => {
+    takeOver();
+    hand.current.what = next;
+    setWhat(next);
+  };
+  const cellAt = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const live = world.current!;
+    return { x: ((event.clientX - rect.left) / rect.width) * live.w, y: ((event.clientY - rect.top) / rect.height) * live.h };
+  };
+  const rewind = (on: boolean) => {
+    if (on) takeOver();
+    hand.current.rewinding = on;
+  };
+
   return (
-    <div className={s.algo} role="img" aria-label="Twelve bars are sorted by height, one swap at a time.">
-      <ol className={s.bars} aria-hidden="true" data-sorted={tick >= SORT.length - 1 || undefined}>
-        {SORT[0].list.map((value) => (
-          <li key={value} data-on={step.pair.includes(value) || undefined} style={at({ '--at': step.list.indexOf(value), '--tall': value / 12 })} />
-        ))}
-      </ol>
-      <p className={s.caption} aria-hidden="true">
-        swap {Math.min(tick, SORT.length - 1)} of {SORT.length - 1}
-      </p>
+    <div className={s.sandbox} ref={box}>
+      <div className={s.tank}>
+        <canvas
+          ref={screen}
+          role="img"
+          aria-label="A box of sand, water and lava. Where water meets lava it boils, and the lava sets into stone."
+          style={{ touchAction: mine ? 'none' : 'pan-y' }}
+          onPointerDown={(event) => {
+            takeOver();
+            event.currentTarget.setPointerCapture(event.pointerId);
+            hand.current.at = cellAt(event);
+          }}
+          onPointerMove={(event) => {
+            if (hand.current.at) hand.current.at = cellAt(event);
+          }}
+          onPointerUp={() => {
+            hand.current.at = null;
+          }}
+          onPointerCancel={() => {
+            hand.current.at = null;
+          }}
+        />
+        <canvas ref={glow} className={s.lamp} aria-hidden="true" />
+        <b className={s.tag} aria-hidden="true">
+          Rewinding
+        </b>
+      </div>
+      <div className={s.pour}>
+        <div role="group" aria-label="What to pour">
+          {POURS.map((item) => (
+            <button key={item.name} type="button" aria-pressed={what === item.what} onClick={() => choose(item.what)}>
+              <i className={s.swatch} data-matter={item.name.toLowerCase()} />
+              {item.name}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          className={s.hold}
+          onPointerDown={() => rewind(true)}
+          onPointerUp={() => rewind(false)}
+          onPointerLeave={() => rewind(false)}
+          onPointerCancel={() => rewind(false)}
+          onKeyDown={(event) => {
+            if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) rewind(true);
+          }}
+          onKeyUp={() => rewind(false)}
+          onBlur={() => rewind(false)}
+          data-rewind
+        >
+          Hold to rewind
+          {/* How much of the past the box still holds, out of ten seconds. */}
+          <span className={s.past} aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          className={s.wipe}
+          onClick={() => {
+            takeOver();
+            sand.clear(world.current!);
+            hand.current.restart = true;
+          }}
+        >
+          Empty the box
+        </button>
+      </div>
     </div>
   );
 }
@@ -479,6 +661,7 @@ type Kind = 'tool' | 'study' | 'hardware' | 'field';
 const STAGES: Record<string, { kind: Kind; scene: () => ReactElement; clue: string; try?: string }> = {
   omnicompiler: { kind: 'tool', scene: Omni, clue: 'One small program, stepped through in five languages.', try: 'Press a language or a button to take over.' },
   'local-llm-lab': { kind: 'study', scene: Lab, clue: 'My real results, ranked two ways.', try: 'Press a ranking to hold it.' },
+  sandglass: { kind: 'tool', scene: Sandbox, clue: 'A small box of it, written for this page: it pours, it reacts, and it goes back.', try: 'Pick one and draw, then hold Rewind.' },
   'prats-deck': { kind: 'hardware', scene: Deck, clue: 'The real screens of the deck.', try: 'Tap an app to open it.' },
   scrub: { kind: 'tool', scene: Scrub, clue: 'A trim: two handles on your frames, and one command.' },
   neat: { kind: 'hardware', scene: Neat, clue: 'What Neat does to a Downloads folder.' },
@@ -486,7 +669,6 @@ const STAGES: Record<string, { kind: Kind; scene: () => ReactElement; clue: stri
   'idea-hackathon': { kind: 'hardware', scene: Idea, clue: 'A visit to the desk: you log in, you say it your way, and it lands with the right people.' },
   malshield: { kind: 'field', scene: Mal, clue: 'A file being read, without being run.' },
   chronicle: { kind: 'study', scene: Chronicle, clue: 'When I listen, from my own 104,329 plays.' },
-  algomotion: { kind: 'tool', scene: Algo, clue: 'A bubble sort, run once and played back.' },
 };
 
 /** What kind of page a project gets. Without a stage it keeps the plain one. */

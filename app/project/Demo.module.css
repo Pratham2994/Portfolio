@@ -96,7 +96,6 @@
 .float,
 .idea,
 .chronicle,
-.algo,
 .mal {
   display: grid;
   gap: var(--space-4);
@@ -321,7 +320,6 @@
 .bench[data-look='bar'] .steps i,
 .bench[data-look='chat'] .steps i,
 .bench[data-look='pills'] .steps i,
-.bench[data-look='tiles'] .steps i,
 .bench[data-look='report'] .steps i {
   display: none;
 }
@@ -490,25 +488,6 @@
   min-height: 0;
   padding: 0 0 var(--space-3);
   border: 0;
-}
-
-/* Algomotion: three counters, like the readouts of the visualiser itself. */
-.bench[data-look='tiles'] .steps {
-  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-  gap: 0.5rem;
-}
-
-.bench[data-look='tiles'] .steps li {
-  grid-template-columns: minmax(0, 1fr);
-  align-content: start;
-  gap: 0.35em;
-  padding: 0.8em 0.9em;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--ink) 9%, transparent);
-}
-
-.bench[data-look='tiles'] .steps span {
-  font-weight: 700;
 }
 
 /* MalShield: a lab report. One ruled row for each test, and the verdict stamped on it. */
@@ -1098,64 +1077,6 @@
   from {
     transform: scaleX(0);
   }
-}
-
-/* Algomotion */
-.maze {
-  display: grid;
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-  gap: 1px;
-  max-width: 62rem;
-  margin-inline: auto;
-  width: 100%;
-  cursor: pointer;
-}
-
-.maze i {
-  aspect-ratio: 1;
-  background: color-mix(in srgb, var(--ink) 16%, transparent);
-}
-
-/* A wall is a gap: the page shows through. */
-.maze i[data-cell='wall'] {
-  background: none;
-}
-
-.maze i[data-cell='wait'] {
-  background: color-mix(in srgb, var(--accent) 45%, transparent);
-}
-
-.maze i[data-cell='seen'] {
-  background: color-mix(in srgb, var(--ink) 55%, transparent);
-}
-
-.maze i[data-cell='path'],
-.maze i[data-cell='end'] {
-  background: var(--accent);
-}
-
-.maze i[data-cell='end'] {
-  border-radius: 50%;
-}
-
-/* The bar that takes the recording back and forth. */
-.seek {
-  flex: 1 1 12rem;
-  display: grid;
-  gap: 0.2em;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  text-transform: uppercase;
-}
-
-.seek input {
-  width: 100%;
-  accent-color: var(--accent);
-}
-
-.count {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
 }
 
 /* MalShield */

@@ -1,7 +1,7 @@
 ---
 title: Neat
-size: poster
-order: 2
+size: postcard
+order: 10
 made: '2026-09'
 status: I use it every day
 tagline: Stops the Downloads folder from becoming a landfill.
