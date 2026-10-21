@@ -95,20 +95,17 @@ html[data-project-open] {
   opacity: 0;
 }
 
-/*
- * Sections below the wall rise into place as they scroll into view. Parts that arrive together
- * come one after the other: scroll.ts sets the delay of each.
- */
+/* Sections below the wall rise into place as they scroll into view. */
 @media (prefers-reduced-motion: no-preference) {
   [data-reveal] {
     transition:
-      opacity 0.8s var(--ease-out) var(--reveal-delay, 0ms),
-      translate 0.8s var(--ease-out) var(--reveal-delay, 0ms);
+      opacity var(--dur-slow) var(--ease-out),
+      translate var(--dur-slow) var(--ease-out);
   }
 
   html[data-ready] [data-reveal]:not([data-seen]) {
     opacity: 0;
-    translate: 0 1.25rem;
+    translate: 0 1.5rem;
   }
 }
 

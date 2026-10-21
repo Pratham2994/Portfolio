@@ -209,9 +209,7 @@ export function ProjectPage({ project }: { project: Project }) {
     <li key={sector.title}>
       <span className={s.sectorTag}>S{i + 1}</span>
       <h3>{sector.title}</h3>
-      <p>
-        <span>{sector.body}</span>
-      </p>
+      <p>{sector.body}</p>
     </li>
   ));
 

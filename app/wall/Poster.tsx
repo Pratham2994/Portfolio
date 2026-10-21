@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 
 import { projects } from '~/content';
 import type { Project } from '~/content/schema';
-import { markIntent, peelNow } from '~/project/transition';
+import { markIntent } from '~/project/transition';
 import { track } from '~/lib/analytics';
 import { contrast } from '~/lib/colour';
 
@@ -59,12 +59,8 @@ export function Poster({ project, index }: { project: Project; index: number }) 
       data-ink={contrast(project.palette.accent, project.palette.bg) >= 3 || undefined}
       style={style}
       preventScrollReset
-      onClick={(event) => {
-        // A click that opens a new tab or window leaves the sheet on the wall.
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+      onClick={() => {
         markIntent(project.slug);
-        // The sheet starts to peel at the click, before the page behind it is built.
-        peelNow(event.currentTarget);
         track('poster_opened', { project: project.slug });
       }}
     >

@@ -746,29 +746,24 @@ a:is(.status, .statusBelow):is(:hover, :focus-visible) {
     top: max(5.5rem, 50vh - 15rem);
   }
 
-  /* One step closes as the next opens, on the same curve and the same clock, so they trade places smoothly. */
   .steps li {
     border-left-color: var(--rule);
     opacity: 0.45;
     transition:
-      opacity 0.5s var(--ease-out),
-      border-color 0.5s var(--ease-out);
+      opacity 0.35s var(--ease-out),
+      border-color 0.35s var(--ease-out);
   }
 
   .steps h3 {
-    transition: font-size 0.5s var(--ease-out);
+    transition: font-size 0.35s var(--ease-out);
   }
 
-  /* The text opens to its own height, so the close starts at once and does not wait. */
   .steps p {
     display: grid;
     grid-template-rows: 0fr;
     overflow: hidden;
-    transition: grid-template-rows 0.5s var(--ease-out);
-  }
-
-  .steps p > span {
-    min-height: 0;
+    max-height: 0;
+    transition: max-height 0.45s var(--ease-out);
   }
 
   .how[data-at='0'] .steps li:nth-child(1),
@@ -787,7 +782,7 @@ a:is(.status, .statusBelow):is(:hover, :focus-visible) {
   .how[data-at='0'] .steps li:nth-child(1) p,
   .how[data-at='1'] .steps li:nth-child(2) p,
   .how[data-at='2'] .steps li:nth-child(3) p {
-    grid-template-rows: 1fr;
+    max-height: 14em;
   }
 }
 

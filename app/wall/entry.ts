@@ -36,9 +36,8 @@ function bootScreen(): HTMLElement {
 }
 
 /**
- * The boot-up. The machine starts, the screen gives way to the word on the centre piece, the
- * view pulls back to show the wall, and the sheets are dealt onto it from the middle.
- * Everything slows as it arrives and stops clean: no sheet speeds into the wall, nothing shakes.
+ * The boot-up. The machine starts, the screen cuts to the word on the centre piece, the
+ * view pulls back to show the wall, and the sheets are dealt onto it one by one.
  * Plays each time the wall is loaded on a wide screen. Any key or click skips it.
  */
 export function playEntry(wall: HTMLElement): void {
@@ -79,7 +78,7 @@ export function playEntry(wall: HTMLElement): void {
       clearTimeout(guard);
       stopListening();
       screen.remove();
-      gsap.set([grid, wall, ...sheets, ...centre.children], { clearProps: 'transform,opacity,x,y,willChange' });
+      gsap.set([grid, wall, ...sheets, ...centre.children], { clearProps: 'transform,opacity,x,y' });
       if (light) gsap.set(light, { clearProps: 'opacity' });
       done();
     },
@@ -89,55 +88,51 @@ export function playEntry(wall: HTMLElement): void {
   window.addEventListener('keydown', skip);
   window.addEventListener('pointerdown', skip);
 
-  // Where the deal starts: while the pull-back is still settling, so the two read as one move.
-  const DEAL = 1.4;
-
   timeline
-    // 1. The machine starts. The sheets get their own layers now, and are painted while the black
-    // screen still covers them: all but invisible, not hidden, since a hidden sheet is not painted.
-    // So the first frames of the deal have nothing left to prepare, and do not stall.
+    // 1. The machine starts.
     .set(lines, { opacity: 0 })
-    .set(sheets, { opacity: 0.001, willChange: 'transform, opacity' })
+    .set(sheets, { opacity: 0 })
     .set(centre.children, { opacity: 0 })
     .set(grid, { scale: zoom, transformOrigin: origin })
     .call(() => root.classList.remove(PENDING))
-    .to(lines, { opacity: 1, duration: 0.12, ease: 'power1.out', stagger: 0.09 }, 0.05)
-    // 2. The screen gives way to the word.
-    .set(centre.children[0], { opacity: 1 }, 0.72)
-    .to(screen, { opacity: 0, duration: 0.2, ease: 'power1.in' }, 0.72)
-    // 3. The view pulls back: soft at the start and at the end.
-    .to(grid, { scale: 1, duration: 1, ease: 'power3.inOut' }, 0.85)
-    .to([...centre.children].slice(1), { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.1 }, 1.5);
+    .to(lines, { opacity: 1, duration: 0.01, stagger: 0.11 }, 0.05)
+    // 2. Hard cut to the word.
+    .set(screen, { opacity: 0 }, 0.85)
+    .set(centre.children[0], { opacity: 1 }, 0.85)
+    // 3. The view pulls back.
+    .to(grid, { scale: 1, duration: 1.05, ease: 'expo.inOut' }, 1)
+    .to([...centre.children].slice(1), { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.1 }, 1.7);
 
   if (light) {
     timeline.fromTo(
       light,
       { opacity: 0 },
       { keyframes: [{ opacity: 0.9, duration: 0.07 }, { opacity: 0.1, duration: 0.09 }, { opacity: 1, duration: 0.06 }, { opacity: 0.3, duration: 0.12 }, { opacity: 1, duration: 0.6 }] },
-      0.85,
+      1,
     );
   }
 
-  // 4. The deal: the sheets go out from the middle, the nearest first, each with a small turn
-  // it loses on the way, and each slows to a stop on its own place, like a card on a table.
-  const placed = sheets.map((sheet) => {
+  // 4. The deal: each sheet flies out from the middle, spinning, and slaps onto the wall.
+  gsap.utils.shuffle(sheets.slice()).forEach((sheet, i) => {
+    const at = 1.55 + i * 0.075;
     const rect = sheet.getBoundingClientRect();
     // Positions were measured while zoomed in, so the offsets are scaled back.
     const dx = (middle.x - (rect.left + rect.width / 2)) / zoom;
     const dy = (middle.y - (rect.top + rect.height / 2)) / zoom;
-    return { sheet, dx, dy, far: Math.hypot(dx, dy) };
+    timeline
+      .fromTo(
+        sheet,
+        { opacity: 0, x: dx, y: dy, scale: 2.1, rotation: gsap.utils.random(-40, 40), rotationY: gsap.utils.random(-70, 70) },
+        { opacity: 1, x: 0, y: 0, scale: 1, rotation: 0, rotationY: 0, duration: 0.55, ease: 'power3.in' },
+        at,
+      )
+      // The hit: a short knock through the whole wall.
+      .fromTo(
+        wall,
+        { x: gsap.utils.random(-5, 5), y: gsap.utils.random(-4, 4) },
+        { x: 0, y: 0, duration: 0.16, ease: 'power2.out', immediateRender: false },
+        at + 0.55,
+      )
+      .fromTo(sheet, { scale: 0.96 }, { scale: 1, duration: 0.3, ease: 'back.out(3)', immediateRender: false }, at + 0.55);
   });
-  placed
-    .sort((a, b) => a.far - b.far)
-    .forEach(({ sheet, dx, dy }, i) => {
-      const at = DEAL + i * 0.045;
-      timeline
-        .fromTo(
-          sheet,
-          { x: dx, y: dy, scale: 1.18, rotation: gsap.utils.random(-12, 12) },
-          { x: 0, y: 0, scale: 1, rotation: 0, duration: 0.85, ease: 'expo.out' },
-          at,
-        )
-        .to(sheet, { opacity: 1, duration: 0.18, ease: 'power1.out' }, at);
-    });
 }

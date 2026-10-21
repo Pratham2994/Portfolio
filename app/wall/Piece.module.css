@@ -155,14 +155,14 @@
 @media (hover: hover) and (pointer: fine) {
   .piece:hover {
     rotate: 0deg;
-    scale: 1.07;
+    scale: 1.09;
     z-index: 2;
   }
 }
 
 .piece:focus-visible {
   rotate: 0deg;
-  scale: 1.07;
+  scale: 1.09;
   z-index: 2;
   outline-color: var(--bone);
 }
