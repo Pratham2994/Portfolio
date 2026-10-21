@@ -866,6 +866,386 @@ html[data-project-open] {
   --side-b: #2a0a4a;
 }
 
+/* ---- The anime secrets, from app/wall/anime.ts. */
+.sport-aura,
+.sport-circle,
+.sport-meter,
+.sport-clock,
+.sport-bubble,
+.sport-wave,
+.sport-slash,
+.sport-ki,
+.sport-beam,
+.sport-note,
+.sport-rasengan,
+.sport-orb,
+.sport-hollow,
+.sport-system,
+.sport-soldier {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/*
+ * Where the moment is in the sheets themselves, the call darkens only a small patch behind its
+ * words, so the sheets round it stay in sight and the words can still be read.
+ */
+.sport:is([data-sport='alchemy'], [data-sport='mob'], [data-sport='gearfive'], [data-sport='arise']) .sport-call {
+  background: radial-gradient(ellipse 34% 20% at 50% 50%, rgb(0 0 0 / 0.82), rgb(0 0 0 / 0.5) 55%, transparent);
+}
+
+/* Hunter x Hunter: Gon's aura, gold and green, pulsing as it builds. */
+.sport-aura {
+  width: 9rem;
+  height: 9rem;
+  margin: -4.5rem 0 0 -4.5rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff7c2 0 18%, #ffd23a 34%, rgb(70 200 110 / 0.55) 58%, transparent 72%);
+  box-shadow: 0 0 3rem 1rem rgb(255 210 58 / 0.45);
+  animation: sport-throb 0.18s ease-in-out infinite alternate;
+}
+
+@keyframes sport-throb {
+  to {
+    filter: brightness(1.35);
+  }
+}
+
+.sport[data-sport='jajanken'] {
+  --side-a: #2e9e4f;
+  --side-b: #ffcf3a;
+}
+
+/* Fullmetal Alchemist: the circle, drawn in the blue light of a transmutation. */
+.sport-circle {
+  width: 26rem;
+  height: 26rem;
+  margin: -13rem 0 0 -13rem;
+  filter: drop-shadow(0 0 0.8rem #5cc8ff);
+}
+
+.sport-circle svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.sport-circle :is(circle, path) {
+  fill: none;
+  stroke: #9fe3ff;
+  stroke-width: 2.2;
+  stroke-dasharray: 700;
+}
+
+.sport[data-sport='alchemy'] {
+  --side-a: #5cc8ff;
+  --side-b: #e6f7ff;
+}
+
+/* Mob Psycho 100: the meter, and the colours that come when it fills. */
+.sport-meter {
+  translate: -50% 0;
+  padding: 0.2em 0.5em;
+  background: #000;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: var(--step-5);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.sport-meter[data-full] {
+  background: linear-gradient(90deg, #ff4d6d, #ffb703, #3ddc84, #4cc9f0, #b5179e);
+  color: #000;
+}
+
+.sport-psychic {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgb(255 255 255 / 0.35), rgb(181 23 158 / 0.25) 40%, rgb(76 201 240 / 0.18) 70%, transparent);
+  mix-blend-mode: screen;
+  animation: sport-psychic 1.4s ease-out forwards;
+}
+
+@keyframes sport-psychic {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.sport[data-sport='mob'] {
+  --side-a: #b5179e;
+  --side-b: #4cc9f0;
+}
+
+/* Re:Zero: the dark that falls, and the clock that runs back. */
+.sport-witch {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgb(20 0 30 / 0.55), rgb(10 0 15 / 0.92) 70%);
+  opacity: 0;
+}
+
+.sport-clock {
+  width: 15rem;
+  height: 15rem;
+  margin: -7.5rem 0 0 -7.5rem;
+  filter: drop-shadow(0 0 1rem #9b5de5);
+}
+
+.sport-clock svg {
+  width: 100%;
+  height: 100%;
+}
+
+.sport-clock :is(circle, path) {
+  fill: none;
+  stroke: #e9d8ff;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.sport[data-sport='rezero'] {
+  --side-a: #9b5de5;
+  --side-b: #e9d8ff;
+}
+
+/* Bakuman: the screentone of a printed manga, and its speech bubbles. */
+.sport-tone {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgb(0 0 0 / 0.55) 22%, transparent 24%) 0 0 / 7px 7px;
+  mix-blend-mode: multiply;
+  opacity: 0;
+}
+
+.sport-bubble {
+  translate: -50% -100%;
+  max-width: 13rem;
+  padding: 0.6em 0.9em;
+  border: 3px solid #000;
+  border-radius: 50% / 45%;
+  background: #fff;
+  color: #000;
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.sport[data-sport='bakuman'] {
+  --side-a: #000;
+  --side-b: #fff;
+}
+
+/* Demon Slayer: the wave, and the cut of the sword. */
+.sport-wave {
+  width: 150vw;
+  height: 46vh;
+}
+
+.sport-wave svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sport-slash {
+  width: 34rem;
+  margin: -6rem 0 0 -17rem;
+  filter: drop-shadow(0 0 0.6rem #9fd0ff);
+}
+
+.sport-slash svg {
+  width: 100%;
+  overflow: visible;
+}
+
+.sport-slash path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 520;
+}
+
+.sport[data-sport='water'] {
+  --side-a: #2f74cf;
+  --side-b: #e6f2ff;
+}
+
+/* Dragon Ball Z: the ki in his hands, and the beam. */
+.sport-ki {
+  width: 8rem;
+  height: 8rem;
+  margin: -4rem 0 0 -4rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 22%, #9be7ff 40%, rgb(30 140 255 / 0.6) 60%, transparent 72%);
+  box-shadow: 0 0 3rem 1rem rgb(80 180 255 / 0.55);
+  animation: sport-throb 0.09s ease-in-out infinite alternate;
+}
+
+.sport-beam {
+  height: 7rem;
+  margin-top: -3.5rem;
+  border-radius: 0 4rem 4rem 0;
+  background: linear-gradient(180deg, transparent, rgb(80 180 255 / 0.7) 18%, #bdf0ff 38%, #fff 50%, #bdf0ff 62%, rgb(80 180 255 / 0.7) 82%, transparent);
+  box-shadow: 0 0 4rem 1rem rgb(80 180 255 / 0.5);
+  transform-origin: 0 50%;
+}
+
+.sport[data-sport='kamehameha'] {
+  --side-a: #4cb3ff;
+  --side-b: #ff8a1f;
+}
+
+/* Death Note: the notebook, and the name written in it. */
+.sport-note {
+  display: grid;
+  gap: 0.8rem;
+  width: 22rem;
+  margin-left: -11rem;
+  padding: 1.2rem 1.4rem 1.6rem;
+  border-radius: 4px;
+  background: #0b0b0d;
+  box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 0.7);
+}
+
+.sport-note b {
+  color: #e8e2d6;
+  font-family: 'Times New Roman', serif;
+  font-size: var(--step-1);
+  letter-spacing: 0.25em;
+}
+
+.sport-note p {
+  min-height: 1.6em;
+  border-bottom: 1px solid #555;
+  color: #f5f1ea;
+  font-family: 'Segoe Script', 'Brush Script MT', cursive;
+  font-size: var(--step-1);
+}
+
+.sport[data-sport='kira'] {
+  --side-a: #b30d1a;
+  --side-b: #0b0b0d;
+}
+
+/* One Piece: the beat of the drums. */
+.sport-ring.sport-ring-white {
+  border-color: #fff;
+  box-shadow: 0 0 1.5rem #fff, inset 0 0 1.5rem #fff;
+}
+
+.sport[data-sport='gearfive'] {
+  --side-a: #fff;
+  --side-b: #e63946;
+}
+
+/* Naruto: the Rasengan, spinning. */
+.sport-rasengan {
+  width: 6rem;
+  height: 6rem;
+  margin: -3rem 0 0 -3rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #fff 0 16%, transparent 40%),
+    conic-gradient(from 0deg, #e6f7ff, #3aa0ff, #e6f7ff, #1f6fd1, #e6f7ff, #3aa0ff, #e6f7ff);
+  box-shadow: 0 0 2.5rem 0.8rem rgb(58 160 255 / 0.6);
+  animation: sport-spin 0.22s linear infinite;
+}
+
+@keyframes sport-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+.sport[data-sport='rasengan'] {
+  --side-a: #3aa0ff;
+  --side-b: #ff8a1f;
+}
+
+/* Jujutsu Kaisen: blue, red, and the purple they make together. */
+.sport-orb {
+  width: 7rem;
+  height: 7rem;
+  margin: -3.5rem 0 0 -3.5rem;
+  border-radius: 50%;
+}
+
+.sport-orb[data-tone='blue'] {
+  background: radial-gradient(circle, #fff 0 14%, #5aa9ff 36%, rgb(20 80 255 / 0.5) 60%, transparent 72%);
+  box-shadow: 0 0 3rem 1rem rgb(40 110 255 / 0.55);
+}
+
+.sport-orb[data-tone='red'] {
+  background: radial-gradient(circle, #fff 0 14%, #ff5a6a 36%, rgb(255 20 50 / 0.5) 60%, transparent 72%);
+  box-shadow: 0 0 3rem 1rem rgb(255 30 60 / 0.55);
+}
+
+.sport-hollow {
+  width: 16rem;
+  height: 16rem;
+  margin: -8rem 0 0 -8rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 12%, #d6a8ff 26%, #8a2be2 46%, rgb(80 0 160 / 0.6) 62%, transparent 72%);
+  box-shadow: 0 0 5rem 2rem rgb(138 43 226 / 0.6);
+}
+
+.sport[data-sport='purple'] {
+  --side-a: #8a2be2;
+  --side-b: #ff4d6d;
+}
+
+/* Solo Leveling: the system window, and the shadow soldiers with their violet eyes. */
+.sport-system {
+  display: grid;
+  gap: 0.4rem;
+  translate: -50% 0;
+  padding: 1rem 1.6rem;
+  border: 1px solid #6fb8ff;
+  background: rgb(8 20 40 / 0.85);
+  box-shadow: 0 0 1.5rem rgb(111 184 255 / 0.5), inset 0 0 1.5rem rgb(111 184 255 / 0.2);
+  color: #d8ecff;
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
+.sport-system b {
+  color: #6fb8ff;
+  letter-spacing: 0.2em;
+}
+
+.sport-soldier {
+  width: 4.5rem;
+  margin: -4.7rem 0 0 -2.25rem;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 0 0.8rem rgb(140 80 255 / 0.6));
+}
+
+.sport-soldier svg {
+  display: block;
+  width: 100%;
+}
+
+.sport-soldier .eye {
+  fill: #c9a7ff;
+  filter: drop-shadow(0 0 3px #b77bff);
+}
+
+.sport[data-sport='arise'] {
+  --side-a: #6fb8ff;
+  --side-b: #8a4dff;
+}
+
 .sport[data-sport='rcb'] {
   --side-a: #d1171b;
   --side-b: #d4a12a;

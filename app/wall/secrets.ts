@@ -23,6 +23,18 @@ export const SECRETS: { name: Name; word: string; about: string }[] = [
   { name: 'domain', word: 'domain expansion', about: 'anime' },
   { name: 'titan', word: 'titan', about: 'anime' },
   { name: 'geass', word: 'geass', about: 'anime' },
+  { name: 'jajanken', word: 'jajanken', about: 'anime' },
+  { name: 'alchemy', word: 'alchemy', about: 'anime' },
+  { name: 'mob', word: 'mob', about: 'anime' },
+  { name: 'rezero', word: 'return by death', about: 'anime' },
+  { name: 'bakuman', word: 'bakuman', about: 'anime' },
+  { name: 'water', word: 'water breathing', about: 'anime' },
+  { name: 'kamehameha', word: 'kamehameha', about: 'anime' },
+  { name: 'kira', word: 'kira', about: 'anime' },
+  { name: 'gearfive', word: 'gear five', about: 'anime' },
+  { name: 'rasengan', word: 'rasengan', about: 'anime' },
+  { name: 'purple', word: 'hollow purple', about: 'anime' },
+  { name: 'arise', word: 'arise', about: 'anime' },
 ];
 
 /** The small line in the corner of the wall. It leads to the first two, then to the list. */
@@ -56,6 +68,33 @@ const WORDS: Record<string, Exclude<Name, 'meow'>> = {
   eren: 'titan',
   geass: 'geass',
   lelouch: 'geass',
+  jajanken: 'jajanken',
+  gon: 'jajanken',
+  alchemy: 'alchemy',
+  fullmetal: 'alchemy',
+  mob: 'mob',
+  psycho: 'mob',
+  returnbydeath: 'rezero',
+  subaru: 'rezero',
+  rezero: 'rezero',
+  bakuman: 'bakuman',
+  mangaka: 'bakuman',
+  waterbreathing: 'water',
+  tanjiro: 'water',
+  demonslayer: 'water',
+  kamehameha: 'kamehameha',
+  goku: 'kamehameha',
+  kira: 'kira',
+  deathnote: 'kira',
+  ryuk: 'kira',
+  gearfive: 'gearfive',
+  nika: 'gearfive',
+  luffy: 'gearfive',
+  rasengan: 'rasengan',
+  hollowpurple: 'purple',
+  murasaki: 'purple',
+  arise: 'arise',
+  sololeveling: 'arise',
 };
 const LONGEST = Math.max(...Object.keys(WORDS).map((word) => word.length));
 const STORE = 'wall-secrets';
@@ -117,9 +156,11 @@ export function initSecrets(wall: HTMLElement, onFound: (found: Name[]) => void)
   const onKey = (event: KeyboardEvent) => {
     if (event.ctrlKey || event.metaKey || event.altKey) return;
     if ((event.target as Element).closest?.('input, textarea, select, [contenteditable]')) return;
-    // The space in "lights out" would page the wall out of view, so it is held back mid-word.
+    // The space in "lights out" or "return by death" would page the wall out of view, so it is
+    // held back while a word is on its way, however many spaces it has had so far.
     if (event.key === ' ' && !(event.target as Element).closest?.('button')) {
-      const part = [3, 4, 5, 6].map((n) => typed.slice(-n)).some((end) => Object.keys(WORDS).some((w) => w.length > end.length && w.startsWith(end)));
+      const ends = Array.from({ length: Math.max(typed.length - 2, 0) }, (_, i) => typed.slice(-(i + 3)));
+      const part = ends.some((end) => Object.keys(WORDS).some((w) => w.length > end.length && w.startsWith(end)));
       if (part && ready()) event.preventDefault();
       return;
     }

@@ -29,7 +29,7 @@ test('typing "lights out" runs a race start and times the reaction', async ({ pa
   await expect(page.locator('.race-time')).toHaveText(/^\d\.\d{3}s$/);
   await expect(page.locator('[data-race]')).toHaveCount(0, { timeout: 10000 });
   expect(await leftovers(page)).toBe(0);
-  await expect(page.locator('[data-cheat]')).toContainText('1/15');
+  await expect(page.locator('[data-cheat]')).toContainText('1/27');
   // A poster still opens afterwards.
   await page.locator('[data-poster="scrub"]').click();
   await expect(page.locator('#project-title')).toHaveText('Scrub');
@@ -44,7 +44,7 @@ test('going before the lights are out is a jump start', async ({ page }) => {
   expect(await leftovers(page)).toBe(0);
 });
 
-for (const word of ['messi', 'kohli', 'federer', 'rcb', 'siuu', 'smash', 'ace', 'box box', 'naruto', 'creeper', 'domain expansion', 'titan', 'geass']) {
+for (const word of ['messi', 'kohli', 'federer', 'rcb', 'siuu', 'smash', 'ace', 'box box', 'naruto', 'creeper', 'domain expansion', 'titan', 'geass', 'jajanken', 'alchemy', 'mob', 'return by death', 'bakuman', 'water breathing', 'kamehameha', 'kira', 'gear five', 'rasengan', 'hollow purple', 'arise']) {
   test(`typing "${word}" plays its moment and leaves the wall clean`, async ({ page }) => {
     await page.keyboard.type(word, { delay: 20 });
     await expect(page.locator('.sport')).toHaveCount(1);
@@ -55,10 +55,10 @@ for (const word of ['messi', 'kohli', 'federer', 'rcb', 'siuu', 'smash', 'ace', 
 
 test('the list names every secret, and a click on one starts it', async ({ page }) => {
   await page.locator('[data-cheat]').click();
-  await expect(page.locator('#secret-list li')).toHaveCount(15);
+  await expect(page.locator('#secret-list li')).toHaveCount(27);
   await page.getByRole('button', { name: 'kohli' }).click();
   await expect(page.locator('.sport[data-sport="kohli"]')).toHaveCount(1);
-  await expect(page.locator('[data-cheat]')).toContainText('1/15');
+  await expect(page.locator('[data-cheat]')).toContainText('1/27');
 });
 
 test('"meow" moves the hint on to the next secret', async ({ page }) => {
