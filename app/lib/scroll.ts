@@ -95,11 +95,15 @@ export function initScroll(): () => void {
 
 /**
  * Marks [data-reveal] elements with data-seen as they scroll into view. Anything already on
- * screen is marked at once, so nothing visible is ever hidden first.
+ * screen is marked at once, so nothing visible is ever hidden first. Parts that come into view
+ * together arrive one after the other, in reading order, not as one block.
  */
 export function initReveals(): () => void {
   const items = [...document.querySelectorAll<HTMLElement>('[data-reveal]')];
-  const see = (el: Element) => el.setAttribute('data-seen', '');
+  const see = (el: Element, turn = 0) => {
+    (el as HTMLElement).style.setProperty('--reveal-delay', `${turn * 80}ms`);
+    el.setAttribute('data-seen', '');
+  };
 
   if (prefersReducedMotion() || !('IntersectionObserver' in window)) {
     items.forEach(see);
@@ -108,11 +112,13 @@ export function initReveals(): () => void {
 
   const watch = new IntersectionObserver(
     (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        see(entry.target);
-        watch.unobserve(entry.target);
-      }
+      const arrived = entries.filter((entry) => entry.isIntersecting).map((entry) => entry.target);
+      // In page order, so the one higher up, or further left, comes first.
+      arrived.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+      arrived.forEach((el, turn) => {
+        see(el, turn);
+        watch.unobserve(el);
+      });
     },
     { rootMargin: '0px 0px -10% 0px' },
   );

@@ -35,6 +35,21 @@ const GROW = WAIT + PEELED - 0.08;
 /** Puts a peeled sheet back on the wall, whole. */
 function resetPoster(poster: HTMLElement): void {
   poster.removeAttribute('data-opening');
+  delete poster.dataset.peeledAt;
+}
+
+/**
+ * Starts the peel at the click. Building the page takes a moment, and a sheet that waits for it
+ * feels stuck; the open then picks up from where the peel has got to. If no page opens after
+ * all, the sheet goes back on the wall by itself.
+ */
+export function peelNow(poster: HTMLElement): void {
+  if (prefersReducedMotion()) return;
+  poster.setAttribute('data-opening', '');
+  poster.dataset.peeledAt = String(performance.now());
+  setTimeout(() => {
+    if (poster.dataset.peeledAt && !active) resetPoster(poster);
+  }, 1500);
 }
 
 // The wall scales around the middle of the screen, wherever the page is scrolled.
@@ -72,6 +87,8 @@ export function openFrom(poster: HTMLElement | null, page: HTMLElement): Promise
   // The peel is a CSS animation on the sheet, started by this mark. The browser runs it off the
   // main thread, so it stays smooth while the new page is still being built and painted. The
   // mark also holds the sheet straight, so its outline can be measured for the page.
+  // A click has usually started it already: the open then catches up by the time gone.
+  const gone = poster.dataset.peeledAt ? (performance.now() - Number(poster.dataset.peeledAt)) / 1000 : 0;
   poster.setAttribute('data-opening', '');
 
   return new Promise((resolve) => {
@@ -94,7 +111,9 @@ export function openFrom(poster: HTMLElement | null, page: HTMLElement): Promise
       .to(page, { clipPath: FULL, duration: 0.42, ease: 'power3.out' }, GROW)
       .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.42, ease: 'power3.out' }, GROW)
       .call(() => resetPoster(poster), [], GROW + 0.36)
-      .to(items, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', stagger: 0.03 }, GROW + 0.12);
+      .to(items, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', stagger: 0.03 }, GROW + 0.12)
+      // Never past the moment the page appears: that part must not be skipped.
+      .time(Math.min(gone, GROW - 0.05));
   });
 }
 

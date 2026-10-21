@@ -4,10 +4,10 @@ import { useRef, type PointerEvent } from 'react';
 import { finePointer, prefersReducedMotion } from '~/lib/motion';
 
 // How far a sheet leans toward the pointer, in degrees.
-const LEAN = 13;
+const LEAN = 9;
 
 /**
- * A sheet on the wall leans toward the pointer like loose paper, and springs back when the
+ * A sheet on the wall leans toward the pointer like loose paper, and settles back flat when the
  * pointer leaves. It sets --rx and --ry on the element; the CSS turns them into a rotation.
  */
 export function useLean<T extends HTMLElement>() {
@@ -17,8 +17,8 @@ export function useLean<T extends HTMLElement>() {
     gsap.to(ref.current, {
       '--rx': rx,
       '--ry': ry,
-      duration: settle ? 1.1 : 0.45,
-      ease: settle ? 'elastic.out(1, 0.45)' : 'power3.out',
+      duration: settle ? 0.7 : 0.45,
+      ease: 'power3.out',
       overwrite: 'auto',
     });
 
