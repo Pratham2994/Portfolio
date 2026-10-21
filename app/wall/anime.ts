@@ -167,11 +167,16 @@ function bakuman({ wall, sheets, prop, say, shout }: Scene, timeline: Timeline) 
 }
 
 // A great wave, in the old woodblock way: deep water, a lighter crest, and white foam curling.
-const WAVE = `<svg viewBox="0 0 400 200" preserveAspectRatio="none">
-  <path d="M0 200 V120 C40 70 90 40 150 60 C190 74 200 110 230 104 C260 98 250 50 300 30 C340 14 380 40 400 70 V200 Z" fill="#1d4f9c"/>
-  <path d="M0 200 V150 C50 110 100 100 150 118 C200 136 240 150 300 120 C340 100 370 110 400 130 V200 Z" fill="#2f74cf"/>
-  <path d="M300 30 C330 18 360 26 380 44 C360 36 340 40 326 54 C340 44 356 46 366 56 C346 54 330 66 322 80" fill="none" stroke="#f2f6ff" stroke-width="5" stroke-linecap="round"/>
-  <path d="M150 60 C170 54 188 64 196 80 C182 70 166 72 158 84" fill="none" stroke="#f2f6ff" stroke-width="4" stroke-linecap="round"/>
+const WAVE = `<svg viewBox="0 0 400 220">
+  <path d="M0 220 V150 C30 110 60 90 100 96 C140 102 150 132 186 128 C226 124 222 70 262 38 C292 14 336 12 364 34 C380 46 392 64 400 84 V220 Z" fill="#163f86"/>
+  <path d="M262 38 C292 14 336 12 364 34 C344 28 322 32 308 46 C324 38 342 40 352 52 C334 48 316 56 306 70 C318 64 330 66 338 76 C320 76 304 86 296 100 C288 80 276 58 262 38 Z" fill="#f4f7ff"/>
+  <g fill="#f4f7ff">
+    <circle cx="340" cy="22" r="3"/><circle cx="356" cy="14" r="2.4"/><circle cx="372" cy="24" r="2"/><circle cx="328" cy="10" r="1.8"/><circle cx="384" cy="36" r="1.6"/><circle cx="350" cy="4" r="1.4"/>
+  </g>
+  <path d="M0 220 V172 C40 140 80 132 120 142 C170 154 200 176 250 160 C300 144 330 120 370 130 C384 134 394 140 400 146 V220 Z" fill="#2a68c4"/>
+  <path d="M0 220 V196 C50 178 100 176 150 186 C200 196 250 204 300 190 C340 180 372 176 400 182 V220 Z" fill="#4b8fe0"/>
+  <path d="M100 96 C118 92 134 100 140 114 C128 106 116 108 108 118" fill="none" stroke="#f4f7ff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M120 142 C134 138 148 144 152 156" fill="none" stroke="#dbe8ff" stroke-width="3" stroke-linecap="round"/>
 </svg>`;
 
 /** Demon Slayer: Water Breathing. A great wave crosses the wall, and a sword cuts through it. */
@@ -179,11 +184,13 @@ function water({ wall, box, prop, say, shout, impact }: Scene, timeline: Timelin
   const middle = middleOf(wall, box);
   const wave = prop('sport-wave', 0, window.innerHeight * 0.32);
   wave.innerHTML = WAVE;
+  const reach = wave.getBoundingClientRect().width || window.innerWidth;
   const slash = prop('sport-slash', middle.x, middle.y);
   slash.innerHTML = '<svg viewBox="0 0 400 140"><path d="M10 120 C120 20 280 10 390 60"/></svg>';
   timeline
     .call(() => say('Total concentration breathing.'), undefined, 0.2)
-    .fromTo(wave, { x: -window.innerWidth * 1.5 }, { x: window.innerWidth * 1.05, duration: 1.6, ease: 'power1.inOut' }, 0.5)
+    // From just off the left edge to past the right one: the crest crosses the middle as the sword cuts.
+    .fromTo(wave, { x: -reach }, { x: window.innerWidth + 40, duration: 1.5, ease: 'none' }, 0.4)
     .fromTo(slash.querySelector('path'), { strokeDashoffset: 520 }, { strokeDashoffset: 0, duration: 0.22, ease: 'power3.out' }, 1.25)
     .to(slash, { opacity: 0, duration: 0.6, ease: 'power2.in' }, 1.8)
     .call(() => say(''), undefined, 1.3);
@@ -332,7 +339,7 @@ function arise({ sheets, prop, say, shout }: Scene, timeline: Timeline) {
     .call(() => say('Arise.'), undefined, 1.2);
   chosen.forEach((sheet, i) => {
     const box = sheet.getBoundingClientRect();
-    const soldier = prop('sport-soldier', box.left + box.width / 2, box.bottom - 46);
+    const soldier = prop('sport-soldier', box.left + box.width / 2, box.bottom - box.height * 0.06);
     soldier.innerHTML = SOLDIER;
     timeline
       .fromTo(soldier, { yPercent: 50, scaleY: 0.15, opacity: 0 }, { yPercent: 0, scaleY: 1, opacity: 1, duration: 0.7, ease: 'power3.out' }, 1.3 + i * 0.12)

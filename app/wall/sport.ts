@@ -398,10 +398,13 @@ function creeper({ wall, sheets, prop, say, shout, impact }: Scene, timeline: Ti
   // It comes out on the side with room for it.
   const side = rect.right < window.innerWidth - 140 ? 1 : -1;
   const edge = side > 0 ? rect.right : rect.left;
-  const width = 56;
-  const height = 154;
+  // Sized to the sheet it comes from, so it is the same size next to it on any screen.
+  const k = Math.max(1, rect.height / 300);
+  const width = 56 * k;
+  const height = 154 * k;
   const feet = Math.min(rect.bottom, window.innerHeight - 30);
   const mob = prop('sport-creeper', edge, feet - height / 2);
+  mob.style.setProperty('--k', String(k));
   mob.innerHTML = creeperSvg();
   const point = { x: edge + side * (width / 2 + 6), y: feet - height / 2 };
 
@@ -471,8 +474,8 @@ function domain({ wall, sheets, box, prop, say, shout, onEnd }: Scene, timeline:
   empty.innerHTML = Array.from({ length: 90 }, () => `<i style="left:${gsap.utils.random(0, 100)}%;top:${gsap.utils.random(0, 100)}%;opacity:${gsap.utils.random(0.2, 0.9).toFixed(2)}"></i>`).join('');
 
   const from = sheets.map(centreOf);
-  const across = Math.min(box.width * 0.42, 640);
-  const down = Math.min(box.height * 0.38, 320);
+  const across = Math.min(box.width * 0.42, 1100);
+  const down = Math.min(box.height * 0.38, 560);
   const ring = { turn: 0, gather: 0 };
   // Each sheet's place on the ring, as the ring turns. Gathered 0 is home, 1 is on the ring.
   const place = () =>

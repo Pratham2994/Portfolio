@@ -629,9 +629,9 @@ html[data-project-open] {
   position: absolute;
   top: 0;
   left: 0;
-  width: 56px;
-  height: 154px;
-  margin: -77px 0 0 -28px;
+  width: calc(56px * var(--k, 1));
+  height: calc(154px * var(--k, 1));
+  margin: calc(-77px * var(--k, 1)) 0 0 calc(-28px * var(--k, 1));
   transform-origin: 50% 100%;
 }
 
@@ -742,8 +742,8 @@ html[data-project-open] {
 /* Muryōkūsho: a white sun at the heart of the void. */
 .sport-sun {
   position: absolute;
-  width: 26rem;
-  height: 26rem;
+  width: clamp(22rem, 28vw, 46rem);
+  height: clamp(22rem, 28vw, 46rem);
   border-radius: 50%;
   background: radial-gradient(circle, #fff 0 30%, rgb(255 255 255 / 0.92) 34%, rgb(214 220 255 / 0.55) 46%, rgb(150 140 255 / 0.15) 60%, transparent 70%);
   box-shadow:
@@ -792,7 +792,7 @@ html[data-project-open] {
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: min(34rem, 48vw);
+  width: clamp(24rem, 34vw, 64rem);
   translate: -50% 0;
   filter: drop-shadow(0 0 2.5rem rgb(255 120 60 / 0.35));
 }
@@ -1047,8 +1047,9 @@ html[data-project-open] {
 
 /* Demon Slayer: the wave, and the cut of the sword. */
 .sport-wave {
-  width: 150vw;
-  height: 46vh;
+  /* The shape of the drawing, so the crest keeps its curl at any screen size. */
+  width: calc(58vh * 400 / 220);
+  height: 58vh;
 }
 
 .sport-wave svg {
@@ -1225,8 +1226,8 @@ html[data-project-open] {
 }
 
 .sport-soldier {
-  width: 4.5rem;
-  margin: -4.7rem 0 0 -2.25rem;
+  width: clamp(4.5rem, 3.2vw, 7.5rem);
+  translate: -50% -100%;
   transform-origin: 50% 100%;
   filter: drop-shadow(0 0 0.8rem rgb(140 80 255 / 0.6));
 }
