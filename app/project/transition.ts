@@ -4,6 +4,8 @@ import { prefersReducedMotion } from '~/lib/motion';
 
 let active: gsap.core.Timeline | null = null;
 let ghost: HTMLElement | null = null;
+// The page an open is growing into, while it runs.
+let opening: HTMLElement | null = null;
 let intent: string | null = null;
 
 /** A poster was activated, so the next page for this slug opens from it. */
@@ -47,9 +49,10 @@ export function peelNow(poster: HTMLElement): void {
   if (prefersReducedMotion()) return;
   poster.setAttribute('data-opening', '');
   poster.dataset.peeledAt = String(performance.now());
+  // Long enough for a slow connection, or the dev server, to load the page's code first.
   setTimeout(() => {
     if (poster.dataset.peeledAt && !active) resetPoster(poster);
-  }, 1500);
+  }, 4000);
 }
 
 // The wall scales around the middle of the screen, wherever the page is scrolled.
@@ -57,10 +60,17 @@ const origin = () => `50% ${window.scrollY + window.innerHeight / 2}px`;
 
 function finish(): void {
   active = null;
+  opening = null;
   ghost?.remove();
   ghost = null;
   delete document.documentElement.dataset.transitioning;
 }
+
+/**
+ * True while an open is growing into this page. React runs a page's effects twice in development,
+ * to find bugs; the second run must not cut short the open that the first one started.
+ */
+export const isOpening = (page: HTMLElement) => active !== null && opening === page;
 
 /** Jumps any running transition to its end state. */
 export function cancelTransition(): void {
@@ -93,6 +103,7 @@ export function openFrom(poster: HTMLElement | null, page: HTMLElement): Promise
 
   return new Promise((resolve) => {
     const items = page.querySelectorAll('[data-in]');
+    opening = page;
     start(() => {
       gsap.set(page, { clearProps: 'clipPath,opacity' });
       gsap.set(main, { clearProps: 'scale,opacity,transform,transformOrigin' });

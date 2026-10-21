@@ -16,7 +16,7 @@ import { follow } from './follow';
 import s from './ProjectPage.module.css';
 import { Sketch, hasSketch } from './Sketch';
 import { Stage, kindOf } from './Stage';
-import { cancelTransition, closeLive, closeTo, openFrom, riseIn, takeClosed, takeIntent, takeTurned, turnTo } from './transition';
+import { cancelTransition, closeLive, closeTo, isOpening, openFrom, riseIn, takeClosed, takeIntent, takeTurned, turnTo } from './transition';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const longestWord = (text: string) => Math.max(...text.split(/\s+/).map((word) => word.length));
@@ -42,7 +42,8 @@ export function ProjectPage({ project }: { project: Project }) {
       void openFrom(poster(), node);
     }
     // A page that opens with a cut (history, next, previous) must not sit under a closing sheet.
-    else {
+    // An open already growing into this page is left alone (React runs this twice in development).
+    else if (!isOpening(node)) {
       cancelTransition();
       if (takeTurned()) riseIn(node);
     }

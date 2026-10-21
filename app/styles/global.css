@@ -119,43 +119,90 @@ html[data-project-open] {
   }
 }
 
-/* The boot screen, built by wall/entry.ts. It covers the page until the wall cuts in. */
+/*
+ * The boot screen, built by wall/entry.ts. It covers the page until the wall cuts in: a start-up
+ * check of the PC on the desk, one part to a line, then a bar while the wall loads.
+ */
 .boot {
   position: fixed;
   inset: 0;
   z-index: 40;
   display: grid;
   align-content: center;
-  gap: 0.35em;
+  gap: 0.45em;
   padding: var(--gutter);
   padding-left: clamp(1rem, 14vw, 16rem);
   background: #000;
   color: var(--bone);
   font-family: var(--font-mono);
-  font-size: clamp(0.8125rem, 1.25vw, 1.125rem);
+  font-size: clamp(0.8125rem, 1.15vw, 1.125rem);
   white-space: pre;
   pointer-events: none;
 }
 
-.boot p:first-child {
-  margin-bottom: 1em;
+.boot-head {
+  display: flex;
+  justify-content: space-between;
+  max-width: 46em;
+  margin-bottom: 1.2em;
   color: var(--signal);
   font-weight: 700;
 }
 
-.boot p:last-child {
-  margin-top: 1em;
+.boot-skip {
+  color: color-mix(in srgb, var(--bone) 55%, #000);
+  font-weight: 400;
 }
 
-.boot p:last-child::after {
-  content: '_';
-  animation: boot-caret 0.4s steps(1) infinite;
+/* A part: its name in a fixed column, what it is, a row of dots to the edge, and the result. */
+.boot-line {
+  display: grid;
+  grid-template-columns: 5ch max-content minmax(2ch, 1fr) 9ch;
+  gap: 1ch;
+  max-width: 46em;
 }
 
-@keyframes boot-caret {
-  50% {
-    opacity: 0;
-  }
+.boot-line b {
+  color: color-mix(in srgb, var(--bone) 55%, #000);
+  font-weight: 400;
+}
+
+.boot-line i {
+  overflow: hidden;
+  color: color-mix(in srgb, var(--bone) 40%, #000);
+  font-style: normal;
+}
+
+.boot-line i::before {
+  content: '................................................................................';
+}
+
+.boot-line em {
+  color: var(--signal);
+  font-style: normal;
+  font-weight: 700;
+  text-align: right;
+}
+
+.boot-load {
+  display: flex;
+  align-items: center;
+  gap: 2ch;
+  margin-top: 1.2em;
+}
+
+.boot-bar {
+  width: 20ch;
+  height: 0.7em;
+  border: 2px solid color-mix(in srgb, var(--bone) 55%, #000);
+  padding: 2px;
+}
+
+.boot-bar span {
+  display: block;
+  height: 100%;
+  background: var(--bone);
+  transform-origin: left;
 }
 
 /* The race start, built by wall/race.ts: a dark room, a gantry of five lights, and the call. */
