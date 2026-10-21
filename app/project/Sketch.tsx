@@ -167,9 +167,9 @@ const Cut = () => (
 const Rules = () => (
   <Row
     parts={[
-      ['RULES', 'acids, fuels, solvents'],
-      ['COMPILER', 'once, as it loads'],
-      ['PAIR TABLE', 'what meets what, and why'],
+      ['RULES', 'acids, fuels'],
+      ['COMPILER', 'once, at load'],
+      ['PAIR TABLE', 'what meets what'],
     ]}
   />
 );
