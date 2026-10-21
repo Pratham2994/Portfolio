@@ -315,6 +315,12 @@
     border-color var(--dur-fast) linear;
 }
 
+.cheat[data-all] {
+  border-color: #ffc21a;
+  color: #ffc21a;
+  box-shadow: 0 0 0.9rem rgb(255 194 26 / 0.35);
+}
+
 .cheat:hover,
 .cheat:focus-visible,
 .cheat[aria-expanded='true'] {

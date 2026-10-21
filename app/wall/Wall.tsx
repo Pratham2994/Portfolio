@@ -89,7 +89,9 @@ export function Wall() {
     secrets.current = initSecrets(wall.current, setFound);
     return secrets.current.stop;
   }, []);
-  const hint = HINTS[!found.includes('meow') ? 0 : !found.includes('lights') ? 1 : 2];
+  // Every one of them found: the counter goes gold, and the hint says so.
+  const all = found.length === SECRETS.length;
+  const hint = all ? 'all of them. you know me better than my resume does.' : HINTS[!found.includes('meow') ? 0 : !found.includes('lights') ? 1 : 2];
 
   return (
     <section
@@ -129,7 +131,7 @@ export function Wall() {
       </aside>
       {/* A footer, not a div: the grid stays the only div directly in the wall. */}
       <footer className={styles.secrets} data-secrets>
-        <button type="button" className={styles.cheat} aria-expanded={listOpen} aria-controls="secret-list" onClick={() => setListOpen((open) => !open)} data-cheat>
+        <button type="button" className={styles.cheat} aria-expanded={listOpen} aria-controls="secret-list" onClick={() => setListOpen((open) => !open)} data-cheat data-all={all || undefined}>
           secrets {found.length}/{SECRETS.length}
         </button>
         {/* One line along the bottom of the wall, so the list covers nothing. */}

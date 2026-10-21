@@ -61,6 +61,14 @@ test('the list names every secret, and a click on one starts it', async ({ page 
   await expect(page.locator('[data-cheat]')).toContainText('1/31');
 });
 
+test('with every secret found, the counter goes gold and the hint says so', async ({ page }) => {
+  await page.evaluate((all) => localStorage.setItem('wall-secrets', JSON.stringify(all)), ['meow', 'lights', 'boxbox', 'messi', 'siuu', 'kohli', 'rcb', 'federer', 'smash', 'ace', 'naruto', 'creeper', 'domain', 'titan', 'geass', 'jajanken', 'alchemy', 'mob', 'rezero', 'bakuman', 'water', 'kamehameha', 'kira', 'gearfive', 'rasengan', 'purple', 'arise', 'moonwalk', 'spiderman', 'snap', 'batman']);
+  await open(page, '/');
+  await expect(page.locator('[data-cheat]')).toContainText('31/31');
+  await expect(page.locator('[data-cheat]')).toHaveAttribute('data-all');
+  await expect(page.locator('[data-hint]')).toContainText('all of them');
+});
+
 test('"meow" moves the hint on to the next secret', async ({ page }) => {
   await expect(page.locator('[data-hint]')).toContainText('meow');
   await page.keyboard.type('meow', { delay: 20 });
