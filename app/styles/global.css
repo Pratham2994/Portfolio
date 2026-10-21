@@ -895,7 +895,14 @@ html[data-project-open] {
   background: radial-gradient(ellipse 34% 20% at 50% 50%, rgb(0 0 0 / 0.82), rgb(0 0 0 / 0.5) 55%, transparent);
 }
 
-/* Hunter x Hunter: Gon's aura, gold and green, pulsing as it builds. */
+/* Hunter x Hunter: Gon's aura, gold and green, pulsing as it builds, with his fist in it. */
+.sport-aura svg {
+  position: absolute;
+  inset: 26%;
+  width: 48%;
+  filter: drop-shadow(0 0 0.5rem #fff3a0);
+}
+
 .sport-aura {
   width: 9rem;
   height: 9rem;
@@ -1150,14 +1157,22 @@ html[data-project-open] {
 
 /* Naruto: the Rasengan, spinning. */
 .sport-rasengan {
-  width: 6rem;
-  height: 6rem;
-  margin: -3rem 0 0 -3rem;
+  width: 8rem;
+  height: 8rem;
+  margin: -4rem 0 0 -4rem;
+  border-radius: 50%;
+  box-shadow: 0 0 2.5rem 0.8rem rgb(58 160 255 / 0.6);
+}
+
+/* The spin is on a layer inside: spun itself, the sphere would also spin the move that places it. */
+.sport-rasengan::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
   background:
     radial-gradient(circle, #fff 0 16%, transparent 40%),
     conic-gradient(from 0deg, #e6f7ff, #3aa0ff, #e6f7ff, #1f6fd1, #e6f7ff, #3aa0ff, #e6f7ff);
-  box-shadow: 0 0 2.5rem 0.8rem rgb(58 160 255 / 0.6);
   animation: sport-spin 0.22s linear infinite;
 }
 
@@ -1165,6 +1180,18 @@ html[data-project-open] {
   to {
     rotate: 1turn;
   }
+}
+
+/* The wind round it: a thin ring that turns the other way, a little wider than the sphere. */
+.sport-rasengan::after {
+  content: '';
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: rgb(230 247 255 / 0.85);
+  border-left-color: rgb(58 160 255 / 0.6);
+  animation: sport-spin 0.35s linear infinite reverse;
 }
 
 .sport[data-sport='rasengan'] {

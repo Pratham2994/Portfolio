@@ -38,6 +38,8 @@ function inView(sheets: HTMLElement[]): HTMLElement[] {
 function jajanken({ wall, box, prop, say, shout, impact }: Scene, timeline: Timeline) {
   const target = middleOf(wall, box);
   const aura = prop('sport-aura', box.left + box.width * 0.12, target.y + 40);
+  // Rock: a fist in the middle of the aura, side on, knuckles forward.
+  aura.innerHTML = `<svg viewBox="0 0 60 50"><path d="M8 14 C8 8 14 6 18 8 C20 4 26 3 29 6 C32 3 38 3 40 7 C43 5 49 6 50 11 C54 12 56 16 55 22 L54 34 C53 42 46 47 38 47 L22 47 C13 47 7 41 7 33 Z" fill="#f2c9a0" stroke="#5a3a1a" stroke-width="2"/><path d="M18 8 V20 M29 6 V20 M40 7 V20" stroke="#5a3a1a" stroke-width="2" fill="none"/><path d="M8 26 C14 22 22 24 24 30" stroke="#5a3a1a" stroke-width="2" fill="none"/></svg>`;
   timeline
     .call(() => say('Saisho wa guu…'), undefined, 0.2)
     .fromTo(aura, { scale: 0.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.3)
@@ -273,7 +275,12 @@ function gearfive({ wall, sheets, box, prop, say, shout }: Scene, timeline: Time
 /** Naruto: a Rasengan, spun up in one hand and driven into the nearest sheet. */
 function rasengan({ wall, sheets, box, prop, say, shout, impact }: Scene, timeline: Timeline) {
   const cat = wall.querySelector('[data-cat]');
-  const start = cat ? centreOf(cat) : middleOf(wall, box);
+  // Where the cat is, but never at the very edge of the screen, where it would be half out of sight.
+  const near = cat ? centreOf(cat) : middleOf(wall, box);
+  const start = {
+    x: gsap.utils.clamp(box.left + box.width * 0.12, box.right - box.width * 0.12, near.x),
+    y: gsap.utils.clamp(window.innerHeight * 0.18, window.innerHeight * 0.8, near.y),
+  };
   const target = inView(sheets)
     .filter((sheet) => far(centreOf(sheet), start) > 160)
     .sort((a, b) => far(centreOf(a), start) - far(centreOf(b), start))[0];

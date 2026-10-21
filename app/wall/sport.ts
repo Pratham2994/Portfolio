@@ -716,6 +716,9 @@ function sparks(prop: Scene['prop'], point: Point) {
   }
 }
 
+// Stage pieces that grow by CSS alone, and stay where they are put. GSAP never touches them.
+const GROWS = /(^| )sport-(ring|impact|poof|steam|trail|mark)( |$)/;
+
 /** Plays one short moment across the wall, then leaves the wall as it was. */
 export function playSport(name: Play, wall: HTMLElement, done: () => void): void {
   const sheets = gsap.utils.toArray<HTMLElement>('[data-poster], [data-piece]', wall);
@@ -765,7 +768,11 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
     node.className = className;
     // Under the commentary and the call, which are the last things on the stage.
     stage.insertBefore(node, sayLine);
-    gsap.set(node, { x, y });
+    // Pieces that grow by a CSS animation are placed without GSAP. GSAP would copy the first frame
+    // of that animation into its own transform, and the two scales together would send the piece
+    // across the screen. They never move once put down, so plain left and top are enough.
+    if (GROWS.test(className)) Object.assign(node.style, { left: `${x}px`, top: `${y}px` });
+    else gsap.set(node, { x, y });
     return node;
   };
 
