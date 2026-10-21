@@ -8,7 +8,7 @@ let started = false;
 // Events that happen before the client has loaded wait here.
 const queue: Array<[string, Props | undefined]> = [];
 
-/** Records that something happened: a poster opened, the lever pressed. Safe to call anywhere. */
+/** Records that something happened: a poster opened, a secret found. Safe to call anywhere. */
 export function track(name: string, props?: Props): void {
   if (!ANALYTICS.key) return;
   if (client) client.capture(name, props);

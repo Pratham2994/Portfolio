@@ -42,13 +42,10 @@ export function Centre({ className }: { className?: string }) {
   const [at, setAt] = useState(0);
   // Counts down to 0 while the cards fall. At 0 every place shows its real letter.
   const [left, setLeft] = useState(0);
-  // A word put on the board from outside (the wall, when it is down). It holds until it is taken off.
-  const [told, setTold] = useState<{ word: string; proof: string } | null>(null);
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
     let fall = 0;
-    let held = false;
     // The cards fall to whatever the board says next.
     const flip = () => {
       let now = TURNS;
@@ -61,27 +58,17 @@ export function Centre({ className }: { className?: string }) {
       }, BEAT);
     };
     const next = window.setInterval(() => {
-      if (held || !watching()) return;
+      if (!watching()) return;
       setAt((before) => (before + 1) % BOARD.length);
       flip();
     }, HOLD);
-    const onBoard = (event: Event) => {
-      const detail = (event as CustomEvent<{ word: string; proof: string } | null>).detail;
-      held = detail !== null;
-      setTold(detail);
-      // Taken off, the board goes back to the word the page opens on.
-      if (!detail) setAt(0);
-      flip();
-    };
-    window.addEventListener('wall:board', onBoard);
     return () => {
       window.clearInterval(next);
       window.clearInterval(fall);
-      window.removeEventListener('wall:board', onBoard);
     };
   }, []);
 
-  const { word, proof } = told ?? BOARD[at];
+  const { word, proof } = BOARD[at];
   const cards = [...word].map((letter, i) => {
     // Place i stops when the count passes its own mark, so they settle one after the other.
     const turns = left - (5 - i) * LAG;

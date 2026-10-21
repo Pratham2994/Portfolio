@@ -8,7 +8,6 @@ import { warmWhenIdle } from '~/project/warm';
 import { Album } from './Album';
 import { Cat } from './Cat';
 import { Centre } from './Centre';
-import { dropWall } from './drop';
 import { playEntry } from './entry';
 import { hangWall, OUTSIDE, type WallItem } from './layout';
 import { Light } from './Light';
@@ -155,14 +154,6 @@ export function Wall() {
           </p>
         )}
       </footer>
-      <button type="button" className={styles.lever} onClick={() => {
-          track('lever_pressed');
-          if (wall.current) dropWall(wall.current);
-        }} data-lever>
-        <span>Do not press</span>
-        {/* While the wall is down, the same button hangs it back. */}
-        <span>Hang it back up</span>
-      </button>
     </section>
   );
 }
