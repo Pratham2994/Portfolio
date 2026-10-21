@@ -241,7 +241,8 @@
 @media (hover: hover) and (pointer: fine) {
   .grid :is([data-poster], [data-piece]) {
     /* --dim comes from useSpotlight: shorter when the pointer moves fast. */
-    transition-duration: var(--dur-base), var(--dur-base), var(--dim, 0.2s), var(--dur-base);
+    /* Lifting a sheet is quick: a hover that lags behind the pointer feels heavy. */
+    transition-duration: 0.3s, 0.3s, var(--dim, 0.2s), 0.3s;
   }
 
   .grid :is([data-poster], [data-piece]):hover {
