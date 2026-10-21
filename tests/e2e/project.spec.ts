@@ -12,6 +12,23 @@ test('poster opens its project and Escape returns to the wall', async ({ page })
   await expect(page.locator('[data-project]')).toHaveCount(0);
 });
 
+test('the project page is fetched while the wall is up, so the first poster does not wait for it', async ({ page }) => {
+  await open(page, '/');
+  // Its code and its styles are asked for ahead of any click.
+  await expect(page.locator('head link[rel="modulepreload"][href*="/work-"]')).toHaveCount(1, { timeout: 8000 });
+  await expect(page.locator('head link[rel="prefetch"][as="style"]')).not.toHaveCount(0);
+});
+
+test('where a project runs live, its status at the top is the link to it', async ({ page }) => {
+  await open(page, '/work/sandglass');
+  const live = page.locator('[data-status-live]:visible');
+  await expect(live).toHaveAttribute('href', 'https://sandglass.prathampanchal02994.workers.dev/');
+  await expect(live).toContainText('Live in the browser');
+  // A project with no live address keeps a plain status.
+  await open(page, '/work/neat');
+  await expect(page.locator('[data-status-live]')).toHaveCount(0);
+});
+
 test('direct load shows the page, and close leads home', async ({ page }) => {
   await open(page, '/work/neat');
   await expect(page.locator('#project-title')).toHaveText('Neat');

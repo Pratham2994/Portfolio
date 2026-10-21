@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import { Link } from 'react-router';
 import { projects } from '~/content';
 import { track } from '~/lib/analytics';
+import { warmWhenIdle } from '~/project/warm';
 
 import { Album } from './Album';
 import { Cat } from './Cat';
@@ -79,6 +80,8 @@ export function Wall() {
   useEffect(() => {
     if (wall.current) playEntry(wall.current);
   }, []);
+  // The project page is fetched ahead of the first click.
+  useEffect(() => warmWhenIdle(), []);
   const secrets = useRef<Secrets>(null);
   const [found, setFound] = useState<string[]>([]);
   const [listOpen, setListOpen] = useState(false);

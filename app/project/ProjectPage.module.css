@@ -102,6 +102,20 @@
   display: none;
 }
 
+/* A status that is a link: it fills on hover, like the other buttons in the bar. */
+a:is(.status, .statusBelow) {
+  color: inherit;
+  text-decoration: none;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+
+a:is(.status, .statusBelow):is(:hover, :focus-visible) {
+  background: var(--fg);
+  color: var(--bg);
+}
+
 /* On a phone the bar is one short row. The status moves down, above the title. */
 @media (max-width: 600px) {
   .bar .status {

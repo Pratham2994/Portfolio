@@ -139,13 +139,30 @@ export function ProjectPage({ project }: { project: Project }) {
   // A project with a stage gets a page of its own kind. The others keep the plain one.
   const kind = kindOf(project.slug);
 
+  // The status, at the top. Where the project runs live, the status is also the way to it.
+  const status = (className: string) => {
+    const words = (
+      <>
+        {underReview && <b aria-hidden="true">VAR</b>}
+        {project.status}
+      </>
+    );
+    return project.links.live ? (
+      <a href={project.links.live} target="_blank" rel="noreferrer" className={className} data-var={underReview || undefined} data-status-live>
+        {words}
+        <span aria-hidden="true"> ↗</span>
+      </a>
+    ) : (
+      <span className={className} data-var={underReview || undefined}>
+        {words}
+      </span>
+    );
+  };
+
   const heading = (
     <div className={s.heroText}>
       {/* On a phone the bar has no room for the status, so it sits here. */}
-      <span className={s.statusBelow} data-var={underReview || undefined}>
-        {underReview && <b aria-hidden="true">VAR</b>}
-        {project.status}
-      </span>
+      {status(s.statusBelow)}
       <h1
         id="project-title"
         className={s.title}
@@ -244,10 +261,7 @@ export function ProjectPage({ project }: { project: Project }) {
           <span className={s.count}>
             {pad(position)} / {pad(projects.length)}
           </span>
-          <span className={s.status} data-var={underReview || undefined}>
-            {underReview && <b aria-hidden="true">VAR</b>}
-            {project.status}
-          </span>
+          {status(s.status)}
           {/* Three sectors, as on a timing screen. Each one fills as the page goes by. */}
           <i className={s.laps} aria-hidden="true" data-laps>
             <b />
