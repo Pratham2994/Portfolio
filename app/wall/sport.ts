@@ -541,6 +541,50 @@ function domain({ wall, sheets, box, prop, say, shout, onEnd }: Scene, timeline:
     .call(() => say(''), undefined, 1.5);
   // The domain opens: rings go out from the board, one after another.
   [0.55, 0.9, 1.25, 1.6].forEach((at) => timeline.call(() => void prop('sport-ring', middle.x, middle.y), undefined, at));
+
+  // Muryōkūsho, the void without end. A white sun at its heart, rays turning slowly behind it,
+  // and light that never stops coming out of it: everything, all at once, forever.
+  const home = wall.getBoundingClientRect();
+  const heart = { x: middle.x - home.left, y: middle.y - home.top };
+  const rays = document.createElement('b');
+  rays.className = 'sport-rays';
+  const sun = document.createElement('b');
+  sun.className = 'sport-sun';
+  empty.append(rays, sun);
+  gsap.set([rays, sun], { left: heart.x, top: heart.y, xPercent: -50, yPercent: -50 });
+  const splash = prop('sport-splash', 0, 0);
+  const streaks = (count: number) => {
+    for (let i = 0; i < count; i++) {
+      const streak = document.createElement('i');
+      streak.className = 'sport-streak';
+      empty.append(streak);
+      const angle = gsap.utils.random(0, Math.PI * 2);
+      const far = gsap.utils.random(500, 1200);
+      gsap.set(streak, { left: heart.x, top: heart.y, rotation: (angle * 180) / Math.PI, transformOrigin: '0 50%' });
+      gsap.fromTo(
+        streak,
+        { x: Math.cos(angle) * 40, y: Math.sin(angle) * 40, scaleX: 0.15, opacity: 0 },
+        {
+          x: Math.cos(angle) * far,
+          y: Math.sin(angle) * far,
+          scaleX: gsap.utils.random(0.8, 1.6),
+          duration: gsap.utils.random(0.7, 1.2),
+          ease: 'power2.in',
+          keyframes: { opacity: [0, 1, 1, 0] },
+          delay: gsap.utils.random(0, 0.5),
+          onComplete: () => streak.remove(),
+        },
+      );
+    }
+  };
+  timeline
+    // The splash: the whole screen goes white the moment the domain closes round you.
+    .fromTo(splash, { opacity: 0 }, { keyframes: [{ opacity: 1, duration: 0.07 }, { opacity: 1, duration: 0.12 }, { opacity: 0, duration: 0.9, ease: 'power2.out' }] }, 1.3)
+    .fromTo(sun, { scale: 0.1, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.7, ease: 'expo.out' }, 1.35)
+    .to(sun, { scale: 1.07, duration: 0.55, ease: 'sine.inOut', yoyo: true, repeat: 3 }, 2.05)
+    .fromTo(rays, { opacity: 0, rotation: 0 }, { opacity: 1, rotation: 40, duration: 2.6, ease: 'none' }, 1.35)
+    .to([sun, rays], { opacity: 0, scale: 0.6, duration: 0.8, ease: 'power2.in' }, 3.9);
+  [1.35, 1.85, 2.35, 2.85, 3.3].forEach((at) => timeline.call(() => streaks(18), undefined, at));
   // The board steps back while the name is called, so the name is the only word in the middle.
   if (board) {
     onEnd(() => gsap.set(board, { clearProps: 'opacity' }));

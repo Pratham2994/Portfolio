@@ -727,6 +727,60 @@ html[data-project-open] {
   background: none;
 }
 
+/* The name is set in the ink of the void, so it reads on the white sun behind it. */
+.sport[data-sport='domain'] .sport-call strong {
+  color: #07061a;
+  text-shadow: 0 0 1.5rem #fff, 0 0 4rem #fff;
+}
+
+.sport[data-sport='domain'] .sport-call span {
+  color: #07061a;
+  font-weight: 700;
+  text-shadow: 0 0 0.8rem #fff;
+}
+
+/* Muryōkūsho: a white sun at the heart of the void. */
+.sport-sun {
+  position: absolute;
+  width: 26rem;
+  height: 26rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 30%, rgb(255 255 255 / 0.92) 34%, rgb(214 220 255 / 0.55) 46%, rgb(150 140 255 / 0.15) 60%, transparent 70%);
+  box-shadow:
+    0 0 5rem 1.5rem rgb(255 255 255 / 0.6),
+    0 0 14rem 5rem rgb(150 140 255 / 0.35);
+  opacity: 0;
+}
+
+/* Its rays: thin spokes of light, turning slowly, fading out toward the edge. */
+.sport-rays {
+  position: absolute;
+  width: 110rem;
+  height: 110rem;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, rgb(255 255 255 / 0.22) 0deg 1.2deg, transparent 1.2deg 7deg);
+  mask: radial-gradient(circle, #000 8%, rgb(0 0 0 / 0.5) 30%, transparent 62%);
+  opacity: 0;
+}
+
+/* Light coming out of it, endless. */
+.sport-streak {
+  position: absolute;
+  width: 11rem;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #fff 60%, #fff);
+  box-shadow: 0 0 6px #c9c3ff;
+  opacity: 0;
+}
+
+/* The white splash as the domain closes round the wall. */
+.sport-splash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+}
+
 /* Attack on Titan: the sky over the wall, where the titan shows, and the steam around it. */
 .sport-sky {
   position: absolute;
