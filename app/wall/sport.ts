@@ -1,9 +1,10 @@
 import gsap from 'gsap';
 
 import { ANIME, type AnimePlay } from './anime';
+import { POP, type PopPlay } from './pop';
 import { centreOf, hit, pick, type Point, type Scene, type Timeline } from './play-kit';
 
-export type Play = 'messi' | 'kohli' | 'federer' | 'rcb' | 'siuu' | 'smash' | 'ace' | 'boxbox' | 'naruto' | 'creeper' | 'domain' | 'titan' | 'geass' | AnimePlay;
+export type Play = 'messi' | 'kohli' | 'federer' | 'rcb' | 'siuu' | 'smash' | 'ace' | 'boxbox' | 'naruto' | 'creeper' | 'domain' | 'titan' | 'geass' | AnimePlay | PopPlay;
 
 // The stands: every sheet gets up and sits down, left to right.
 function wave(timeline: Timeline, sheets: HTMLElement[], at: number) {
@@ -657,6 +658,7 @@ const PLAYS: Record<Play, { ball?: string; play: (scene: Scene, timeline: Timeli
   titan: { play: titan },
   geass: { play: geass },
   ...(Object.fromEntries(Object.entries(ANIME).map(([name, play]) => [name, { play }])) as Record<AnimePlay, { play: (scene: Scene, timeline: Timeline) => void }>),
+  ...(Object.fromEntries(Object.entries(POP).map(([name, play]) => [name, { play }])) as Record<PopPlay, { play: (scene: Scene, timeline: Timeline) => void }>),
 };
 
 /**

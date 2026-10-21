@@ -89,6 +89,8 @@ function alchemy({ wall, sheets, box, prop, say, shout, impact }: Scene, timelin
 /** Mob Psycho 100: his meter climbs, the sheets start to float, and at 100% everything goes. */
 function mob({ sheets, box, prop, say, shout }: Scene, timeline: Timeline) {
   const meter = prop('sport-meter', box.left + box.width / 2, box.top + 70);
+  // GSAP places it, so GSAP centres it too: a CSS translate would be replaced by its transform.
+  gsap.set(meter, { xPercent: -50 });
   const count = { value: 0 };
   timeline
     .call(() => say('Mob is at 10%.'), undefined, 0.2)
@@ -156,6 +158,7 @@ function bakuman({ wall, sheets, prop, say, shout }: Scene, timeline: Timeline) 
   three.forEach((sheet, i) => {
     const box = sheet.getBoundingClientRect();
     const bubble = prop('sport-bubble', box.left + box.width * 0.55, box.top + 6);
+    gsap.set(bubble, { xPercent: -50, yPercent: -100 });
     bubble.textContent = lines[i] ?? lines[0];
     timeline.fromTo(bubble, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(2)' }, 1 + i * 0.35).to(bubble, { opacity: 0, duration: 0.3 }, 4.2);
   });
@@ -329,6 +332,7 @@ const SOLDIER = `<svg viewBox="0 0 40 84">
 /** Solo Leveling: Arise. The system asks, and shadow soldiers stand up out of the sheets. */
 function arise({ sheets, prop, say, shout }: Scene, timeline: Timeline) {
   const panel = prop('sport-system', window.innerWidth / 2, window.innerHeight * 0.18);
+  gsap.set(panel, { xPercent: -50 });
   panel.innerHTML = '<b>[ System ]</b><span>Extract the shadows? Arise.</span>';
   const pool = inView(sheets).slice().sort((a, b) => centreOf(a).x - centreOf(b).x);
   const step = Math.max(Math.floor(pool.length / 7), 1);
@@ -340,10 +344,11 @@ function arise({ sheets, prop, say, shout }: Scene, timeline: Timeline) {
   chosen.forEach((sheet, i) => {
     const box = sheet.getBoundingClientRect();
     const soldier = prop('sport-soldier', box.left + box.width / 2, box.bottom - box.height * 0.06);
+    gsap.set(soldier, { xPercent: -50 });
     soldier.innerHTML = SOLDIER;
     timeline
-      .fromTo(soldier, { yPercent: 50, scaleY: 0.15, opacity: 0 }, { yPercent: 0, scaleY: 1, opacity: 1, duration: 0.7, ease: 'power3.out' }, 1.3 + i * 0.12)
-      .to(soldier, { yPercent: 50, scaleY: 0.1, opacity: 0, duration: 0.5, ease: 'power2.in' }, 3.9 + i * 0.05);
+      .fromTo(soldier, { yPercent: -50, scaleY: 0.15, opacity: 0 }, { yPercent: -100, scaleY: 1, opacity: 1, duration: 0.7, ease: 'power3.out' }, 1.3 + i * 0.12)
+      .to(soldier, { yPercent: -50, scaleY: 0.1, opacity: 0, duration: 0.5, ease: 'power2.in' }, 3.9 + i * 0.05);
   });
   shout(timeline, 2.6, 'Arise', pick('arise', ['The shadows answer.', 'Every one of them, his.', 'Level up.']));
   timeline

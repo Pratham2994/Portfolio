@@ -35,6 +35,10 @@ export const SECRETS: { name: Name; word: string; about: string }[] = [
   { name: 'rasengan', word: 'rasengan', about: 'anime' },
   { name: 'purple', word: 'hollow purple', about: 'anime' },
   { name: 'arise', word: 'arise', about: 'anime' },
+  { name: 'moonwalk', word: 'moonwalk', about: 'pop' },
+  { name: 'spiderman', word: 'spiderman', about: 'Marvel' },
+  { name: 'snap', word: 'snap', about: 'Marvel' },
+  { name: 'batman', word: 'batman', about: 'DC' },
 ];
 
 /** The small line in the corner of the wall. It leads to the first two, then to the list. */
@@ -95,6 +99,14 @@ const WORDS: Record<string, Exclude<Name, 'meow'>> = {
   murasaki: 'purple',
   arise: 'arise',
   sololeveling: 'arise',
+  moonwalk: 'moonwalk',
+  heehee: 'moonwalk',
+  spiderman: 'spiderman',
+  thwip: 'spiderman',
+  snap: 'snap',
+  thanos: 'snap',
+  batman: 'batman',
+  gotham: 'batman',
 };
 const LONGEST = Math.max(...Object.keys(WORDS).map((word) => word.length));
 const STORE = 'wall-secrets';
