@@ -21,7 +21,8 @@ export function track(name: string, props?: Props): void {
  * It sets no cookies: a visit is counted, but the visitor is not followed between visits.
  */
 export function initAnalytics(): void {
-  if (started || !ANALYTICS.key || typeof window === 'undefined') return;
+  // The dev server has no /relay (only the Worker does), and a visit from my own machine is not a visit.
+  if (started || !ANALYTICS.key || typeof window === 'undefined' || import.meta.env.DEV) return;
   started = true;
 
   const start = async () => {
