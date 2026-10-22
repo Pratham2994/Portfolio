@@ -478,6 +478,8 @@ function Sandbox() {
   useEffect(() => {
     const canvas = screen.current!;
     const light = glow.current!;
+    // Kept here: React clears the ref when the page closes, a frame before this effect is stopped.
+    const stage = box.current!;
     // The grid takes the shape of the box, at about 120 cells across.
     const w = 120;
     const h = Math.min(Math.max(Math.round((w * canvas.clientHeight) / Math.max(canvas.clientWidth, 1)), 50), 150);
@@ -494,7 +496,7 @@ function Sandbox() {
       sand.paint(live, scene, lit, (flicker += 3));
       pen.putImageData(scene, 0, 0);
       pen2.putImageData(lit, 0, 0);
-      box.current!.style.setProperty('--kept', String(sand.kept(live) / 10));
+      stage.style.setProperty('--kept', String(sand.kept(live) / 10));
     };
 
     let t = 0;
@@ -517,7 +519,7 @@ function Sandbox() {
         backing = 0;
       }
       const rewinding = now.rewinding || backing > 0;
-      box.current!.toggleAttribute('data-rewinding', rewinding);
+      stage.toggleAttribute('data-rewinding', rewinding);
       if (rewinding) {
         sand.back(live);
         sand.back(live);

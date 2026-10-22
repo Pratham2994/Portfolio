@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, type CSSProperties, type MouseEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, type CSSProperties, type MouseEvent, type PointerEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { neighbours, projects } from '~/content';
@@ -116,6 +116,18 @@ export function ProjectPage({ project }: { project: Project }) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
     event.preventDefault();
     close();
+  };
+
+  // A tap while the page still glides from a swipe only stops it: the phone sends the press and
+  // the release, but no click. So on a touch screen a clean tap on the way back is enough by itself.
+  const pressed = useRef<{ id: number; x: number; y: number } | null>(null);
+  const onClosePress = (event: PointerEvent) => {
+    pressed.current = event.pointerType === 'mouse' ? null : { id: event.pointerId, x: event.clientX, y: event.clientY };
+  };
+  const onCloseRelease = (event: PointerEvent) => {
+    const down = pressed.current;
+    pressed.current = null;
+    if (down?.id === event.pointerId && Math.hypot(event.clientX - down.x, event.clientY - down.y) < 10) close();
   };
 
   const onTurnClick = (to: Project, side: 'left' | 'right') => (event: MouseEvent) => {
@@ -257,7 +269,16 @@ export function ProjectPage({ project }: { project: Project }) {
       </div>
       <div className={s.inner}>
         <header className={s.bar} data-in>
-          <Link to="/" className={s.close} data-close preventScrollReset onClick={onCloseClick}>
+          <Link
+            to="/"
+            className={s.close}
+            data-close
+            preventScrollReset
+            onClick={onCloseClick}
+            onPointerDown={onClosePress}
+            onPointerUp={onCloseRelease}
+            onPointerCancel={() => (pressed.current = null)}
+          >
             Back to the wall
             <kbd aria-hidden="true">Esc</kbd>
           </Link>

@@ -32,3 +32,17 @@ test('petting the cat five times opens the list', async ({ page }) => {
   }
   await expect(page.locator('#secret-list')).toBeVisible();
 });
+
+test('a tap on the way back works when the phone sends no click', async ({ page }) => {
+  // A tap while the page still glides from a swipe only stops it: the phone sends the press and
+  // the release, but no click. The way back must answer to the tap by itself.
+  await page.locator('[data-poster="chronicle"]').first().tap();
+  await expect(page).toHaveURL(/\/work\/chronicle/);
+  const close = page.locator('[data-close]');
+  await expect(close).toBeVisible();
+  const box = (await close.boundingBox())!;
+  const at = { clientX: box.x + box.width / 2, clientY: box.y + box.height / 2, pointerId: 7, pointerType: 'touch', isPrimary: true, bubbles: true };
+  await close.dispatchEvent('pointerdown', at);
+  await close.dispatchEvent('pointerup', at);
+  await expect(page).toHaveURL(/\/$/);
+});
