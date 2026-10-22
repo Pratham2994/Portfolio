@@ -489,6 +489,42 @@ html[data-project-open] {
   font-style: normal;
 }
 
+/* Speed lines behind a call: thin rays that burst out and turn slowly. The turn is on a layer of
+   its own, since GSAP scales the burst itself. */
+.sport-burst {
+  position: absolute;
+  inset: -25%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sport-burst::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--side-a, #fff) 32%, transparent) 0deg 0.8deg, transparent 0.8deg 5.5deg);
+  mask: radial-gradient(circle, transparent 14%, #000 26%, rgb(0 0 0 / 0.5) 46%, transparent 64%);
+  animation: sport-spin 14s linear infinite;
+}
+
+/* The edges of the screen darken while a play is on. */
+.sport-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, transparent 52%, rgb(0 0 0 / 0.55) 100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The second wave of the biggest landing: wider and fainter. */
+.sport-impact.sport-impact-wide {
+  width: 11rem;
+  height: 11rem;
+  margin: -5.5rem 0 0 -5.5rem;
+  border-width: 2px;
+  opacity: 0.7;
+}
+
 /* A ring that opens where something lands. */
 .sport-impact {
   position: absolute;

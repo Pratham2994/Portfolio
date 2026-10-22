@@ -729,12 +729,18 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
   stage.className = 'sport';
   stage.dataset.sport = name;
   stage.setAttribute('aria-hidden', 'true');
-  stage.innerHTML = `<div class="sport-ball" data-ball="${PLAYS[name].ball ?? ''}"><i></i></div><p class="sport-say"></p><div class="sport-call"><strong></strong><span></span></div>`;
+  stage.innerHTML = `<div class="sport-ball" data-ball="${PLAYS[name].ball ?? ''}"><i></i></div><p class="sport-say"></p><div class="sport-call"><i class="sport-burst"></i><strong></strong><span></span></div>`;
   document.body.append(stage);
   const ball = stage.querySelector<HTMLElement>('.sport-ball')!;
   const spin = ball.querySelector<HTMLElement>('i')!;
   const sayLine = stage.querySelector<HTMLElement>('.sport-say')!;
   const call = stage.querySelector<HTMLElement>('.sport-call')!;
+  const callWord = call.querySelector<HTMLElement>('strong')!;
+  const callLine = call.querySelector<HTMLElement>('span')!;
+  const burst = call.querySelector<HTMLElement>('.sport-burst')!;
+  // The view pushes in on a call, about the middle of the screen, wherever the wall is scrolled.
+  const wallBox = wall.getBoundingClientRect();
+  const lens = `50% ${window.innerHeight / 2 - wallBox.top}px`;
 
   // Every place something lands, in the order the play was written.
   const landings: { at: number; point: Point }[] = [];
@@ -747,7 +753,7 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
     timeline.kill();
     stage.remove();
     for (const run of ends) run();
-    gsap.set([...sheets, wall, grid, wall.querySelector('[data-centre]')], { clearProps: 'transform,x,y,rotation,scale,filter' });
+    gsap.set([...sheets, wall, grid, wall.querySelector('[data-centre]')], { clearProps: 'transform,x,y,rotation,scale,filter,transformOrigin' });
     // The cat is free to go back to what she was doing.
     window.dispatchEvent(new CustomEvent('wall:cat', { detail: null }));
     done();
@@ -762,6 +768,10 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
   const flash = document.createElement('div');
   flash.className = 'sport-flash';
   stage.append(flash);
+  // The edges of the screen darken while a play is on, as in a cinema, so the eye goes to the middle.
+  const vignette = document.createElement('div');
+  vignette.className = 'sport-vignette';
+  stage.prepend(vignette);
 
   const prop: Scene['prop'] = (className, x, y, tag = 'div') => {
     const node = document.createElement(tag);
@@ -811,13 +821,16 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
               one.textContent = letter === ' ' ? '\u00a0' : letter;
               return one;
             });
-            call.children[0].replaceChildren(...letters);
-            call.children[1].textContent = line;
+            callWord.replaceChildren(...letters);
+            callLine.textContent = line;
+            // Each letter slams up into place, big and turned, and lands straight.
             gsap.fromTo(
               letters,
-              { yPercent: 115, rotation: 9 },
-              { yPercent: 0, rotation: 0, duration: 0.55, ease: 'back.out(2.4)', stagger: 0.035 },
+              { yPercent: 130, rotation: 12, scale: 1.3, opacity: 0 },
+              { yPercent: 0, rotation: 0, scale: 1, opacity: 1, duration: 0.6, ease: 'back.out(2.2)', stagger: 0.035 },
             );
+            // Then the whole word takes the hit, and settles.
+            gsap.fromTo(callWord, { scale: 1.22 }, { scale: 1, duration: 0.8, ease: 'elastic.out(1, 0.45)', delay: 0.12 });
           },
           undefined,
           at,
@@ -825,7 +838,13 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
           // A flash, as from the stands, and the room goes dark behind the word.
           .fromTo(flash, { opacity: 0.55 }, { opacity: 0, duration: 0.5, ease: 'power2.out', immediateRender: false }, at)
           .fromTo(call, { opacity: 0 }, { opacity: 1, duration: 0.2 }, at)
-          .fromTo(call.children[1], { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', immediateRender: false }, at + 0.45)
+          // Speed lines burst out behind the word, as in a manga panel.
+          .fromTo(burst, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'expo.out', immediateRender: false }, at)
+          .to(burst, { opacity: 0, duration: 0.7, ease: 'power2.in' }, at + 1.3)
+          .fromTo(callLine, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', immediateRender: false }, at + 0.45)
+          // The view leans in on the call, and lets go as it ends.
+          .fromTo(wall, { scale: 1 }, { scale: 1.03, transformOrigin: lens, duration: 0.9, ease: 'power2.out', immediateRender: false }, at)
+          .to(wall, { scale: 1, duration: 0.9, ease: 'power2.inOut' }, at + 1.8)
           .to(call, { opacity: 0, duration: 0.4 }, at + 2);
       },
     },
@@ -833,6 +852,8 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
   );
 
   film(stage, timeline, sheets, name === 'naruto');
+  const end = Math.max(timeline.duration(), 1);
+  timeline.fromTo(vignette, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0).to(vignette, { opacity: 0, duration: 0.5, ease: 'power2.in' }, end - 0.5);
   // The wall feels every landing. The last one is the big one: time slows, the view pushes in, and sparks fly.
   landings.sort((one, other) => one.at - other.at);
   landings.forEach(({ at, point }, i) => {
@@ -843,6 +864,9 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
       .call(
         () => {
           sparks(prop, point);
+          // A second, wider wave right behind the first, and the screen flashes white for a blink.
+          setTimeout(() => void prop('sport-impact sport-impact-wide', point.x, point.y), 70);
+          gsap.fromTo(flash, { opacity: 0.35 }, { opacity: 0, duration: 0.35, ease: 'power2.out' });
           slow = gsap
             .timeline()
             .to(timeline, { timeScale: 0.12, duration: 0.05, ease: 'none' })
