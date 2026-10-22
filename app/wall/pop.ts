@@ -25,7 +25,7 @@ const DANCER = `<svg viewBox="0 0 60 140">
 /** The moonwalk: he glides backwards along the foot of the wall, and the whole wall does the lean. */
 function moonwalk({ sheets, box, prop, say, shout, onEnd }: Scene, timeline: Timeline) {
   // The lean turns each sheet on its feet; afterwards each one hangs from its pin again.
-  onEnd(() => gsap.set(sheets, { clearProps: 'transformOrigin' }));
+  onEnd(() => sheets.forEach((sheet) => sheet.style.removeProperty('transform-origin')));
   const floor = Math.min(box.bottom, window.innerHeight * 0.86);
   const spot = prop('sport-spotlight', box.left + box.width * 0.7, floor - 60);
   const dancer = prop('sport-dancer', box.left + box.width * 0.78, floor);

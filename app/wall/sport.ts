@@ -771,7 +771,15 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
     timeline.kill();
     stage.remove();
     for (const run of ends) run();
-    gsap.set([...sheets, wall, grid, wall.querySelector('[data-centre]')], { clearProps: 'transform,x,y,rotation,scale,filter,transformOrigin' });
+    // Only what GSAP has moved is cleared. Handed something it never touched, GSAP reads its
+    // transform first and writes it back, on a sheet that never moved (on a phone, most of them).
+    const touched = [...sheets, wall, grid, wall.querySelector('[data-centre]')].filter((el): el is HTMLElement => !!el && '_gsap' in el);
+    // Anything still moving them stops first, or it would write them again after they are cleared.
+    gsap.killTweensOf(touched);
+    gsap.set(touched, { clearProps: 'transform,x,y,rotation,scale,filter' });
+    // The pivot the camera lean set, removed by hand: cleared through GSAP, it would first read
+    // every sheet's transform and write it back, on sheets that never moved.
+    for (const el of touched) el.style.removeProperty('transform-origin');
     // The cat is free to go back to what she was doing.
     window.dispatchEvent(new CustomEvent('wall:cat', { detail: null }));
     done();

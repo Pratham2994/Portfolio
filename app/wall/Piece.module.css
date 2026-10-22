@@ -14,7 +14,7 @@
   color: var(--ink);
   font-family: var(--font-mono);
   text-decoration: none;
-  rotate: calc(var(--tilt) + var(--nudge, 0deg));
+  rotate: calc(var(--tilt) + var(--nudge, 0deg) + var(--sway, 0deg));
   transform: perspective(42rem) rotateX(calc(var(--rx, 0) * 1deg)) rotateY(calc(var(--ry, 0) * 1deg));
   box-shadow: calc(var(--ry, 0) * -0.09rem) calc(0.9rem + var(--rx, 0) * 0.07rem) 1.6rem -0.7rem rgb(0 0 0 / 0.85);
   transition:

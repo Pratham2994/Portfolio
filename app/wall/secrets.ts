@@ -108,6 +108,7 @@ const STORE = 'wall-secrets';
 
 // The secrets need the wide wall and a keyboard, and they are all motion.
 const ROOM = '(min-width: 900px) and (orientation: landscape) and (hover: hover) and (pointer: fine)';
+const BY_HAND = '(min-width: 340px)';
 
 export type Secrets = { stop: () => void; run: (name: Name) => void };
 
@@ -137,8 +138,10 @@ export function initSecrets(wall: HTMLElement, onFound: (found: Name[]) => void)
 
   let typed = '';
   let busy = false;
-  const ready = () => {
-    if (busy || prefersReducedMotion() || !window.matchMedia(ROOM).matches) return false;
+  // A word typed needs the wide wall and a keyboard. A word picked from the list, with a tap,
+  // plays on a phone or a tablet too.
+  const ready = (byHand = false) => {
+    if (busy || prefersReducedMotion() || !window.matchMedia(byHand ? BY_HAND : ROOM).matches) return false;
     if (!('entered' in wall.dataset) || 'fallen' in wall.dataset || 'projectOpen' in document.documentElement.dataset) return false;
     // Only while the wall fills the screen. Nothing should play out of sight.
     const box = wall.getBoundingClientRect();
@@ -151,7 +154,13 @@ export function initSecrets(wall: HTMLElement, onFound: (found: Name[]) => void)
       for (const key of 'meow') window.dispatchEvent(new KeyboardEvent('keydown', { key }));
       return;
     }
-    if (!ready()) return;
+    const byHand = typedWord === undefined;
+    // Picked from the list at the foot of a long phone wall: back up to the top of the wall first,
+    // at once, so the moment plays where it can be seen.
+    if (byHand && wall.getBoundingClientRect().top < -window.innerHeight * 0.2) {
+      window.scrollTo({ top: window.scrollY + wall.getBoundingClientRect().top, behavior: 'instant' });
+    }
+    if (!ready(byHand)) return;
     busy = true;
     const done = () => void (busy = false);
     track('secret', { name, typed: typedWord ?? 'list' });

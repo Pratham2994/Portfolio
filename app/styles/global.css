@@ -371,6 +371,15 @@ html[data-project-open] {
   text-transform: uppercase;
 }
 
+/* On a narrow screen the line wraps, in the middle, instead of being cut short. */
+@media (max-width: 600px) {
+  .sport-say {
+    width: max-content;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
 .sport-say:empty {
   display: none;
 }

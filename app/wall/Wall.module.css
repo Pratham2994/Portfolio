@@ -368,6 +368,63 @@
   }
 }
 
+/* One hint for a keyboard, one for a thumb. */
+.taps {
+  display: none;
+}
+
+/*
+ * Phones and tablets: the corner sits under the last sheets of the wall, with the hint for a
+ * thumb. Opened, the list is a panel along the foot of the screen, over everything.
+ */
+@media (hover: none) and (prefers-reduced-motion: no-preference) {
+  .wall[data-entered] .secrets {
+    position: static;
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: var(--space-5);
+  }
+
+  .keys {
+    display: none;
+  }
+
+  .taps {
+    display: inline;
+  }
+
+  .wall[data-entered] .secrets[data-open] {
+    position: fixed;
+    inset: auto 0.75rem 0.75rem;
+    z-index: 31;
+    max-width: none;
+    max-height: 55vh;
+    overflow: auto;
+    padding: 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--wall-shade);
+    box-shadow: 0 -1rem 2.5rem rgb(0 0 0 / 0.7);
+    font-size: 0.875rem;
+  }
+
+  .secrets[data-open] .list {
+    padding: 0;
+    border: 0;
+    gap: 0.6em 1.2em;
+  }
+
+  .secrets[data-open] .list li button {
+    padding: 0.35em 0;
+  }
+}
+
+/* While a secret plays, its own stage is the only thing on top. */
+:global(html:has(.sport)) .secrets[data-open] {
+  visibility: hidden;
+}
+
 /*
  * Half time. As the wall leaves the top of the screen its lights go down, so the desk under
  * it is the lit thing in the room. A browser that cannot tie this to the scroll leaves the

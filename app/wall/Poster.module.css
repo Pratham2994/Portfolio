@@ -9,7 +9,7 @@
   background: var(--bg);
   color: var(--fg);
   text-decoration: none;
-  rotate: calc(var(--tilt) + var(--nudge, 0deg));
+  rotate: calc(var(--tilt) + var(--nudge, 0deg) + var(--sway, 0deg));
   /* --rx and --ry are set while the pointer is over the poster. */
   transform: perspective(42rem) rotateX(calc(var(--rx, 0) * 1deg)) rotateY(calc(var(--ry, 0) * 1deg));
   box-shadow:

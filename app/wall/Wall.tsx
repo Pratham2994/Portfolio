@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import { Link } from 'react-router';
 import { projects } from '~/content';
 import { track } from '~/lib/analytics';
+import { prefersReducedMotion } from '~/lib/motion';
 import { warmWhenIdle } from '~/project/warm';
 
 import { Album } from './Album';
@@ -89,6 +90,40 @@ export function Wall() {
     secrets.current = initSecrets(wall.current, setFound);
     return secrets.current.stop;
   }, []);
+  // On a phone, tilt it and the sheets sway on their pins. An iPhone sends no tilt until a site
+  // asks the visitor's leave, and this one never asks: a question on the first tap is worse than
+  // no sway. So there the wall stays still, and on Android it moves.
+  useEffect(() => {
+    const on = grid.current;
+    if (!on || !('DeviceOrientationEvent' in window)) return;
+    if (!window.matchMedia('(hover: none)').matches || prefersReducedMotion()) return;
+    let target = 0;
+    let now = 0;
+    let frame = 0;
+    const onTilt = (event: DeviceOrientationEvent) => {
+      // Side to side, as the phone is held: up to 4 degrees each way.
+      target = Math.max(-1, Math.min(1, (event.gamma ?? 0) / 25)) * 4;
+    };
+    const step = () => {
+      // Eased toward the phone, so the paper lags a little, as it would.
+      now += (target - now) * 0.12;
+      on.style.setProperty('--sway', `${now.toFixed(2)}deg`);
+      frame = requestAnimationFrame(step);
+    };
+    window.addEventListener('deviceorientation', onTilt);
+    frame = requestAnimationFrame(step);
+    return () => {
+      window.removeEventListener('deviceorientation', onTilt);
+      cancelAnimationFrame(frame);
+      on.style.removeProperty('--sway');
+    };
+  }, []);
+  // The cat, petted five times, opens the list.
+  useEffect(() => {
+    const open = () => setListOpen(true);
+    window.addEventListener('wall:secrets', open);
+    return () => window.removeEventListener('wall:secrets', open);
+  }, []);
   // Every one of them found: the counter goes gold, and the hint says so.
   const all = found.length === SECRETS.length;
   const hint = all ? 'all of them. you know me better than my resume does.' : HINTS[!found.includes('meow') ? 0 : !found.includes('lights') ? 1 : 2];
@@ -130,7 +165,7 @@ export function Wall() {
         <Album />
       </aside>
       {/* A footer, not a div: the grid stays the only div directly in the wall. */}
-      <footer className={styles.secrets} data-secrets>
+      <footer className={styles.secrets} data-secrets data-open={listOpen || undefined}>
         <button type="button" className={styles.cheat} aria-expanded={listOpen} aria-controls="secret-list" onClick={() => setListOpen((open) => !open)} data-cheat data-all={all || undefined}>
           secrets {found.length}/{SECRETS.length}
         </button>
@@ -144,7 +179,15 @@ export function Wall() {
           <ul className={styles.list} id="secret-list" aria-label="Words to type on the wall, or to click">
             {SECRETS.map((secret) => (
               <li key={secret.name} data-found={found.includes(secret.name) || undefined}>
-                <button type="button" title={secret.about} onClick={() => secrets.current?.run(secret.name)}>
+                <button
+                  type="button"
+                  title={secret.about}
+                  onClick={() => {
+                    secrets.current?.run(secret.name);
+                    // On a touch screen the list covers the wall, so it gets out of the way.
+                    if (window.matchMedia('(hover: none)').matches) setListOpen(false);
+                  }}
+                >
                   {secret.word}
                 </button>
               </li>
@@ -152,7 +195,9 @@ export function Wall() {
           </ul>
         ) : (
           <p className={styles.hint} aria-hidden="true" data-hint>
-            {hint}
+            <span className={styles.keys}>{hint}</span>
+            {/* There is nothing to type on a phone, so the way in there is the cat. */}
+            <span className={styles.taps}>psst. pet the cat five times.</span>
           </p>
         )}
       </footer>

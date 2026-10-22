@@ -177,6 +177,8 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
         zoomies = 2.5;
         cat.rest = 0;
         track('cat_annoyed');
+        // Annoy her and she gives the secrets away: the list opens. The way in on a phone.
+        window.dispatchEvent(new Event('wall:secrets'));
         return;
       }
       puff('\u2665');
