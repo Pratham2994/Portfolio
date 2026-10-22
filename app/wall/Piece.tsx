@@ -1,6 +1,6 @@
 import { useState, useSyncExternalStore, type CSSProperties } from 'react';
 
-import { pieces } from '~/content';
+import { pieces, shipped } from '~/content';
 import { track } from '~/lib/analytics';
 import { prefersReducedMotion } from '~/lib/motion';
 
@@ -80,8 +80,20 @@ function useToday(): string {
  * The note is a tear-off calendar. The top page is today. Pull it, and the page under it
  * says what I was doing before.
  */
+/** How long ago, in words: "yesterday", "3 days ago". */
+function ago(at: string): string {
+  const hours = (Date.parse(at) - Date.now()) / 3.6e6;
+  const say = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+  return Math.abs(hours) < 24 ? say.format(Math.round(hours), 'hour') : say.format(Math.round(hours / 24), 'day');
+}
+
+const still = () => () => {};
+/** Worked out in the browser, so it is never stale. The page built ahead of time has no time in it. */
+const useAgo = (at: string | undefined) => useSyncExternalStore(still, () => (at ? ago(at) : ''), () => '');
+
 function Now({ page, tearing, onTorn }: { page: number; tearing: boolean; onTorn: () => void }) {
   const today = useToday();
+  const ago = useAgo(shipped?.at);
   const { now } = pieces;
   const pages = [{ when: today, lines: now.more ? [...now.lines, now.more] : now.lines }, ...(now.before ?? [])];
   const shown = pages[page % pages.length];
@@ -98,6 +110,13 @@ function Now({ page, tearing, onTorn }: { page: number; tearing: boolean; onTorn
           </li>
         ))}
       </ul>
+      {/* Proof that the work goes on: the last push to a project, read from GitHub at build time. */}
+      {shipped && !(page % pages.length) && (
+        <span className={s.shipped} data-shipped>
+          Last push: {shipped.repo}
+          {ago && `, ${ago}`}
+        </span>
+      )}
     </span>
   );
 }
