@@ -342,18 +342,32 @@ html[data-project-open] {
     radial-gradient(circle at 125% 50%, transparent 58%, #fff 59% 65%, transparent 66%), #d6ee3b;
 }
 
+/*
+ * The commentary line. It sits well clear of the film bar at the foot of the screen, which is
+ * black too, in the light colour of the wall, with an edge in the colour of the play.
+ */
 .sport-say {
   position: absolute;
-  bottom: 7vh;
+  bottom: calc(7vh + 1.6rem);
   left: 50%;
-  padding: 0.55em 0.9em;
-  border: 1px solid var(--line);
-  background: var(--wall-shade);
+  z-index: 2;
+  max-width: calc(100vw - 2 * var(--gutter));
+  padding: 0.65em 1.2em;
+  border: 1px solid color-mix(in srgb, var(--side-a, var(--bone)) 70%, transparent);
+  border-radius: 2px;
+  background: rgb(10 9 8 / 0.9);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.6),
+    0 0.6rem 1.6rem rgb(0 0 0 / 0.7);
+  color: var(--bone);
   translate: -50% 0;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-family: var(--font-mono);
-  font-size: var(--step--1);
-  letter-spacing: 0.1em;
+  font-size: clamp(0.9375rem, 1.1vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
