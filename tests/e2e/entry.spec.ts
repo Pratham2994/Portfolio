@@ -29,6 +29,22 @@ test('the sequence is armed again on a reload', async ({ page }, info) => {
   expect(await hiddenPosters(page)).toBe(0);
 });
 
+test('the full show plays once in a tab; a reload only deals the wall, and ?boot plays it again', async ({ page }, info) => {
+  test.skip(['phone', 'tablet'].includes(info.project.name), 'the sequence plays on wide screens only');
+  const boot = page.locator('body > [data-boot]');
+  await page.goto('/');
+  await expect(boot).toHaveCount(1);
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 8000 });
+  await page.reload();
+  // The deal still runs, but there is no start-up, and the wall is ready quickly.
+  await expect(page.locator('html')).toHaveAttribute('data-boot', 'quick');
+  await expect(boot).toHaveCount(0);
+  await expect(page.locator(entered)).toHaveCount(1, { timeout: 2500 });
+  expect(await hiddenPosters(page)).toBe(0);
+  await page.goto('/?boot');
+  await expect(boot).toHaveCount(1);
+});
+
 test('posters are in flight shortly after a wide wall loads', async ({ page }, info) => {
   test.skip(['phone', 'tablet'].includes(info.project.name), 'the sequence plays on wide screens only');
   await page.goto('/');

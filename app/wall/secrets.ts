@@ -36,8 +36,6 @@ export const SECRETS: { name: Name; word: string; about: string }[] = [
   { name: 'purple', word: 'hollow purple', about: 'anime' },
   { name: 'arise', word: 'arise', about: 'anime' },
   { name: 'moonwalk', word: 'moonwalk', about: 'pop' },
-  { name: 'spiderman', word: 'spiderman', about: 'Marvel' },
-  { name: 'snap', word: 'snap', about: 'Marvel' },
   { name: 'batman', word: 'batman', about: 'DC' },
 ];
 
@@ -101,10 +99,6 @@ const WORDS: Record<string, Exclude<Name, 'meow'>> = {
   sololeveling: 'arise',
   moonwalk: 'moonwalk',
   heehee: 'moonwalk',
-  spiderman: 'spiderman',
-  thwip: 'spiderman',
-  snap: 'snap',
-  thanos: 'snap',
   batman: 'batman',
   gotham: 'batman',
 };

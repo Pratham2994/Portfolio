@@ -29,7 +29,7 @@ test('typing "lights out" runs a race start and times the reaction', async ({ pa
   await expect(page.locator('.race-time')).toHaveText(/^\d\.\d{3}s$/);
   await expect(page.locator('[data-race]')).toHaveCount(0, { timeout: 10000 });
   expect(await leftovers(page)).toBe(0);
-  await expect(page.locator('[data-cheat]')).toContainText('1/31');
+  await expect(page.locator('[data-cheat]')).toContainText('1/29');
   // A poster still opens afterwards.
   await page.locator('[data-poster="scrub"]').click();
   await expect(page.locator('#project-title')).toHaveText('Scrub');
@@ -44,7 +44,7 @@ test('going before the lights are out is a jump start', async ({ page }) => {
   expect(await leftovers(page)).toBe(0);
 });
 
-for (const word of ['messi', 'kohli', 'federer', 'rcb', 'siuu', 'smash', 'ace', 'box box', 'naruto', 'creeper', 'domain expansion', 'titan', 'geass', 'jajanken', 'alchemy', 'mob', 'return by death', 'bakuman', 'water breathing', 'kamehameha', 'kira', 'gear five', 'rasengan', 'hollow purple', 'arise', 'moonwalk', 'spiderman', 'snap', 'batman']) {
+for (const word of ['messi', 'kohli', 'federer', 'rcb', 'siuu', 'smash', 'ace', 'box box', 'naruto', 'creeper', 'domain expansion', 'titan', 'geass', 'jajanken', 'alchemy', 'mob', 'return by death', 'bakuman', 'water breathing', 'kamehameha', 'kira', 'gear five', 'rasengan', 'hollow purple', 'arise', 'moonwalk', 'batman']) {
   test(`typing "${word}" plays its moment and leaves the wall clean`, async ({ page }) => {
     await page.keyboard.type(word, { delay: 20 });
     await expect(page.locator('.sport')).toHaveCount(1);
@@ -55,16 +55,16 @@ for (const word of ['messi', 'kohli', 'federer', 'rcb', 'siuu', 'smash', 'ace', 
 
 test('the list names every secret, and a click on one starts it', async ({ page }) => {
   await page.locator('[data-cheat]').click();
-  await expect(page.locator('#secret-list li')).toHaveCount(31);
+  await expect(page.locator('#secret-list li')).toHaveCount(29);
   await page.getByRole('button', { name: 'kohli' }).click();
   await expect(page.locator('.sport[data-sport="kohli"]')).toHaveCount(1);
-  await expect(page.locator('[data-cheat]')).toContainText('1/31');
+  await expect(page.locator('[data-cheat]')).toContainText('1/29');
 });
 
 test('with every secret found, the counter goes gold and the hint says so', async ({ page }) => {
-  await page.evaluate((all) => localStorage.setItem('wall-secrets', JSON.stringify(all)), ['meow', 'lights', 'boxbox', 'messi', 'siuu', 'kohli', 'rcb', 'federer', 'smash', 'ace', 'naruto', 'creeper', 'domain', 'titan', 'geass', 'jajanken', 'alchemy', 'mob', 'rezero', 'bakuman', 'water', 'kamehameha', 'kira', 'gearfive', 'rasengan', 'purple', 'arise', 'moonwalk', 'spiderman', 'snap', 'batman']);
+  await page.evaluate((all) => localStorage.setItem('wall-secrets', JSON.stringify(all)), ['meow', 'lights', 'boxbox', 'messi', 'siuu', 'kohli', 'rcb', 'federer', 'smash', 'ace', 'naruto', 'creeper', 'domain', 'titan', 'geass', 'jajanken', 'alchemy', 'mob', 'rezero', 'bakuman', 'water', 'kamehameha', 'kira', 'gearfive', 'rasengan', 'purple', 'arise', 'moonwalk', 'batman']);
   await open(page, '/');
-  await expect(page.locator('[data-cheat]')).toContainText('31/31');
+  await expect(page.locator('[data-cheat]')).toContainText('29/29');
   await expect(page.locator('[data-cheat]')).toHaveAttribute('data-all');
   await expect(page.locator('[data-hint]')).toContainText('all of them');
 });

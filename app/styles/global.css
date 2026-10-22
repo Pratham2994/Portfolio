@@ -1323,11 +1323,6 @@ html[data-project-open] {
 /* ---- Pop culture secrets, from app/wall/pop.ts. */
 .sport-spotlight,
 .sport-dancer,
-.sport-webs,
-.sport-swing,
-.sport-net,
-.sport-gauntlet,
-.sport-dust,
 .sport-searchlight,
 .sport-signal,
 .sport-bat {
@@ -1364,97 +1359,6 @@ html[data-project-open] {
 .sport[data-sport='moonwalk'] {
   --side-a: #f4f4f4;
   --side-b: #111;
-}
-
-/* Spider-Man: the lines, the swing and the web over the board. */
-.sport-webs {
-  inset: 0;
-}
-
-.sport-webs svg {
-  width: 100%;
-  height: 100%;
-}
-
-.sport-webs path {
-  fill: none;
-  stroke: #f4f4f4;
-  stroke-width: 2;
-}
-
-.sport-swing {
-  width: 4.5rem;
-  height: 52vh;
-  margin-left: -2.25rem;
-  transform-origin: 50% 0;
-  opacity: 0;
-}
-
-.sport-swing i {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 2px;
-  height: calc(100% - 4rem);
-  background: #f4f4f4;
-}
-
-.sport-swing svg {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  filter: drop-shadow(0 0.4rem 0.8rem rgb(0 0 0 / 0.6));
-}
-
-.sport-net {
-  width: 22rem;
-  height: 22rem;
-  margin: -11rem 0 0 -11rem;
-}
-
-.sport-net svg {
-  width: 100%;
-  height: 100%;
-}
-
-.sport-net :is(path, polygon) {
-  fill: none;
-  stroke: rgb(244 244 244 / 0.85);
-  stroke-width: 1.4;
-}
-
-.sport[data-sport='spiderman'] {
-  --side-a: #d1121f;
-  --side-b: #1f4fd1;
-}
-
-/* The snap: the gauntlet, and the dust. */
-.sport-gauntlet {
-  width: 10rem;
-  margin: -6rem 0 0 -5rem;
-  filter: drop-shadow(0 0 1.5rem rgb(255 200 60 / 0.55));
-}
-
-.sport-gauntlet svg {
-  display: block;
-  width: 100%;
-}
-
-.sport-ring.sport-ring-gold {
-  border-color: #ffd400;
-  box-shadow: 0 0 1.5rem #ffb000, inset 0 0 1.5rem #ffb000;
-}
-
-.sport-dust {
-  width: 5px;
-  height: 5px;
-  margin: -2.5px 0 0 -2.5px;
-}
-
-.sport[data-sport='snap'] {
-  --side-a: #d9a520;
-  --side-b: #6a2ca0;
 }
 
 /* Batman: the night, the searchlight and the signal in the sky. */
