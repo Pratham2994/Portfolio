@@ -13,6 +13,6 @@
     // Unknown addresses get 404.html with a real 404 status. The app then shows its own page.
     "not_found_handling": "404-page",
     // Everything is served as a file with no Worker run, except the analytics path.
-    "run_worker_first": ["/relay/*"]
+    "run_worker_first": ["/relay/*", "/api/*"]
   }
 }

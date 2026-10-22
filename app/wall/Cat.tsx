@@ -1,6 +1,7 @@
 import { useEffect, useRef, type RefObject } from 'react';
 
 import { prefersReducedMotion } from '~/lib/motion';
+import { sound } from '~/lib/sound';
 import { track } from '~/lib/analytics';
 
 import { CAT, CAT_HEIGHT, CAT_SCALE, CAT_WIDTH, drawCat, type CatPose } from './cat-sprite';
@@ -182,6 +183,7 @@ export function Cat({ grid }: { grid: RefObject<HTMLElement | null> }) {
         return;
       }
       puff('\u2665');
+      sound('meow');
       if (pets.length === 1) track('cat_petted');
       if (!hop) {
         cat.rest = 1.4;

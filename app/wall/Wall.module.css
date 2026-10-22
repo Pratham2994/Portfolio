@@ -254,6 +254,81 @@
   }
 }
 
+/* The last push to a project, under the album in the top right corner. */
+.shipped {
+  position: absolute;
+  top: calc(var(--space-4) + 4.4rem);
+  right: var(--gutter);
+  z-index: 6;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-decoration: none;
+}
+
+.shipped b {
+  color: var(--bone);
+}
+
+.shipped:hover,
+.shipped:focus-visible {
+  color: var(--bone);
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+/* On a narrow wall the top is full, so it goes to the foot, over the secrets and the sound. */
+@media (max-width: 899.98px), (orientation: portrait) {
+  .shipped {
+    position: static;
+    grid-column: 1 / -1;
+    margin-top: var(--space-5);
+    text-align: center;
+  }
+}
+
+/* Sound, in the corner: off until it is turned on. */
+.sound {
+  position: absolute;
+  right: var(--gutter);
+  bottom: var(--space-4);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.45em 0.75em;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--wall-shade);
+  color: var(--dim);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) linear,
+    border-color var(--dur-fast) linear;
+}
+
+.sound svg {
+  width: 1.2em;
+  height: 1.2em;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.sound:hover,
+.sound:focus-visible,
+.sound[aria-pressed='true'] {
+  border-color: var(--signal);
+  color: var(--bone);
+}
+
 /* The way out for a reader with no time: top right, small, and always there. */
 .hurry {
   position: absolute;
@@ -290,8 +365,8 @@
   display: none;
   align-items: baseline;
   gap: 1em;
-  /* It stops short of the button in the other corner. */
-  max-width: min(68rem, calc(100% - 2 * var(--gutter)));
+  /* It stops short of the sound button in the other corner. */
+  max-width: min(68rem, calc(100% - 2 * var(--gutter) - 10rem));
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.06em;
@@ -365,6 +440,15 @@
 @media (min-width: 900px) and (orientation: landscape) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .wall[data-entered] .secrets {
     display: flex;
+  }
+}
+
+/* On a touch screen the sound button sits in the flow at the foot of the wall, under the rest. */
+@media (hover: none) {
+  .sound {
+    position: static;
+    grid-column: 1 / -1;
+    margin: var(--space-3) auto 0;
   }
 }
 

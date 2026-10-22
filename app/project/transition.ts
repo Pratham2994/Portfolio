@@ -1,6 +1,7 @@
 import gsap from 'gsap';
 
 import { prefersReducedMotion } from '~/lib/motion';
+import { sound } from '~/lib/sound';
 
 let active: gsap.core.Timeline | null = null;
 let ghost: HTMLElement | null = null;
@@ -46,6 +47,7 @@ function resetPoster(poster: HTMLElement): void {
  * all, the sheet goes back on the wall by itself.
  */
 export function peelNow(poster: HTMLElement): void {
+  sound('peel');
   if (prefersReducedMotion()) return;
   poster.setAttribute('data-opening', '');
   poster.dataset.peeledAt = String(performance.now());
@@ -120,6 +122,7 @@ export function openFrom(poster: HTMLElement | null, page: HTMLElement): Promise
       // Then that same patch of colour grows to fill the screen, and the wall steps back.
       // It starts at full speed, with no wind-up, so the page answers the click at once.
       .to(page, { clipPath: FULL, duration: 0.42, ease: 'power3.out' }, GROW)
+      .call(() => sound('whoosh'), [], GROW)
       .to(main, { ...RECEDE, transformOrigin: origin(), duration: 0.42, ease: 'power3.out' }, GROW)
       .call(() => resetPoster(poster), [], GROW + 0.36)
       .to(items, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', stagger: 0.03 }, GROW + 0.12)
@@ -131,6 +134,7 @@ export function openFrom(poster: HTMLElement | null, page: HTMLElement): Promise
 /** Runs while the page is unmounting: a copy of its background shrinks back to the poster. */
 export function closeTo(poster: HTMLElement | null, page: HTMLElement): Promise<void> {
   cancelTransition();
+  sound('whoosh');
   const main = wall();
   if (!poster || !main || prefersReducedMotion()) return Promise.resolve();
 
@@ -180,6 +184,7 @@ export function takeTurned(): boolean {
  */
 export function turnTo(colour: string, side: 'left' | 'right', from?: HTMLElement | null): Promise<void> {
   cancelTransition();
+  sound('whoosh');
   if (prefersReducedMotion()) return Promise.resolve();
 
   return new Promise((resolve) => {
@@ -230,6 +235,7 @@ export function takeClosed(): boolean {
  */
 export function closeLive(poster: HTMLElement | null, page: HTMLElement): Promise<void> {
   cancelTransition();
+  sound('whoosh');
   const main = wall();
   if (!poster || !main || prefersReducedMotion()) return Promise.resolve();
 

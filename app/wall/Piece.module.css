@@ -152,17 +152,6 @@
   border-bottom: 1px solid rgb(25 18 0 / 0.35);
 }
 
-/* The last push to a project, small, at the foot of today's page. */
-.shipped {
-  display: block;
-  margin-top: 3cqw;
-  font-family: var(--font-mono);
-  font-size: clamp(0.625rem, 5cqw, 0.75rem);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  opacity: 0.8;
-}
-
 @media (hover: hover) and (pointer: fine) {
   .piece:hover {
     rotate: 0deg;

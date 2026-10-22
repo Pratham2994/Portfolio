@@ -1,5 +1,7 @@
 import gsap from 'gsap';
 
+import { sound } from '~/lib/sound';
+
 import { ANIME, type AnimePlay } from './anime';
 import { POP, type PopPlay } from './pop';
 import { centreOf, hit, pick, type Point, type Scene, type Timeline } from './play-kit';
@@ -835,7 +837,7 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
       },
       impact: (tl, at, point) => {
         landings.push({ at, point });
-        tl.call(() => void prop('sport-impact', point.x, point.y), undefined, at);
+        tl.call(() => void (prop('sport-impact', point.x, point.y), sound('thud')), undefined, at);
       },
       say: (text) => void (sayLine.textContent = text),
       shout: (tl, at, word, line) => {
@@ -848,6 +850,9 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
               return one;
             });
             callWord.replaceChildren(...letters);
+            // The slam of the word, and the stands.
+            sound('slam');
+            sound('crowd');
             callLine.textContent = line;
             // Each letter slams up into place, big and turned, and lands straight.
             gsap.fromTo(
@@ -890,6 +895,7 @@ export function playSport(name: Play, wall: HTMLElement, done: () => void): void
       .call(
         () => {
           sparks(prop, point);
+          sound('slam');
           // A second, wider wave right behind the first, and the screen flashes white for a blink.
           setTimeout(() => void prop('sport-impact sport-impact-wide', point.x, point.y), 70);
           gsap.fromTo(flash, { opacity: 0.35 }, { opacity: 0, duration: 0.35, ease: 'power2.out' });

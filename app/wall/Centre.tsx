@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { track } from '~/lib/analytics';
 import { prefersReducedMotion } from '~/lib/motion';
+import { sound } from '~/lib/sound';
 
 import styles from './Centre.module.css';
 
@@ -53,6 +54,8 @@ export function Centre({ className }: { className?: string }) {
       window.clearInterval(fall);
       fall = window.setInterval(() => {
         now -= 1;
+        // The clatter of the cards as they fall.
+        if (now % 2 === 0) sound('flap');
         setLeft(now);
         if (now <= 0) window.clearInterval(fall);
       }, BEAT);
