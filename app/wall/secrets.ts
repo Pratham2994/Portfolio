@@ -1,8 +1,9 @@
 import { track } from '~/lib/analytics';
 import { prefersReducedMotion } from '~/lib/motion';
 
-import { lightsOut } from './race';
-import { playSport, type Play } from './sport';
+// Only the type: the plays themselves are fetched the first time a secret runs, so the wall loads
+// without the code of all of them.
+import type { Play } from './sport';
 
 type Name = 'meow' | 'lights' | Play;
 
@@ -154,8 +155,9 @@ export function initSecrets(wall: HTMLElement, onFound: (found: Name[]) => void)
     busy = true;
     const done = () => void (busy = false);
     track('secret', { name, typed: typedWord ?? 'list' });
-    if (name === 'lights') lightsOut(wall, done);
-    else playSport(name, wall, done);
+    // On a failed fetch the wall is free again, and nothing else happens.
+    if (name === 'lights') void import('./race').then(({ lightsOut }) => lightsOut(wall, done), done);
+    else void import('./sport').then(({ playSport }) => playSport(name, wall, done), done);
     reach(name);
   };
 

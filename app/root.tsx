@@ -17,7 +17,10 @@ import './styles/global.css';
 export function links() {
   // The two faces used above the fold load with the page, so text does not shift when they arrive.
   const font = (href: string) => ({ rel: 'preload', as: 'font', type: 'font/woff2', href, crossOrigin: 'anonymous' as const });
-  return [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }, font(displayFont), font(textFont)];
+  // The paper on every sheet is the largest thing painted first. Asked for here, it does not wait
+  // for the style sheet that names it.
+  const paper = { rel: 'preload', as: 'image', href: '/textures/paper.webp', type: 'image/webp' };
+  return [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }, font(displayFont), font(textFont), paper];
 }
 
 export function Layout({ children }: { children: ReactNode }) {

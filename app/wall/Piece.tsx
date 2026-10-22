@@ -122,7 +122,6 @@ export function Piece({ id, index }: { id: PieceId; index: number }) {
         className={`${s.piece} ${s.now}`}
         style={style}
         data-piece={id}
-        aria-label="Right now. Pull the page to see what came before"
         onClick={() => {
           track('piece_clicked', { piece: id });
           if (prefersReducedMotion()) turn();
@@ -132,6 +131,8 @@ export function Piece({ id, index }: { id: PieceId; index: number }) {
         <span className={s.body}>
           <Now page={page} tearing={tearing} onTorn={turn} />
         </span>
+        {/* Its name is what is written on it, as a reader sees it, with what a press does after. */}
+        <span className="sr-only"> Pull the page to see what came before.</span>
       </button>
     );
   }

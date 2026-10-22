@@ -13,7 +13,7 @@ const SEEN = 'wall-booted';
  * Phones and tablets skip the sequence, so their first paint never waits for scripts.
  * The full show plays once in a tab. After that the wall is only dealt, which is quick.
  */
-export const pendingScript = `try{if(location.pathname==='/'&&matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){var d=document.documentElement,q=0;try{q=!/[?&]boot/.test(location.search)&&sessionStorage.getItem('${SEEN}');sessionStorage.setItem('${SEEN}','1')}catch(e){}d.dataset.boot=q?'quick':'full';d.classList.add('${PENDING}');setTimeout(function(){d.classList.remove('${PENDING}')},6500)}}catch(e){}`;
+export const pendingScript = `try{if(location.pathname==='/'&&matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){var d=document.documentElement,q=0;try{q=!/[?&]boot/.test(location.search)&&sessionStorage.getItem('${SEEN}');sessionStorage.setItem('${SEEN}','1')}catch(e){}d.dataset.boot=q?'quick':'full';d.classList.add('${PENDING}');setTimeout(function(){d.classList.remove('${PENDING}')},5000)}}catch(e){}`;
 
 // What the machine checks while it starts: the parts of the PC on the desk, and the cat.
 const PARTS: [part: string, name: string][] = [
