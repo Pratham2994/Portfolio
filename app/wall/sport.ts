@@ -188,12 +188,30 @@ function rcb({ sheets, box, prop, shout }: Scene, timeline: Timeline) {
 }
 
 /** Wrong player. Nothing happens, and the wall says why. */
-function siuu({ say }: Scene, timeline: Timeline) {
-  const line = pick('siuu', ['Wrong wall.', 'Wrong wall. This one belongs to the number 10.', 'Not here. This wall is taken.']);
-  timeline
-    .call(() => say(line), undefined, 0.9)
-    .to({}, { duration: 2.2 }, 0.9)
-    .call(() => say(''));
+/**
+ * The celebration. The board in the middle is him: it runs out, jumps with a full turn in the air,
+ * and comes down with its arms out. The wall takes the landing, and the stands rise.
+ */
+function siuu({ wall, sheets, box, say, shout, impact }: Scene, timeline: Timeline) {
+  const board = wall.querySelector<HTMLElement>('[data-centre]');
+  const middle = board ? centreOf(board) : { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  const line = pick('siuu', ['Wrong wall. This one belongs to the number 10.', 'Not here. This wall is taken.', 'Wrong wall.']);
+  timeline.call(() => say('He scores. He runs to the corner.'), undefined, 0.2);
+  if (board) {
+    timeline
+      // The run out to the corner flag, and the turn to face the crowd.
+      .to(board, { x: 40, duration: 0.5, ease: 'power2.in' }, 0.3)
+      .call(() => say('The jump…'), undefined, 0.85)
+      // Up, with a whole turn in the air.
+      .to(board, { y: -110, rotationY: 360, scale: 1.08, duration: 0.55, ease: 'power2.out' }, 0.85)
+      // And down, hard, arms out.
+      .to(board, { y: 0, x: 0, scale: 1, duration: 0.22, ease: 'power3.in' }, 1.4)
+      .fromTo(board, { scaleX: 1.18, scaleY: 0.86 }, { scaleX: 1, scaleY: 1, duration: 0.6, ease: 'elastic.out(1.1, 0.35)', immediateRender: false }, 1.62);
+  }
+  impact(timeline, 1.62, middle);
+  wave(timeline, sheets, 1.75);
+  timeline.call(() => say(''), undefined, 1.62);
+  shout(timeline, 1.7, 'Siuuu', line);
 }
 
 /** A lift that hangs in the air too long. Most times it gets smashed. Now and then, a drop. */
