@@ -18,7 +18,7 @@ const KEEP_SECONDS = 1800;
  * half an hour, from here and not from the visitor's browser, so its limit is never reached and
  * the visitor's address is not passed on. The site's own repo is not a project.
  */
-async function shipped(request, ctx) {
+async function shipped(request, env, ctx) {
   const cache = caches.default;
   const key = new Request(new URL('/api/shipped', request.url).toString());
   const kept = await cache.match(key);
@@ -26,7 +26,13 @@ async function shipped(request, ctx) {
   let body = { repo: null, at: null };
   try {
     const response = await fetch(`https://api.github.com/users/${GITHUB_USER}/repos?sort=pushed&per_page=20`, {
-      headers: { 'User-Agent': 'prathampanchal.dev', Accept: 'application/vnd.github+json' },
+      // A read-only key, if one is set as a secret, lifts GitHub's limit for addresses it shares
+      // with other sites. Without one, the page keeps the answer the build got.
+      headers: {
+        'User-Agent': 'prathampanchal.dev',
+        Accept: 'application/vnd.github+json',
+        ...(env.GITHUB_TOKEN ? { Authorization: `Bearer ${env.GITHUB_TOKEN}` } : {}),
+      },
     });
     if (response.ok) {
       const repos = await response.json();
@@ -46,7 +52,7 @@ async function shipped(request, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.pathname === '/api/shipped') return shipped(request, ctx);
+    if (url.pathname === '/api/shipped') return shipped(request, env, ctx);
     if (!url.pathname.startsWith(`${PREFIX}/`)) return env.ASSETS.fetch(request);
 
     const path = url.pathname.slice(PREFIX.length);
