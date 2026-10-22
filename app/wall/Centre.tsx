@@ -95,8 +95,11 @@ export function Centre({ className }: { className?: string }) {
       <p className={styles.proof} key={word} data-proof>
         {proof}
       </p>
+      {/* Who and what, in five seconds: the name, and the three things I build. */}
       <p className={styles.name}>
-        Pratham Panchal, software engineer <span className={styles.cue}>About me</span>
+        <strong>Pratham Panchal</strong>
+        <span className={styles.what}>Backend systems. Automation. Applied AI.</span>
+        <span className={styles.cue}>About me</span>
       </p>
     </a>
   );
