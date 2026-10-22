@@ -3,7 +3,20 @@
  * the visitor turns it on, and the choice is kept for their next visit. Every sound is short and
  * quiet, and none of them carries anything the page does not already show.
  */
-export type Sound = 'tick' | 'flap' | 'peel' | 'whoosh' | 'thud' | 'slam' | 'crowd' | 'blip' | 'land' | 'meow';
+export type Sound =
+  | 'tick'
+  | 'flap'
+  | 'peel'
+  | 'whoosh'
+  | 'thud'
+  | 'slam'
+  | 'crowd'
+  | 'blip'
+  | 'land'
+  | 'meow'
+  | 'throw'
+  | 'slap'
+  | 'tape';
 
 const KEY = 'sound';
 let on = false;
@@ -128,6 +141,16 @@ export function sound(name: Sound): void {
       return hiss(a, 0.12, 0.35, 'highpass', 1500, 800);
     case 'crowd':
       return hiss(a, 1.6, 0.18, 'bandpass', 700, 1100, 0.6, 0.35);
+    // The photo: air as it is thrown, the crack of a print hitting the wall flat, then the tape.
+    case 'throw':
+      return hiss(a, 0.3, 0.14, 'bandpass', 380, 2400, 1.2, 0.2);
+    case 'slap':
+      tone(a, 'sine', 210, 48, 0.24, 0.65);
+      tone(a, 'triangle', 1300, 260, 0.03, 0.18);
+      return hiss(a, 0.08, 0.55, 'bandpass', 2400, 700, 0.9, 0.002);
+    case 'tape':
+      hiss(a, 0.14, 0.16, 'highpass', 2600, 6200, 0.7, 0.01);
+      return hiss(a, 0.03, 0.12, 'bandpass', 900, 600, 1.5);
     case 'meow': {
       // Up and back down, through a soft filter, like a small cat that has something to say.
       const osc = a.createOscillator();
@@ -147,9 +170,17 @@ export function sound(name: Sound): void {
 
 /** A soft tick on every button and link the visitor presses, anywhere on the site. */
 export function initClicks(): () => void {
+  // Sound kept on from a past visit waits for the visitor's first press: the browser allows no
+  // audio before one. Any press, anywhere, lets it start.
+  const wake = () => void (on && audio()?.resume());
   const onDown = (event: PointerEvent) => {
+    wake();
     if ((event.target as Element | null)?.closest?.('button, a')) sound('tick');
   };
   window.addEventListener('pointerdown', onDown, { passive: true });
-  return () => window.removeEventListener('pointerdown', onDown);
+  window.addEventListener('keydown', wake, { passive: true });
+  return () => {
+    window.removeEventListener('pointerdown', onDown);
+    window.removeEventListener('keydown', wake);
+  };
 }
