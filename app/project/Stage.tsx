@@ -4,6 +4,7 @@ import { track } from '~/lib/analytics';
 import { prefersReducedMotion } from '~/lib/motion';
 
 import { ASKS, CODE, DECK, FLOATS, HOME, MODELS, NATIVE, RUN, SAID, SAYS, STORED, type Press } from './data';
+import { LAPS, type Lap } from './laps';
 import * as sand from './sand';
 import s from './Stage.module.css';
 
@@ -247,58 +248,6 @@ function Scrub() {
       </p>
       <p className={s.caption} aria-hidden="true">
         {cut.says}
-      </p>
-    </div>
-  );
-}
-
-// What lands in a Downloads folder, and the pile each one belongs in.
-const FILES = [
-  ['setup_v2.exe', 0],
-  ['report.pdf', 1],
-  ['photos.zip', 2],
-  ['report (1).pdf', 1],
-  ['driver_installer.exe', 0],
-  ['movie.mp4.crdownload', 2],
-  ['report (2).pdf', 1],
-  ['photos', 2],
-  ['launcher_setup.msi', 0],
-] as const;
-const PILES = ['Installers you ran once', 'The same file, three times', 'Left behind'];
-
-/** Neat: a messy folder, and then the same files in three tidy piles. */
-function Neat() {
-  const tidy = useTick(2800, 1) % 2 === 1;
-  const seat = [0, 0, 0];
-  return (
-    <div className={s.neat} role="img" aria-label="Nine files in a messy pile sort themselves into three groups: installers, copies of the same file, and things left behind." data-tidy={tidy || undefined}>
-      <div className={s.piles} aria-hidden="true">
-        {PILES.map((name) => (
-          <span key={name}>{name}</span>
-        ))}
-      </div>
-      <ul className={s.files} aria-hidden="true">
-        {FILES.map(([name, pile], i) => {
-          const row = seat[pile]++;
-          return (
-            <li
-              key={name}
-              style={at({
-                '--mx': `${4 + ((i * 37) % 52)}%`,
-                '--my': `${6 + ((i * 53) % 66)}%`,
-                '--turn': `${((i * 47) % 31) - 15}deg`,
-                '--pile': pile,
-                '--row': row,
-                '--i': i,
-              })}
-            >
-              {name}
-            </li>
-          );
-        })}
-      </ul>
-      <p className={s.caption} aria-hidden="true">
-        {tidy ? 'moved, not deleted. Each one can be put back' : 'Downloads, on a normal day'}
       </p>
     </div>
   );
@@ -658,15 +607,261 @@ function Sandbox() {
   );
 }
 
+// A real lap takes about 90 seconds. Here it runs six times as fast.
+const PACE = 6;
+// How long the name stays up before the next lap starts by itself, in milliseconds.
+const HOLD = 5200;
+
+/** Where on the line of the circuit a distance is, in the map's own units. Past the line, it goes round again. */
+function spot(lap: Lap, metres: number): [number, number] {
+  const count = lap.line.length;
+  const at = (((metres / lap.step) % count) + count) % count;
+  const i = Math.floor(at);
+  const [x0, y0] = lap.line[i];
+  const [x1, y1] = lap.line[(i + 1) % count];
+  return [x0 + (x1 - x0) * (at - i), y0 + (y1 - y0) * (at - i)];
+}
+
+/** How far round the lap the car is at a time, from its real samples. */
+function distance(lap: Lap, seconds: number): number {
+  const { run } = lap;
+  if (seconds <= run[0][0]) return run[0][1];
+  const next = run.findIndex(([t]) => t >= seconds);
+  if (next === -1) return run[run.length - 1][1];
+  const [[t0, s0], [t1, s1]] = [run[next - 1], run[next]];
+  return s0 + ((s1 - s0) * (seconds - t0)) / (t1 - t0);
+}
+
+const laptime = (seconds: number, places = 1) => {
+  const whole = Math.max(seconds, 0);
+  return `${Math.floor(whole / 60)}:${(whole % 60).toFixed(places).padStart(places + 3, '0')}`;
+};
+
+// Each lap drawn once: the map, the corners on it, and the speed trace with the braking marked.
+const DRAWN = LAPS.map((lap) => {
+  const width = Math.max(...lap.line.map(([x]) => x));
+  const height = Math.max(...lap.line.map(([, y]) => y));
+  const along = (metres: number) => (Math.min(Math.max(metres, 0), lap.length) / lap.length) * 1000;
+  const brakes: [number, number][] = [];
+  let from: number | null = null;
+  for (const [metres, , brake] of lap.trace) {
+    if (brake && from === null) from = metres;
+    if (!brake && from !== null) {
+      brakes.push([along(from), along(metres)]);
+      from = null;
+    }
+  }
+  if (from !== null) brakes.push([along(from), 1000]);
+  return {
+    box: `-50 -50 ${width + 100} ${height + 100}`,
+    road: `M${lap.line.map((point) => point.join(' ')).join(' L')} Z`,
+    turns: lap.corners.map((corner) => spot(lap, corner.mid)),
+    speed: lap.trace.map(([metres, kmh]) => `${along(metres).toFixed(1)},${(96 - (kmh / 360) * 86).toFixed(1)}`).join(' '),
+    brakes,
+  };
+});
+
+/**
+ * Blind Lap: a real qualifying lap with the name taken off. The car goes round at its real speed,
+ * and as it leaves each corner, the model's real guess changes. At the flag the name comes back.
+ * One of the three laps is one the model gets wrong. Press a circuit to play that lap.
+ */
+function Blind() {
+  const [pick, setPick] = useState({ lap: 0, mine: false, round: 0 });
+  const [read, setRead] = useState(0);
+  const [done, setDone] = useState(false);
+  const scene = useRef<HTMLDivElement>(null);
+  const car = useRef<SVGCircleElement>(null);
+  const driven = useRef<SVGPathElement>(null);
+  const head = useRef<SVGLineElement>(null);
+  const clock = useRef<HTMLSpanElement>(null);
+  const lap = LAPS[pick.lap];
+  const drawn = DRAWN[pick.lap];
+
+  useEffect(() => {
+    const lap = LAPS[pick.lap];
+    const last = lap.run[lap.run.length - 1][0];
+    // Half a second on the line before it goes.
+    let seconds = lap.run[0][0] - PACE / 2;
+    let shown = 0;
+    let frame = 0;
+    let rest = 0;
+    let before = performance.now();
+    let seen = true;
+    const watch = new IntersectionObserver(([entry]) => (seen = entry.isIntersecting));
+    watch.observe(scene.current!);
+
+    // Puts the car where it is now. True once the lap is over.
+    const place = () => {
+      const metres = distance(lap, seconds);
+      const [x, y] = spot(lap, metres);
+      car.current?.setAttribute('cx', x.toFixed(1));
+      car.current?.setAttribute('cy', y.toFixed(1));
+      driven.current?.setAttribute('stroke-dasharray', `${Math.min(Math.max(metres, 0), lap.length).toFixed(0)} ${lap.length}`);
+      const along = ((Math.min(Math.max(metres, 0), lap.length) / lap.length) * 1000).toFixed(1);
+      head.current?.setAttribute('x1', along);
+      head.current?.setAttribute('x2', along);
+      // A corner is read as the car leaves it. One that ends past the line is read at the flag.
+      const over = seconds >= last;
+      // The samples start a little before the line. At the flag the clock shows the official time.
+      if (clock.current) clock.current.textContent = over ? laptime(lap.time, 3) : laptime(seconds);
+      const count = over ? lap.corners.length : lap.corners.filter((corner) => corner.exit <= metres).length;
+      if (count !== shown) {
+        shown = count;
+        setRead(count);
+      }
+      if (over) setDone(true);
+      return over;
+    };
+
+    // The next lap, after the name has been up for a while. Only while it plays by itself.
+    const next = () => {
+      setRead(0);
+      setDone(false);
+      setPick((now) => ({ lap: (now.lap + 1) % LAPS.length, mine: false, round: now.round + 1 }));
+    };
+
+    const loop = (now: number) => {
+      const spent = Math.min(now - before, 100);
+      before = now;
+      // Off screen, or in a tab in the background: the lap waits.
+      if (seen && !document.hidden) seconds = Math.min(last, seconds + (spent / 1000) * PACE);
+      if (place()) {
+        if (!pick.mine) rest = window.setTimeout(next, HOLD);
+        return;
+      }
+      frame = requestAnimationFrame(loop);
+    };
+
+    if (prefersReducedMotion()) {
+      // A still picture: the lap over, every corner read, the name shown.
+      seconds = last;
+      frame = requestAnimationFrame(() => place());
+    } else {
+      frame = requestAnimationFrame(loop);
+    }
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(rest);
+      watch.disconnect();
+    };
+  }, [pick]);
+
+  const choose = (i: number) => {
+    if (!pick.mine) track('stage_used', { project: 'blind-lap' });
+    setRead(0);
+    setDone(false);
+    setPick((now) => ({ lap: i, mine: true, round: now.round + 1 }));
+  };
+
+  const corner = read ? lap.corners[read - 1] : null;
+  const right = lap.said === lap.code;
+  const verdict = right
+    ? `${lap.word}, and right.`
+    : `${lap.word}, and wrong: it said ${lap.said}${lap.saidTeam === lap.team ? ', the teammate in the same car' : ''}.`;
+
+  return (
+    <div className={s.blind} ref={scene} data-done={done || undefined}>
+      <div className={s.circuit}>
+        <p className={s.where}>
+          <span>
+            <b>
+              {lap.circuit} {lap.year}
+            </b>{' '}
+            qualifying
+          </span>
+          <span className={s.lapClock} ref={clock} aria-hidden="true">
+            0:00.0
+          </span>
+        </p>
+        <svg className={s.map} viewBox={drawn.box} aria-hidden="true">
+          <path className={s.road} d={drawn.road} />
+          <path key={pick.round} className={s.driven} d={drawn.road} pathLength={lap.length} ref={driven} strokeDasharray={`0 ${lap.length}`} />
+          {drawn.turns.map(([x, y], i) => (
+            <circle key={i} className={s.turn} cx={x} cy={y} r="11" data-read={i < read || undefined} />
+          ))}
+          {/* The corner just read, named as it is beside the guess. */}
+          {corner && !done && (
+            <text className={s.turnName} x={drawn.turns[read - 1][0] + 24} y={drawn.turns[read - 1][1] - 22}>
+              T{corner.n}
+            </text>
+          )}
+          <circle className={s.car} cx={lap.line[0][0]} cy={lap.line[0][1]} r="17" ref={car} />
+        </svg>
+        {/* What the model reads: the speed, and where the driver braked (the dark marks). */}
+        <svg className={s.speed} viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
+          {drawn.brakes.map(([from, to]) => (
+            <rect key={from} x={from} y="88" width={Math.max(to - from, 3)} height="12" />
+          ))}
+          <polyline points={drawn.speed} />
+          <line ref={head} x1="0" x2="0" y1="0" y2="100" />
+        </svg>
+        <p className={s.legend} aria-hidden="true">
+          Speed round the lap. The dark marks are braking.
+        </p>
+      </div>
+      <div className={s.reading}>
+        <p className={s.who}>
+          <span>Driver</span>
+          {done ? (
+            <b key={lap.code}>{lap.name}</b>
+          ) : (
+            <b data-hidden>
+              <span className="sr-only">hidden until the flag</span>
+            </b>
+          )}
+        </p>
+        <p className={s.after}>{corner ? `The model's guess after T${corner.n}, ${read} of ${lap.corners.length}` : 'No corner read yet'}</p>
+        {corner ? (
+          <ol className={s.guesses}>
+            {corner.top.map(([code, percent], i) => (
+              <li key={i} data-it={(done && code === lap.code) || undefined} style={at({ '--share': percent / 100 })}>
+                <b>{code}</b>
+                <i />
+                <span>{percent}%</span>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className={s.level}>All {lap.drivers} drivers start level.</p>
+        )}
+        {done ? (
+          <p className={s.called} data-right={right || undefined}>
+            {verdict}
+          </p>
+        ) : (
+          corner && (
+            <p className={s.says} key={read}>
+              <b>T{corner.n}</b> {corner.says}
+            </p>
+          )
+        )}
+        <div className={s.picks} role="group" aria-label="Lap">
+          {LAPS.map((one, i) => (
+            <button key={one.circuit} type="button" aria-pressed={i === pick.lap} onClick={() => choose(i)}>
+              {one.circuit.split('-')[0]} {one.year}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type Kind = 'tool' | 'study' | 'hardware' | 'field';
 // `clue` says, in one line, what the scene is. `try` is there when the visitor can drive it.
 const STAGES: Record<string, { kind: Kind; scene: () => ReactElement; clue: string; try?: string }> = {
+  'blind-lap': {
+    kind: 'field',
+    scene: Blind,
+    clue: "Three real laps with the name taken off, and the model's real guess as each corner goes by. It gets one of them wrong.",
+    try: 'Press a circuit to play that lap.',
+  },
   omnicompiler: { kind: 'tool', scene: Omni, clue: 'One small program, stepped through in five languages.', try: 'Press a language or a button to take over.' },
   'local-llm-lab': { kind: 'study', scene: Lab, clue: 'My real results, ranked two ways.', try: 'Press a ranking to hold it.' },
   sandglass: { kind: 'tool', scene: Sandbox, clue: 'A small box of it, written for this page: it pours, it reacts, and it goes back.', try: 'Pick one and draw, then hold Rewind.' },
   'prats-deck': { kind: 'hardware', scene: Deck, clue: 'The real screens of the deck.', try: 'Tap an app to open it.' },
   scrub: { kind: 'tool', scene: Scrub, clue: 'A trim: two handles on your frames, and one command.' },
-  neat: { kind: 'hardware', scene: Neat, clue: 'What Neat does to a Downloads folder.' },
   floatchat: { kind: 'field', scene: Float, clue: 'A question in plain words, the tool the model picks, and what comes back.' },
   'idea-hackathon': { kind: 'hardware', scene: Idea, clue: 'A visit to the desk: you log in, you say it your way, and it lands with the right people.' },
   malshield: { kind: 'field', scene: Mal, clue: 'A file being read, without being run.' },

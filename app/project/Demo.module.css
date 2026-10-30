@@ -92,7 +92,6 @@
 }
 
 .scrub,
-.neat,
 .float,
 .idea,
 .chronicle,
@@ -345,30 +344,6 @@
   flex: 1 1 14rem;
 }
 
-/* Neat: a list that is ticked off, one line at a time. */
-.bench[data-look='list'] .steps li {
-  grid-template-columns: auto auto minmax(1rem, 1fr) auto;
-}
-
-.bench[data-look='list'] .steps li::before {
-  content: '';
-  display: grid;
-  place-items: center;
-  width: 1.05em;
-  height: 1.05em;
-  border: 2px solid var(--ink);
-  border-radius: 2px;
-  font-size: 0.95em;
-  line-height: 1;
-  translate: 0 0.12em;
-}
-
-.bench[data-look='list'] .steps li[data-state='done']::before {
-  content: '\2713';
-  background: var(--ink);
-  color: var(--paper);
-}
-
 /* FloatChat: a conversation. What the model did is on the left, a line at a time. The answer is on the right. */
 .bench[data-look='chat'] {
   gap: var(--space-3) var(--space-5);
@@ -611,115 +586,6 @@
   font-size: var(--step-5);
   line-height: 0.9;
   font-variant-numeric: tabular-nums;
-}
-
-/* Neat */
-.queue {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.queue > li {
-  display: grid;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  background: var(--soft);
-}
-
-.queue h3 {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: var(--step-2);
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.why {
-  font-size: var(--step--1);
-}
-
-.files {
-  display: grid;
-  margin-block: var(--space-1);
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-}
-
-.files li {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 0.8fr);
-  gap: var(--space-3);
-  padding-block: 0.35em;
-  border-top: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
-}
-
-.files span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.files span + span {
-  opacity: 0.75;
-}
-
-.files span:last-child {
-  text-align: right;
-}
-
-.always {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-}
-
-.always input {
-  width: 1.1em;
-  height: 1.1em;
-  accent-color: var(--accent);
-}
-
-.choices:has(.always) {
-  align-items: center;
-  gap: var(--space-3);
-}
-
-/* A group that has been dealt with is one line, with the way back next to it. */
-.queue > li.settled {
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  padding-block: var(--space-2);
-  border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
-  background: none;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-}
-
-.learned {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 2px solid var(--ink);
-}
-
-.learned p {
-  flex: 1 1 16rem;
-  font-size: var(--step--1);
-}
-
-/* On a phone the source site goes, so the name has room. */
-@media (max-width: 600px) {
-  .files li {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .files span:nth-child(2) {
-    display: none;
-  }
 }
 
 /* FloatChat */

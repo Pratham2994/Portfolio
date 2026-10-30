@@ -17,7 +17,7 @@ test('opening a poster runs a transition that ends with the page in place', asyn
 });
 
 test('closing runs a transition and leaves the wall as it was', async ({ page }) => {
-  await open(page, '/work/neat');
+  await open(page, '/work/chronicle');
   await page.keyboard.press('Escape');
   await expect(page.locator(html)).toHaveCount(1);
   await expect(page.locator(html)).toHaveCount(0);
@@ -58,12 +58,12 @@ test('a second poster click during the transition still ends on one open page', 
 
 test('closing after a resize returns the poster to its new place', async ({ page }) => {
   await open(page, '/');
-  await page.locator('[data-poster="neat"]').click();
+  await page.locator('[data-poster="chronicle"]').click();
   await expect(page.locator('#project-title')).toBeVisible();
   await page.setViewportSize({ width: 700, height: 900 });
   await page.keyboard.press('Escape');
   await expect(page.locator(html)).toHaveCount(0);
-  const box = await page.locator('[data-poster="neat"]').boundingBox();
+  const box = await page.locator('[data-poster="chronicle"]').boundingBox();
   expect(box && box.x >= 0 && box.x + box.width <= 700).toBe(true);
 });
 

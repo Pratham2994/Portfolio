@@ -21,7 +21,7 @@ test('the wide wall is hung in paper sizes: one A3, nine A4, three A5', async ({
   );
   const count = (paper: string) => papers.filter((p) => p.paper === paper).length;
   expect([count('a3'), count('a4'), count('a5')]).toEqual([1, 9, 3]);
-  expect(papers.find((p) => p.paper === 'a3')!.id).toBe('omnicompiler');
+  expect(papers.find((p) => p.paper === 'a3')!.id).toBe('blind-lap');
   // Real paper sizes: each step doubles the area.
   const area = (paper: string) => papers.find((p) => p.paper === paper)!.area;
   expect(area('a3') / area('a4')).toBeCloseTo(2, 0);

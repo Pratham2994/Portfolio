@@ -135,6 +135,34 @@ function Sand() {
   );
 }
 
+// Suzuka, from Blind Lap's own data: the line of the circuit, one point every 40 m, 1000 across.
+const SUZUKA =
+  'M633 0 L653 0 L673 1 L693 1 L713 1 L733 1 L753 1 L773 1 L793 2 L813 2 L833 2 L853 2 L873 2 L893 3 L913 3 L933 3 L953 4 L972 11 L986 24 L997 41 L1000 60 L990 77 L973 86 L953 86 L934 82 L914 78 L894 77 L874 79 L857 89 L842 103 L824 111 L805 109 L787 100 L768 93 L748 93 L731 103 L717 117 L701 129 L682 134 L662 131 L647 119 L638 101 L628 83 L613 71 L594 68 L575 74 L557 82 L540 94 L526 108 L514 123 L505 142 L500 161 L499 181 L502 201 L506 220 L510 240 L513 260 L511 279 L501 296 L490 313 L477 329 L459 335 L441 327 L424 316 L407 307 L389 297 L372 287 L354 277 L337 267 L323 253 L313 236 L305 217 L290 206 L280 220 L286 239 L292 258 L298 277 L302 297 L303 317 L300 336 L291 354 L279 370 L266 385 L250 397 L233 408 L216 418 L197 426 L178 431 L158 433 L138 432 L119 428 L100 422 L80 416 L61 411 L41 409 L23 417 L10 432 L1 450 L0 469 L13 485 L30 493 L50 494 L70 491 L89 486 L109 481 L128 476 L147 469 L165 462 L184 455 L202 447 L220 437 L238 428 L255 418 L272 408 L289 397 L307 387 L324 377 L341 367 L358 357 L376 347 L393 337 L410 326 L427 317 L443 306 L454 289 L461 270 L466 251 L469 231 L470 211 L469 191 L468 171 L467 151 L466 131 L466 111 L477 95 L495 88 L500 70 L502 50 L512 33 L527 20 L544 10 L563 3 L583 1 L603 0 L623 0 Z';
+
+/** Blind Lap: a circuit with a car going round, and a timing tower with the names blacked out. */
+function Lap() {
+  return (
+    <div className={s.lap}>
+      <div className={s.road}>
+        <svg viewBox="-30 -30 1060 553">
+          <path className={s.circuit} d={SUZUKA} />
+        </svg>
+        <b className={s.racer} />
+      </div>
+      {/* The model's three guesses: who it thinks it is, and how sure, with no names. */}
+      <ol className={s.tower}>
+        {[0.62, 0.24, 0.09].map((share, i) => (
+          <li key={share} style={vars({ '--share': share, '--name': `${[58, 44, 52][i]}%` })}>
+            <b>{i + 1}</b>
+            <i />
+            <u />
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 function Code() {
   return (
     <div className={s.code}>
@@ -203,4 +231,5 @@ export const ART: Record<ArtTemplate, (props: ArtProps) => ReactElement> = {
   type: Type,
   hex: Hex,
   sand: Sand,
+  lap: Lap,
 };

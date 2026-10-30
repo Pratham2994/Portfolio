@@ -1,7 +1,7 @@
 ---
 title: Chronicle
 size: postcard
-order: 9
+order: 10
 made: '2026-06'
 status: Side project
 tagline: Your whole Spotify history, not one year of it.

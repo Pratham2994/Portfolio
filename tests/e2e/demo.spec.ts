@@ -2,8 +2,8 @@ import { expect, test } from '@playwright/test';
 
 import { open } from './helpers';
 
-// The projects that still have a demo under the drawing. The other three are driven on their stage.
-const slugs = ['scrub', 'neat', 'floatchat', 'idea-hackathon', 'chronicle', 'malshield'];
+// The projects that still have a demo under the drawing. The others are driven on their stage.
+const slugs = ['scrub', 'floatchat', 'idea-hackathon', 'chronicle', 'malshield'];
 
 // Playwright needs the first argument to be a destructuring pattern.
 // eslint-disable-next-line no-empty-pattern
@@ -82,23 +82,6 @@ test('MalShield plays one scan to a verdict', async ({ page }) => {
   await expect(demo.locator('[data-verdict]')).toBeVisible();
 });
 
-test('Neat clears its queue group by group, and a rule files the next one by itself', async ({ page }) => {
-  await open(page, '/work/neat');
-  const demo = page.locator('[data-demo="neat"]');
-  const count = demo.locator('[data-result] b');
-  await expect(count).toHaveText('9');
-  await demo.getByRole('button', { name: /sure ones/ }).click();
-  await expect(count).toHaveText('3');
-  await demo.getByRole('checkbox').check();
-  await demo.getByRole('button', { name: /Move to Finance/ }).click();
-  await expect(count).toHaveText('0');
-  await demo.getByRole('button', { name: /one more invoice/ }).click();
-  await expect(demo.locator('[data-learned] p')).toContainText('Filed 1 by itself');
-  // Undo brings a group back.
-  await demo.locator('[data-group="installers"]').getByRole('button', { name: 'Undo' }).click();
-  await expect(count).toHaveText('3');
-});
-
 test('FloatChat shows the tool the model calls, and a different picture for each question', async ({ page }) => {
   await open(page, '/work/floatchat');
   const demo = page.locator('[data-demo="floatchat"]');
@@ -137,7 +120,7 @@ test('a run lights its stages one after the other, to the end', async ({ page })
 });
 
 test('every project has a small drawing of what runs underneath, with one sentence', async ({ page }) => {
-  for (const slug of [...slugs, 'prats-deck', 'omnicompiler', 'local-llm-lab', 'sandglass']) {
+  for (const slug of [...slugs, 'blind-lap', 'prats-deck', 'omnicompiler', 'local-llm-lab', 'sandglass']) {
     await open(page, `/work/${slug}`);
     const sketch = page.locator(`[data-sketch="${slug}"]`);
     await expect(sketch.locator('svg')).toBeVisible();
@@ -170,6 +153,32 @@ test('the lab stage ranks the same models differently by the two numbers', async
   await stage.getByRole('button', { name: 'Right answers per hour' }).click();
   await expect(stage.locator('[data-board] li[data-place="1"]')).toContainText('Gemma 4 12B coder');
   await expect(stage.locator('[data-board] li[data-place="4"]')).toContainText('Gemma 4 26B');
+});
+
+test('the Blind Lap stage plays a real lap, keeps the name hidden until the flag, and owns up when it is wrong', async ({ page }) => {
+  await open(page, '/work/blind-lap');
+  const stage = page.locator('[data-stage="blind-lap"]');
+  await stage.getByRole('button', { name: 'Silverstone 2026' }).click();
+  await expect(stage.locator('[data-hidden]')).toHaveCount(1);
+  // The guess changes as the corners go by, three names at a time.
+  await expect(stage.locator('ol li')).toHaveCount(3, { timeout: 8000 });
+  // At the flag the name comes back, with the official lap time, and the model's miss is said.
+  await expect(stage).toContainText('Lewis Hamilton', { timeout: 25000 });
+  await expect(stage.locator('[data-hidden]')).toHaveCount(0);
+  await expect(stage).toContainText('1:28.591');
+  await expect(stage).toContainText('and wrong: it said LEC, the teammate in the same car');
+  // A lap that was picked stays on its result.
+  await page.waitForTimeout(6000);
+  await expect(stage.getByRole('button', { name: 'Silverstone 2026' })).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('with reduced motion the Blind Lap stage is a still picture of a finished lap', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await open(page, '/work/blind-lap');
+  const stage = page.locator('[data-stage="blind-lap"]');
+  await expect(stage).toContainText('Charles Leclerc');
+  await expect(stage).toContainText('Very sure, and right.');
+  await expect(stage).toContainText('1:27.299');
 });
 
 test('the deck stage opens an app from its home page and goes back', async ({ page }) => {

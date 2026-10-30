@@ -8,7 +8,7 @@ const paths = [
   '/brief',
   ...[
     'scrub',
-    'neat',
+    'blind-lap',
     'prats-deck',
     'omnicompiler',
     'floatchat',

@@ -1,8 +1,7 @@
 ---
 title: OmniCompiler
 size: poster
-order: 4
-hero: true
+order: 5
 made: '2025-09'
 status: Paper under review
 tagline: One debugger for five languages.

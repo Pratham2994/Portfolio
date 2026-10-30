@@ -36,8 +36,8 @@ test('with a mouse the art holds still, and plays on the poster under the pointe
   await page.goto('/');
   await expect(page.locator('[data-wall][data-entered]')).toHaveCount(1, { timeout: 8000 });
   expect(await running()(page)).toBe(0);
-  await page.locator('[data-poster="neat"]').hover();
-  await expect.poll(() => running('neat')(page)).toBeGreaterThan(0);
+  await page.locator('[data-poster="blind-lap"]').hover();
+  await expect.poll(() => running('blind-lap')(page)).toBeGreaterThan(0);
   expect(await running('scrub')(page)).toBe(0);
 });
 

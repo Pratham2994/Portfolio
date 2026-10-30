@@ -1,7 +1,7 @@
 ---
 title: Prats-Deck
 size: poster
-order: 3
+order: 4
 made: '2026-10'
 status: On my desk right now
 tagline: A tiny touch screen that runs my desk.

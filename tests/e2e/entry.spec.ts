@@ -108,9 +108,9 @@ test('the cat comes to the poster under the pointer', async ({ page }, info) => 
   const gap = () =>
     page.evaluate(() => {
       const cat = document.querySelector('[data-cat]')!.getBoundingClientRect();
-      const box = document.querySelector('[data-poster="omnicompiler"]')!.getBoundingClientRect();
+      const box = document.querySelector('[data-poster="blind-lap"]')!.getBoundingClientRect();
       return Math.abs((cat.left + cat.right) / 2 - (box.left + box.right) / 2);
     });
-  await page.locator('[data-poster="omnicompiler"]').hover();
+  await page.locator('[data-poster="blind-lap"]').hover();
   await expect.poll(gap, { timeout: 12000 }).toBeLessThan(30);
 });

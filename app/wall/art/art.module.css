@@ -300,6 +300,392 @@
   }
 }
 
+/* lap: a circuit with a car going round it, and a timing tower with the names blacked out */
+.lap {
+  display: grid;
+  gap: 7cqw;
+}
+
+/*
+ * Clear of the corner of the sheet, where a new one has its tape. The car's layer moves by its
+ * own size, so it is clipped here, or it would make a page wider wherever this art is shown.
+ */
+.road {
+  position: relative;
+  margin-top: 7cqw;
+  overflow: clip;
+}
+
+.lap svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.circuit {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 28;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/*
+ * The car is a layer the size of the drawing, moved by a share of its own size. A transform runs
+ * off the main thread, so a phone, where the art never stops, is not kept busy by it.
+ */
+.racer {
+  position: absolute;
+  inset: 0;
+  animation: racer 7s linear infinite;
+}
+
+.racer::after {
+  content: '';
+  position: absolute;
+  width: 4.4cqw;
+  height: 4.4cqw;
+  margin: -2.2cqw 0 0 -2.2cqw;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0.8cqw var(--fg);
+}
+
+/* Round Suzuka, a point every 80 m, from the same line as the drawing. */
+@keyframes racer {
+  0% {
+    transform: translate(62.55%, 5.42%);
+  }
+
+  1.37% {
+    transform: translate(66.32%, 5.61%);
+  }
+
+  2.74% {
+    transform: translate(70.09%, 5.61%);
+  }
+
+  4.11% {
+    transform: translate(73.87%, 5.61%);
+  }
+
+  5.48% {
+    transform: translate(77.64%, 5.79%);
+  }
+
+  6.85% {
+    transform: translate(81.42%, 5.79%);
+  }
+
+  8.22% {
+    transform: translate(85.19%, 5.79%);
+  }
+
+  9.59% {
+    transform: translate(88.96%, 5.97%);
+  }
+
+  10.96% {
+    transform: translate(92.74%, 6.15%);
+  }
+
+  12.33% {
+    transform: translate(95.85%, 9.76%);
+  }
+
+  13.7% {
+    transform: translate(97.17%, 16.27%);
+  }
+
+  15.07% {
+    transform: translate(94.62%, 20.98%);
+  }
+
+  16.44% {
+    transform: translate(90.94%, 20.25%);
+  }
+
+  17.81% {
+    transform: translate(87.17%, 19.35%);
+  }
+
+  19.18% {
+    transform: translate(83.68%, 21.52%);
+  }
+
+  20.55% {
+    transform: translate(80.57%, 25.50%);
+  }
+
+  21.92% {
+    transform: translate(77.08%, 23.51%);
+  }
+
+  23.29% {
+    transform: translate(73.40%, 22.24%);
+  }
+
+  24.66% {
+    transform: translate(70.47%, 26.58%);
+  }
+
+  26.03% {
+    transform: translate(67.17%, 29.66%);
+  }
+
+  27.4% {
+    transform: translate(63.87%, 26.94%);
+  }
+
+  28.77% {
+    transform: translate(62.08%, 20.43%);
+  }
+
+  30.14% {
+    transform: translate(58.87%, 17.72%);
+  }
+
+  31.51% {
+    transform: translate(55.38%, 20.25%);
+  }
+
+  32.88% {
+    transform: translate(52.45%, 24.95%);
+  }
+
+  34.25% {
+    transform: translate(50.47%, 31.10%);
+  }
+
+  35.62% {
+    transform: translate(49.91%, 38.16%);
+  }
+
+  36.99% {
+    transform: translate(50.57%, 45.21%);
+  }
+
+  38.36% {
+    transform: translate(51.23%, 52.44%);
+  }
+
+  39.73% {
+    transform: translate(50.09%, 58.95%);
+  }
+
+  41.1% {
+    transform: translate(47.83%, 64.92%);
+  }
+
+  42.47% {
+    transform: translate(44.43%, 64.56%);
+  }
+
+  43.84% {
+    transform: translate(41.23%, 60.94%);
+  }
+
+  45.21% {
+    transform: translate(37.92%, 57.32%);
+  }
+
+  46.58% {
+    transform: translate(34.62%, 53.71%);
+  }
+
+  47.95% {
+    transform: translate(32.36%, 48.10%);
+  }
+
+  49.32% {
+    transform: translate(30.19%, 42.68%);
+  }
+
+  50.68% {
+    transform: translate(29.81%, 48.64%);
+  }
+
+  52.05% {
+    transform: translate(30.94%, 55.52%);
+  }
+
+  53.42% {
+    transform: translate(31.42%, 62.75%);
+  }
+
+  54.79% {
+    transform: translate(30.28%, 69.44%);
+  }
+
+  56.16% {
+    transform: translate(27.92%, 75.05%);
+  }
+
+  57.53% {
+    transform: translate(24.81%, 79.20%);
+  }
+
+  58.9% {
+    transform: translate(21.42%, 82.46%);
+  }
+
+  60.27% {
+    transform: translate(17.74%, 83.73%);
+  }
+
+  61.64% {
+    transform: translate(14.06%, 82.82%);
+  }
+
+  63.01% {
+    transform: translate(10.38%, 80.65%);
+  }
+
+  64.38% {
+    transform: translate(6.70%, 79.39%);
+  }
+
+  65.75% {
+    transform: translate(3.77%, 83.54%);
+  }
+
+  67.12% {
+    transform: translate(2.83%, 90.24%);
+  }
+
+  68.49% {
+    transform: translate(5.66%, 94.58%);
+  }
+
+  69.86% {
+    transform: translate(9.43%, 94.21%);
+  }
+
+  71.23% {
+    transform: translate(13.11%, 92.41%);
+  }
+
+  72.6% {
+    transform: translate(16.70%, 90.24%);
+  }
+
+  73.97% {
+    transform: translate(20.19%, 87.70%);
+  }
+
+  75.34% {
+    transform: translate(23.58%, 84.45%);
+  }
+
+  76.71% {
+    transform: translate(26.89%, 81.01%);
+  }
+
+  78.08% {
+    transform: translate(30.09%, 77.22%);
+  }
+
+  79.45% {
+    transform: translate(33.40%, 73.60%);
+  }
+
+  80.82% {
+    transform: translate(36.60%, 69.98%);
+  }
+
+  82.19% {
+    transform: translate(39.91%, 66.37%);
+  }
+
+  83.56% {
+    transform: translate(43.11%, 62.75%);
+  }
+
+  84.93% {
+    transform: translate(45.66%, 57.69%);
+  }
+
+  86.3% {
+    transform: translate(46.79%, 50.81%);
+  }
+
+  87.67% {
+    transform: translate(47.17%, 43.58%);
+  }
+
+  89.04% {
+    transform: translate(46.98%, 36.35%);
+  }
+
+  90.41% {
+    transform: translate(46.79%, 29.11%);
+  }
+
+  91.78% {
+    transform: translate(47.83%, 22.60%);
+  }
+
+  93.15% {
+    transform: translate(50.00%, 18.08%);
+  }
+
+  94.52% {
+    transform: translate(51.13%, 11.39%);
+  }
+
+  95.89% {
+    transform: translate(54.15%, 7.23%);
+  }
+
+  97.26% {
+    transform: translate(57.83%, 5.61%);
+  }
+
+  98.63% {
+    transform: translate(61.60%, 5.42%);
+  }
+
+  100% {
+    transform: translate(62.55%, 5.42%);
+  }
+}
+
+.tower {
+  display: grid;
+  gap: 1.8cqw;
+}
+
+.tower li {
+  display: grid;
+  grid-template-columns: 7cqw 30cqw minmax(0, 1fr);
+  align-items: center;
+  gap: 3cqw;
+  padding-top: 1.8cqw;
+  border-top: 0.5cqw solid color-mix(in srgb, var(--fg) 40%, var(--bg));
+}
+
+.tower b {
+  font-family: var(--font-display);
+  font-size: 7cqw;
+  font-weight: 900;
+  line-height: 0.8;
+  color: var(--fg);
+}
+
+/* The name of the driver, blacked out. */
+.tower i {
+  width: var(--name);
+  height: 4.6cqw;
+  background: var(--accent);
+}
+
+/* How sure the model is of that one. */
+.tower u {
+  width: calc(var(--share) * 100%);
+  height: 1.6cqw;
+  background: var(--fg);
+}
+
 /* device: the deck itself. A case, a screen with its bar and fifteen apps, and the lead. */
 .device {
   position: relative;
@@ -493,7 +879,7 @@
 }
 
 /* Art made of fixed shapes cannot stretch, so it sits in the middle of its room. */
-[data-size='poster'] > .art > :is(.grid, .code, .device) {
+[data-size='poster'] > .art > :is(.grid, .code, .device, .lap) {
   align-self: center;
   margin-top: 0;
 }
@@ -542,7 +928,7 @@
   }
 
   /* Art made of fixed shapes cannot stretch, so it sits in the middle of its room. */
-  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > :is(.grid, .code, .device) {
+  :global([data-paper]:not([data-paper='a5-wide'])) > [data-size] > .art > :is(.grid, .code, .device, .lap) {
     align-self: center;
     margin-top: 0;
   }

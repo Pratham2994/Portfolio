@@ -90,6 +90,73 @@ function Funnel() {
   );
 }
 
+// Ten measurements of one corner, each against the field: above the line is more than the others.
+const AGAINST = [-14, 9, 17, -6, 12, -18, 5, -10, 15, -4];
+const READERS = [
+  ['TREES', 'boosted'],
+  ['FOREST', 'random'],
+  ['LOGISTIC', 'regression'],
+] as const;
+
+/** Blind Lap: a corner becomes ten numbers against the field. Three models read them, and one name comes out. */
+function Read() {
+  const rows = [48, 96, 144];
+  const ways = rows.map((y) => `M228 96 C 242 96, 238 ${y}, 252 ${y} H316 C 336 ${y}, 330 96, 346 96`);
+  return (
+    <svg viewBox="0 0 400 192">
+      <path className={s.wire} d="M96 96 H116" />
+      {ways.map((way) => (
+        <path key={way} className={s.wire} d={way} />
+      ))}
+      {ways.map((way, i) => (
+        <circle key={way} className={s.dot} r="4.5" style={{ ...at(i), offsetPath: `path('M96 96 H228 ${way.slice(8)}')` }} />
+      ))}
+      <g data-part>
+        <rect className={s.box} x="2" y="70" width="94" height="52" rx="3" />
+        <text className={s.name} x="49" y="93">
+          A CORNER
+        </text>
+        <text className={s.note} x="49" y="108">
+          of a real lap
+        </text>
+      </g>
+      <g data-part>
+        <rect className={s.box} x="116" y="54" width="112" height="84" rx="3" />
+        <text className={s.name} x="172" y="72">
+          10 NUMBERS
+        </text>
+        <text className={s.note} x="172" y="85">
+          against the field
+        </text>
+        <path className={s.wire} d="M132 114 H212" />
+        {AGAINST.map((value, i) => (
+          <rect key={i} className={s.core} x={137 + i * 7.4} y={value > 0 ? 114 - value : 114} width="4.4" height={Math.abs(value)} />
+        ))}
+      </g>
+      {READERS.map(([name, note], i) => (
+        <g key={name} data-part>
+          <rect className={s.box} x="252" y={rows[i] - 17} width="66" height="34" rx="3" />
+          <text className={s.name} x="285" y={rows[i] - 2}>
+            {name}
+          </text>
+          <text className={s.note} x="285" y={rows[i] + 10}>
+            {note}
+          </text>
+        </g>
+      ))}
+      <g data-part>
+        <circle className={s.core} cx="370" cy="96" r="28" />
+        <text className={s.name} x="370" y="93">
+          ONE
+        </text>
+        <text className={s.name} x="370" y="107">
+          NAME
+        </text>
+      </g>
+    </svg>
+  );
+}
+
 /** Prats-Deck: the PC and the deck, and the one lead between them. */
 function Lead() {
   const out = 'M252 62 C 214 34, 150 34, 112 62';
@@ -173,52 +240,6 @@ const Rules = () => (
     ]}
   />
 );
-
-/** Neat: a new file is looked at once. It is filed, or it goes to the bin, and both can be taken back. */
-function Fork() {
-  return (
-    <svg viewBox="0 0 360 190">
-      <path className={s.wire} d="M124 95 H150" />
-      <path className={s.wire} d="M210 95 C 236 95, 236 46, 262 46" />
-      <path className={s.wire} d="M210 95 C 236 95, 236 144, 262 144" />
-      <circle className={s.dot} r="5" style={{ ...at(0), offsetPath: "path('M60 95 H180 C 236 95, 236 46, 262 46')" }} />
-      <circle className={s.dot} r="5" style={{ ...at(2), offsetPath: "path('M60 95 H180 C 236 95, 236 144, 262 144')" }} />
-      <g data-part>
-        <rect className={s.box} x="2" y="70" width="122" height="50" rx="3" />
-        <text className={s.name} x="63" y="93">
-          A NEW FILE
-        </text>
-        <text className={s.note} x="63" y="108">
-          lands in Downloads
-        </text>
-      </g>
-      <g data-part>
-        <circle className={s.core} cx="180" cy="95" r="31" />
-        <text className={s.name} x="180" y="99">
-          NEAT
-        </text>
-      </g>
-      <g data-part>
-        <rect className={s.box} x="262" y="24" width="90" height="44" rx="3" />
-        <text className={s.name} x="307" y="44">
-          FILED
-        </text>
-        <text className={s.note} x="307" y="58">
-          by your rule
-        </text>
-      </g>
-      <g data-part>
-        <rect className={s.box} x="262" y="122" width="90" height="44" rx="3" />
-        <text className={s.name} x="307" y="142">
-          RECYCLE BIN
-        </text>
-        <text className={s.note} x="307" y="156">
-          never further
-        </text>
-      </g>
-    </svg>
-  );
-}
 
 const LEVELS: [name: string, note: string][] = [
   ['YOUR QUESTION', 'in plain words'],
@@ -363,6 +384,11 @@ function Fan() {
 }
 
 const SKETCHES: Record<string, { draw: () => ReactElement; says: string; label: string }> = {
+  'blind-lap': {
+    draw: Read,
+    says: 'The model that guesses at Monza never saw Monza, in any year. So it has to read the driver, not the circuit.',
+    label: 'A corner of a real lap becomes ten numbers, each set against the field. Three models read them, and their guesses are joined into one name.',
+  },
   omnicompiler: {
     draw: Hub,
     says: 'The page says one word. Each language hears it in the words of its own debugger.',
@@ -377,11 +403,6 @@ const SKETCHES: Record<string, { draw: () => ReactElement; says: string; label: 
     draw: Cut,
     says: 'One function builds the command you see and the command that runs. So the two never disagree.',
     label: 'Your file, then one command that is shown before it runs, then a new file.',
-  },
-  neat: {
-    draw: Fork,
-    says: 'Rules only move things. Anything removed goes to the Recycle Bin, and can come back.',
-    label: 'A new file goes to Neat, which files it by your rule or sends it to the Recycle Bin.',
   },
   floatchat: {
     draw: Depth,

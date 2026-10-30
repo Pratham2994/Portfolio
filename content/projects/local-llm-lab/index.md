@@ -1,7 +1,7 @@
 ---
 title: Local LLM lab
-size: poster
-order: 8
+size: postcard
+order: 9
 made: '2026-09'
 status: Verdict written
 tagline: Which local model is actually worth running?

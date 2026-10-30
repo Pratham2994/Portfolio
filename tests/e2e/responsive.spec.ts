@@ -6,7 +6,7 @@ const paths = ['/', '/work/scrub', '/work/idea-hackathon'];
 // Every page, for the check at each width.
 const all = [
   '/',
-  ...['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'chronicle', 'sandglass'].map((slug) => `/work/${slug}`),
+  ...['blind-lap', 'scrub', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'chronicle', 'sandglass'].map((slug) => `/work/${slug}`),
 ];
 // The edges of the layout, then real screens: small and large phones, 13 to 15.6 inch laptops, and 24 and 27 inch monitors.
 const edges = [320, 599, 600, 899, 900, 1279, 1280, 360, 390, 412, 430, 1366, 1440, 1536, 1920, 2560];

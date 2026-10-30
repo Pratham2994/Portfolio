@@ -28,7 +28,7 @@ const flow = z.object({
   links: z.array(z.tuple([text, text])).min(3),
 });
 
-export const artTemplates = ['frames', 'grid', 'bars', 'code', 'device', 'waves', 'type', 'hex', 'sand'] as const;
+export const artTemplates = ['frames', 'grid', 'bars', 'code', 'device', 'waves', 'type', 'hex', 'sand', 'lap'] as const;
 
 const project = z.object({
   title: z.string().min(1),

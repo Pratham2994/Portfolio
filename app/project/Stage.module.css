@@ -522,60 +522,6 @@
   text-align: center;
 }
 
-/* ---- Neat: a messy pile, then three tidy ones. */
-.neat {
-  grid-template-rows: auto 1fr auto;
-  gap: 2cqw;
-  padding: 4cqw;
-}
-
-.piles {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 2cqw;
-  font-size: 1.8cqw;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0;
-  transition: opacity 0.6s linear 0.5s;
-}
-
-.piles span {
-  padding-bottom: 1.2cqw;
-  border-bottom: 0.3cqw solid var(--fg);
-}
-
-.neat[data-tidy] .piles {
-  opacity: 1;
-}
-
-.files {
-  position: relative;
-}
-
-.files li {
-  position: absolute;
-  top: var(--my);
-  left: var(--mx);
-  padding: 1cqw 1.5cqw;
-  border: 0.25cqw solid var(--fg);
-  border-radius: 0.4cqw;
-  background: var(--bg);
-  font-size: 1.95cqw;
-  white-space: nowrap;
-  rotate: var(--turn);
-  transition:
-    top 0.9s var(--ease-in-out) calc(var(--i) * 55ms),
-    left 0.9s var(--ease-in-out) calc(var(--i) * 55ms),
-    rotate 0.9s var(--ease-in-out) calc(var(--i) * 55ms);
-}
-
-.neat[data-tidy] .files li {
-  top: calc(4% + var(--row) * 27%);
-  left: calc(var(--pile) * (100% + 2cqw) / 3);
-  rotate: 0deg;
-}
-
 /* ---- FloatChat: a question, the tool, the answer. Three parts in a row, each set off by a rule. */
 .float {
   grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1.3fr);
@@ -1041,6 +987,335 @@
   color: var(--soft);
 }
 
+/* ---- Blind Lap: the map with the car on it, and the model's guess beside it. */
+/*
+ * The map has a fixed height and the circuit is fitted inside it, so the sheet is the same
+ * size for every circuit. The map's side is always the taller one.
+ */
+.stage[data-wide] > .blind {
+  aspect-ratio: auto;
+}
+
+.blind {
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+}
+
+.circuit {
+  display: grid;
+  align-content: start;
+  gap: 1cqw;
+  min-width: 0;
+  padding: 2.2cqw 2.6cqw 2cqw;
+}
+
+.where {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 2cqw;
+  font-size: max(0.75rem, 1.1cqw);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.where b {
+  font-weight: 700;
+}
+
+.lapClock {
+  font-size: max(0.75rem, 2cqw);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  color: var(--fg);
+}
+
+.map {
+  width: 100%;
+  height: 31cqw;
+}
+
+.road {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 15;
+  stroke-linejoin: round;
+}
+
+/* The part of the lap already driven, in the dark ink, along the middle of the road. */
+.driven {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linejoin: round;
+}
+
+.turn {
+  fill: var(--bg);
+  stroke: var(--fg);
+  stroke-width: 5;
+}
+
+.turn[data-read] {
+  fill: var(--fg);
+}
+
+.turnName {
+  font-family: var(--font-mono);
+  font-size: 40px;
+  font-weight: 700;
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 10px;
+  paint-order: stroke;
+}
+
+.car {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 6;
+}
+
+.speed {
+  width: 100%;
+  height: 4.2cqw;
+  overflow: visible;
+  border-bottom: 0.2cqw solid var(--faint);
+}
+
+.speed polyline {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.speed rect {
+  fill: var(--accent);
+}
+
+.speed line {
+  stroke: var(--accent);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.legend {
+  font-size: max(0.75rem, 0.95cqw);
+}
+
+.reading {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3cqw;
+  min-width: 0;
+  padding: 2.2cqw 2.6cqw 2cqw;
+  border-left: 0.2cqw solid var(--faint);
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 1.2cqw;
+  min-height: 3.6cqw;
+}
+
+.who span,
+.after {
+  font-size: max(0.75rem, 1.05cqw);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.who b {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 3.2cqw;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* The name, blacked out until the flag. */
+.who b[data-hidden] {
+  width: 15cqw;
+  height: 2.6cqw;
+  background: var(--accent);
+}
+
+.guesses {
+  display: grid;
+  align-content: start;
+  gap: 0.8cqw;
+}
+
+.guesses li {
+  display: grid;
+  grid-template-columns: 4.6cqw minmax(0, 1fr) 4.4cqw;
+  align-items: center;
+  gap: 1cqw;
+  font-size: max(0.75rem, 1.7cqw);
+  font-weight: 700;
+}
+
+.guesses i {
+  position: relative;
+  height: 1.3cqw;
+  overflow: hidden;
+  background: var(--faint);
+}
+
+.guesses i::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--fg);
+  transform: scaleX(var(--share));
+  transform-origin: left;
+  transition: transform 0.35s var(--ease-out);
+}
+
+.guesses li[data-it] i::after {
+  background: var(--accent);
+}
+
+.guesses span {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.level,
+.says,
+.called {
+  font-family: var(--font-text);
+  font-size: max(0.75rem, 1.35cqw);
+  line-height: 1.3;
+}
+
+.says b {
+  margin-right: 0.5em;
+  font-family: var(--font-mono);
+}
+
+.called {
+  padding: 0.9cqw 1.1cqw;
+  border: 0.25cqw solid var(--fg);
+  font-weight: 700;
+}
+
+.called[data-right] {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+/* The laps to pick from stay at the foot, whatever is above them. */
+.picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8cqw;
+  margin-top: auto;
+}
+
+.picks button {
+  padding: 0.7cqw 1.1cqw;
+  border: 0.2cqw solid var(--fg);
+  font-size: max(0.75rem, 1.05cqw);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.picks button[aria-pressed='true'] {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+@container (max-width: 34rem) {
+  .circuit,
+  .reading {
+    gap: 3cqw;
+    padding: 5cqw;
+  }
+
+  .map {
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+
+  .reading {
+    border-top: 0.5cqw solid var(--faint);
+    border-left: 0;
+  }
+
+  .where,
+  .legend,
+  .who span,
+  .after,
+  .picks button {
+    font-size: max(0.75rem, 2.8cqw);
+  }
+
+  .lapClock {
+    font-size: max(0.875rem, 4.6cqw);
+  }
+
+  .speed {
+    height: 10cqw;
+  }
+
+  .who {
+    min-height: 9cqw;
+  }
+
+  .who b {
+    font-size: 8cqw;
+  }
+
+  .who b[data-hidden] {
+    width: 40cqw;
+    height: 6.6cqw;
+  }
+
+  .guesses {
+    gap: 2cqw;
+  }
+
+  .guesses li {
+    grid-template-columns: 12cqw minmax(0, 1fr) 11cqw;
+    gap: 2.4cqw;
+    font-size: max(0.875rem, 4.2cqw);
+  }
+
+  .guesses i {
+    height: 3.4cqw;
+  }
+
+  .level,
+  .says,
+  .called {
+    font-size: max(0.875rem, 3.6cqw);
+  }
+
+  /* Room for two lines, so the sheet keeps its size as the circuit or the sentence changes. */
+  .where span:first-child,
+  .says {
+    min-height: 2lh;
+  }
+
+  .called {
+    padding: 2.4cqw 3cqw;
+  }
+
+  .picks {
+    gap: 2cqw;
+  }
+
+  .picks button {
+    padding: 2cqw 2.8cqw;
+  }
+}
+
 /*
  * On a narrow sheet the same scenes are stacked and their type is larger, so a phone gets a
  * picture it can read and not a small copy of the wide one.
@@ -1229,14 +1504,6 @@
     font-size: max(0.75rem, 2.9cqw);
   }
 
-  .piles {
-    font-size: max(0.75rem, 2.3cqw);
-  }
-
-  .files li {
-    font-size: 2.6cqw;
-  }
-
   .float > *,
   .idea > * {
     gap: 2.4cqw;
@@ -1371,6 +1638,9 @@
     animation: press 0.5s steps(1);
   }
 
+  .says,
+  .called,
+  .who b,
   .controls em b,
   .controls em code,
   .onScreen strong,

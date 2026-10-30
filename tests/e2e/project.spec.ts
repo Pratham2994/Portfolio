@@ -25,40 +25,40 @@ test('where a project runs live, its status at the top is the link to it', async
   await expect(live).toHaveAttribute('href', 'https://sandglass.prathampanchal02994.workers.dev/');
   await expect(live).toContainText('Live in the browser');
   // A project with no live address keeps a plain status.
-  await open(page, '/work/neat');
+  await open(page, '/work/chronicle');
   await expect(page.locator('[data-status-live]')).toHaveCount(0);
 });
 
 test('direct load shows the page, and close leads home', async ({ page }) => {
-  await open(page, '/work/neat');
-  await expect(page.locator('#project-title')).toHaveText('Neat');
-  await expect(page).toHaveTitle('Neat - Pratham Panchal');
+  await open(page, '/work/chronicle');
+  await expect(page.locator('#project-title')).toHaveText('Chronicle');
+  await expect(page).toHaveTitle('Chronicle - Pratham Panchal');
   await page.locator('[data-close]').click();
   await expect(page).toHaveURL(/\/$/);
 });
 
 test('next and previous walk the wall in order and wrap', async ({ page }) => {
-  await open(page, '/work/neat');
+  await open(page, '/work/chronicle');
   await page.locator('[data-next]').click();
-  await expect(page).toHaveURL(/\/work\/scrub$/);
+  await expect(page).toHaveURL(/\/work\/blind-lap$/);
   await page.locator('[data-prev]').click();
-  await expect(page).toHaveURL(/\/work\/neat$/);
+  await expect(page).toHaveURL(/\/work\/chronicle$/);
 });
 
 test('the next project waits at the end of the page, and the arrow keys turn the pages', async ({ page }) => {
-  await open(page, '/work/neat');
-  await expect(page.locator('[data-next]')).toContainText('Scrub');
+  await open(page, '/work/chronicle');
+  await expect(page.locator('[data-next]')).toContainText('Blind Lap');
   await page.keyboard.press('ArrowRight');
-  await expect(page).toHaveURL(/\/work\/scrub$/);
-  await expect(page.locator('#project-title')).toHaveText('Scrub');
+  await expect(page).toHaveURL(/\/work\/blind-lap$/);
+  await expect(page.locator('#project-title')).toHaveText('Blind Lap');
   // The sheet that covered the turn is gone once the new page is in.
   await expect(page.locator('[data-ghost]')).toHaveCount(0);
   await page.keyboard.press('ArrowLeft');
-  await expect(page).toHaveURL(/\/work\/neat$/);
+  await expect(page).toHaveURL(/\/work\/chronicle$/);
 });
 
 test('a project with a stage shows it, and the sectors in the bar fill as the page goes by', async ({ page }) => {
-  for (const slug of ['scrub', 'neat', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'chronicle', 'sandglass']) {
+  for (const slug of ['blind-lap', 'scrub', 'prats-deck', 'omnicompiler', 'floatchat', 'idea-hackathon', 'malshield', 'local-llm-lab', 'chronicle', 'sandglass']) {
     await open(page, `/work/${slug}`);
     await expect(page.locator(`[data-stage="${slug}"]`)).toBeVisible();
     await expect(page.locator('#project-title')).toBeVisible();
@@ -92,11 +92,11 @@ test('keyboard: Enter on a poster opens it and focus lands on the title', async 
 
 test('closing returns focus to the poster, and the wall is inert while a page is open', async ({ page }) => {
   await open(page, '/');
-  await page.locator('[data-poster="neat"]').focus();
+  await page.locator('[data-poster="chronicle"]').focus();
   await page.keyboard.press('Enter');
   await expect(page.locator('main')).toHaveAttribute('inert', '');
   await page.keyboard.press('Escape');
-  await expect(page.locator('[data-poster="neat"]')).toBeFocused();
+  await expect(page.locator('[data-poster="chronicle"]')).toBeFocused();
 });
 
 test('a project page has no horizontal overflow', async ({ page }) => {

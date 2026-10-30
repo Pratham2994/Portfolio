@@ -25,20 +25,20 @@ test('an address with odd characters does not crash the way home', async ({ page
 
 test('reopening by history during the close leaves no sheet over the page', async ({ page }) => {
   await open(page, '/');
-  await page.locator('[data-poster="neat"]').click();
+  await page.locator('[data-poster="chronicle"]').click();
   await expect(page.locator('#project-title')).toBeVisible();
   await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
   // The browser's Back button closes with a sheet. Forward reopens the page while it runs.
   await page.goBack();
   await expect(page.locator('[data-ghost]')).toHaveCount(1);
   await page.goForward();
-  await expect(page.locator('#project-title')).toHaveText('Neat');
+  await expect(page.locator('#project-title')).toHaveText('Chronicle');
   await expect(page.locator('[data-ghost]')).toHaveCount(0, { timeout: 250 });
 });
 
 test('opening another poster during the close ends on that page, with nothing left over', async ({ page }) => {
   await open(page, '/');
-  await page.locator('[data-poster="neat"]').click();
+  await page.locator('[data-poster="chronicle"]').click();
   await expect(page.locator('#project-title')).toBeVisible();
   await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
   await page.goBack();
@@ -53,14 +53,14 @@ test('opening another poster during the close ends on that page, with nothing le
 
 test('after a resize, the close aims at where the poster is now', async ({ page }) => {
   await open(page, '/');
-  await page.locator('[data-poster="neat"]').click();
+  await page.locator('[data-poster="chronicle"]').click();
   await expect(page.locator('#project-title')).toBeVisible();
   await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
   await page.setViewportSize({ width: 700, height: 900 });
   await page.goBack();
   const target = await page.locator('[data-ghost]').getAttribute('data-target');
   await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
-  const box = (await page.locator('[data-poster="neat"]').boundingBox())!;
+  const box = (await page.locator('[data-poster="chronicle"]').boundingBox())!;
   // The poster is focused after the close and drawn a little larger, so compare centres.
   const [top, right, bottom, left] = target!.match(/-?[\d.]+/g)!.map(Number);
   expect(Math.abs((left + 700 - right) / 2 - (box.x + box.width / 2))).toBeLessThan(6);
@@ -128,7 +128,7 @@ test.describe('with reduced motion', () => {
 test('after a poster is opened and closed, Back does not reopen it', async ({ page }) => {
   await page.goto('about:blank');
   await open(page, '/');
-  await page.locator('[data-poster="neat"]').click();
+  await page.locator('[data-poster="chronicle"]').click();
   await expect(page.locator('#project-title')).toBeVisible();
   await expect(page.locator('html[data-transitioning]')).toHaveCount(0);
   await page.keyboard.press('Escape');

@@ -1,7 +1,7 @@
 ---
 title: iDEA Hackathon
 size: poster
-order: 6
+order: 7
 made: '2025-03'
 status: 3rd prize
 tagline: A bank service desk that knows who is asking.

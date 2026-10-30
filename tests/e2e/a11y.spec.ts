@@ -5,7 +5,7 @@ import { open } from './helpers';
 
 const slugs = [
   'scrub',
-  'neat',
+  'blind-lap',
   'prats-deck',
   'omnicompiler',
   'floatchat',

@@ -1,7 +1,7 @@
 ---
 title: MalShield
 size: poster
-order: 7
+order: 8
 made: '2025-02'
 status: Hackathon build
 tagline: Drop in a file. Find out if it bites.
