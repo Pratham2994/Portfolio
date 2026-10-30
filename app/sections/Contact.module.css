@@ -190,8 +190,8 @@
 .email {
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: clamp(0.9375rem, 3.6vw, 1.375rem);
-  overflow-wrap: anywhere;
+  font-size: clamp(0.875rem, 3.6vw, 1.375rem);
+  overflow-wrap: break-word;
 }
 
 .email span {

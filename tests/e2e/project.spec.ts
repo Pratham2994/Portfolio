@@ -19,14 +19,27 @@ test('the project page is fetched while the wall is up, so the first poster does
   await expect(page.locator('head link[rel="prefetch"][as="style"]')).not.toHaveCount(0);
 });
 
-test('where a project runs live, its status at the top is the link to it', async ({ page }) => {
+test('where a project runs live, a large button under its name and its status lead to it', async ({ page }) => {
   await open(page, '/work/sandglass');
-  const live = page.locator('[data-status-live]:visible');
-  await expect(live).toHaveAttribute('href', 'https://sandglass.prathampanchal02994.workers.dev/');
-  await expect(live).toContainText('Live in the browser');
-  // A project with no live address keeps a plain status.
+  const go = page.locator('[data-go-live]');
+  await expect(go).toBeInViewport();
+  await expect(go).toHaveAttribute('href', 'https://sandglass.prathampanchal02994.workers.dev/');
+  await expect(go).toContainText('Try it live');
+  await expect(go).toContainText('sandglass.prathampanchal02994.workers.dev');
+  await expect(page.locator('[data-status-live]').first()).toHaveAttribute('href', 'https://sandglass.prathampanchal02994.workers.dev/');
+  await expect(page.locator('[data-status-live]').first()).toContainText('Live in the browser');
+  // A project with no live address keeps a plain status, and has no button.
   await open(page, '/work/chronicle');
-  await expect(page.locator('[data-status-live]')).toHaveCount(0);
+  await expect(page.locator('[data-status-live], [data-go-live]')).toHaveCount(0);
+});
+
+test('a poster on the wall says LIVE where the project runs on the web', async ({ page }) => {
+  await open(page, '/');
+  await expect(page.locator('[data-on-air]')).toHaveCount(2);
+  await expect(page.locator('[data-poster="blind-lap"] [data-on-air]')).toBeVisible();
+  await expect(page.locator('[data-poster="sandglass"] [data-on-air]')).toBeVisible();
+  // And the board says what the wall is for.
+  await expect(page.locator('[data-wall-hint]')).toHaveText('Every poster is a project. Open one.');
 });
 
 test('direct load shows the page, and close leads home', async ({ page }) => {

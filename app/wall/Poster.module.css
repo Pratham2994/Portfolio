@@ -309,6 +309,48 @@
   box-shadow: 0 0.1rem 0.2rem rgb(0 0 0 / 0.4);
 }
 
+/* LIVE, as in the corner of a broadcast: this one can be opened and used now. */
+.onAir {
+  position: absolute;
+  top: 5cqw;
+  left: 5cqw;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.35em 0.6em;
+  border-radius: 2px;
+  background: #14100f;
+  color: #f6efe3;
+  font-family: var(--font-mono);
+  font-size: clamp(0.6875rem, 4.6cqw, 0.875rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  box-shadow: 0 0.1rem 0.2rem rgb(0 0 0 / 0.4);
+}
+
+.onAir::before {
+  content: '';
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: #ff2a1a;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .onAir::before {
+    animation: on-air 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes on-air {
+  50% {
+    opacity: 0.25;
+  }
+}
+
 /* A sheet hangs from the pin at its top, so that is the point it turns on. */
 .poster {
   transform-origin: 50% 2%;

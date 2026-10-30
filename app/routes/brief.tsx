@@ -136,7 +136,7 @@ export default function Brief() {
                 </a>
                 {project.links.live && (
                   <a href={project.links.live} className={s.code}>
-                    live
+                    try it live
                   </a>
                 )}
               </small>

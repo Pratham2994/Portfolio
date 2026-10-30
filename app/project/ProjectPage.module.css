@@ -102,18 +102,119 @@
   display: none;
 }
 
-/* A status that is a link: it fills on hover, like the other buttons in the bar. */
+/* A status that is a link says the project is on air: filled, with a red light. It empties on hover. */
 a:is(.status, .statusBelow) {
-  color: inherit;
+  align-items: center;
+  gap: 0.6em;
+  background: var(--fg);
+  color: var(--bg);
+  font-weight: 700;
   text-decoration: none;
   transition:
     background-color var(--dur-base) var(--ease-out),
     color var(--dur-base) var(--ease-out);
 }
 
+a.status {
+  display: flex;
+}
+
 a:is(.status, .statusBelow):is(:hover, :focus-visible) {
+  background: transparent;
+  color: var(--fg);
+}
+
+a:is(.status, .statusBelow)::before,
+.go > span:first-child::before {
+  content: '';
+  flex: none;
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: #ff2a1a;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:is(.status, .statusBelow)::before,
+  .go > span:first-child::before {
+    animation: on-air 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes on-air {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* The way to the project on the web, under its name: the largest button on the page. */
+.go {
+  display: grid;
+  grid-template-columns: minmax(0, auto) auto;
+  grid-template-areas:
+    'text arrow'
+    'host arrow';
+  align-items: center;
+  justify-self: start;
+  gap: 0.2em 1.6em;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.8em 1.1em;
+  border: 2px solid var(--fg);
+  border-radius: 2px;
   background: var(--fg);
   color: var(--bg);
+  font-family: var(--font-mono);
+  text-decoration: none;
+  box-shadow: 0 0.6rem 1.2rem -0.6rem rgb(0 0 0 / 0.55);
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+
+.go > span:first-child {
+  grid-area: text;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  font-size: var(--step-1);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.go small {
+  grid-area: host;
+  padding-left: 1.2em;
+  font-size: var(--step--1);
+  /* A long address breaks at any point, so the button never runs off a phone. */
+  overflow-wrap: anywhere;
+}
+
+.go > span:last-child {
+  grid-area: arrow;
+  font-size: var(--step-3);
+  line-height: 1;
+}
+
+.go:is(:hover, :focus-visible) {
+  background: transparent;
+  color: var(--fg);
+}
+
+/* The same way, once more at the end of the page, as a button and not a plain link. */
+.liveLink {
+  padding: 0.5em 0.9em;
+  border-radius: 2px;
+  background: var(--fg);
+  color: var(--bg);
+  text-decoration: none;
+}
+
+.liveLink:is(:hover, :focus-visible) {
+  background: transparent;
+  color: var(--fg);
+  outline: 1px solid var(--fg);
 }
 
 /* On a phone the bar is one short row. The status moves down, above the title. */
@@ -134,6 +235,11 @@ a:is(.status, .statusBelow):is(:hover, :focus-visible) {
     font-size: var(--step--1);
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  /* A live status would say what the button under the name says, a few lines away. */
+  a.statusBelow {
+    display: none;
   }
 }
 
@@ -176,13 +282,15 @@ a:is(.status, .statusBelow):is(:hover, :focus-visible) {
   justify-content: flex-end;
   gap: 0.35rem;
   padding: var(--space-4) var(--space-4) var(--space-4) 0;
+  container-type: inline-size;
 }
 
 .stats dd {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: var(--step-5);
+  /* A number is one row of cards. In a narrow column it gets smaller, so seven of them still fit. */
+  font-size: min(var(--step-5), 21cqw);
   line-height: 1;
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
@@ -343,6 +451,7 @@ a:is(.status, .statusBelow):is(:hover, :focus-visible) {
   display: grid;
   gap: 0.5rem;
   min-width: 0;
+  container-type: inline-size;
 }
 
 .upText > span,
@@ -359,7 +468,8 @@ a:is(.status, .statusBelow):is(:hover, :focus-visible) {
 .upText strong {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: var(--step-5);
+  /* As large as its longest word lets it be, so a name never breaks inside a word. */
+  font-size: min(var(--step-5), calc(100cqw / (var(--chars) * 0.56)));
   line-height: 0.88;
   text-transform: uppercase;
   overflow-wrap: anywhere;
@@ -612,6 +722,29 @@ a:is(.status, .statusBelow):is(:hover, :focus-visible) {
 
   .hero[data-kind='field'] .tagline {
     padding-bottom: 0.2em;
+  }
+
+  /* The name takes two rows, so its line and the way to it stack beside it and add no height. */
+  .hero[data-kind='field'] .title {
+    grid-row: span 2;
+  }
+
+  /* Here the button is one row, so the whole scene still fits on the first screen. */
+  .hero[data-kind='field'] .go {
+    grid-column: 2;
+    grid-template-columns: auto auto auto;
+    grid-template-areas: 'text host arrow';
+    align-items: baseline;
+    gap: 1.2em;
+    padding: 0.6em 1em;
+  }
+
+  .hero[data-kind='field'] .go small {
+    padding-left: 0;
+  }
+
+  .hero[data-kind='field'] .go > span:last-child {
+    font-size: var(--step-1);
   }
 
   .hero[data-kind='field'] .statusBelow {

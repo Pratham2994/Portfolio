@@ -879,9 +879,10 @@ export function Stage({ slug }: { slug: string }) {
       <div className={s.stage} data-stage={slug} data-wide={kind === 'field' || undefined}>
         <Scene />
       </div>
-      {/* A small light, as on a camera, and one line that says what is on the stage. */}
+      {/* A small light, as on a camera, and one line that says what is on the stage. It is "Demo",
+          not "Live": live is the project itself, on the web. */}
       <figcaption className={s.clue} data-clue>
-        <b>Live</b>
+        <b>Demo</b>
         <span>
           {clue}
           {hint && <em> {hint}</em>}

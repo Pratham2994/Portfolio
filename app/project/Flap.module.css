@@ -1,7 +1,8 @@
 /* Each character is one card of a split-flap board: a dark seam across the middle, and a quick fall as it changes. */
 .flap {
   display: inline-flex;
-  flex-wrap: wrap;
+  /* One number is one row of cards: it never breaks in two. */
+  flex-wrap: nowrap;
   gap: 0.04em;
 }
 

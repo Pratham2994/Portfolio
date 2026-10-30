@@ -91,9 +91,13 @@ export function Centre({ className }: { className?: string }) {
         ))}
       </p>
       <p className={styles.line}>Most of my code exists because a tool almost did what I needed.</p>
-      {/* Empty on ALMOST. It keeps its room, so nothing moves when a line comes in. */}
+      {/* On ALMOST it says what the wall is for. It keeps its room, so nothing moves when a line comes in. */}
       <p className={styles.proof} key={word} data-proof>
-        {proof}
+        {proof || (
+          <span className={styles.hint} data-wall-hint>
+            Every poster is a project. Open one.
+          </span>
+        )}
       </p>
       {/* Who and what, in five seconds: the name, and the three things I build. */}
       <p className={styles.name}>

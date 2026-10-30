@@ -82,7 +82,11 @@ export function Contact() {
         <h2 id="contact-title">Say hello</h2>
         <p className={s.pitch}>For a job, a project, or a wrong fact on this site. I answer all three.</p>
         <p className={s.email}>
-          <span ref={address}>{you.email}</span>
+          {/* On a narrow phone the address breaks after the @, not one letter from its end. */}
+          <span ref={address}>
+            {you.email.split('@')[0]}@<wbr />
+            {you.email.split('@')[1]}
+          </span>
         </p>
         <p className={s.said} aria-live="polite" data-said>
           {left ? said : 'All gone. The address is still up there.'}

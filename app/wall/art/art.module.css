@@ -303,7 +303,7 @@
 /* lap: a circuit with a car going round it, and a timing tower with the names blacked out */
 .lap {
   display: grid;
-  gap: 7cqw;
+  gap: 3.5cqw;
 }
 
 /*
@@ -312,8 +312,22 @@
  */
 .road {
   position: relative;
-  margin-top: 7cqw;
+  /* Narrower than the sheet on a phone's 3 by 4 sheet, so the tower still clears the name. */
+  width: 78%;
+  margin: 3cqw auto 0;
   overflow: clip;
+}
+
+/* The big sheet on the wide wall has the room for the whole drawing. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .lap {
+    gap: 7cqw;
+  }
+
+  .road {
+    width: auto;
+    margin: 7cqw 0 0;
+  }
 }
 
 .lap svg {

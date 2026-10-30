@@ -82,6 +82,12 @@ export function Poster({ project, index }: { project: Project; index: number }) 
           New
         </b>
       )}
+      {/* A project that runs on the web says so on the sheet, as a broadcast says it is live. */}
+      {project.links.live && (
+        <b className={styles.onAir} data-on-air>
+          Live
+        </b>
+      )}
       <span className={styles.caption}>
         <strong className={styles.title}>{project.title}</strong>
         <span className={styles.tagline}>{project.tagline}</span>

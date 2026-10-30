@@ -161,7 +161,15 @@ export function ProjectPage({ project }: { project: Project }) {
       </>
     );
     return project.links.live ? (
-      <a href={project.links.live} target="_blank" rel="noreferrer" className={className} data-var={underReview || undefined} data-status-live>
+      <a
+        href={project.links.live}
+        target="_blank"
+        rel="noreferrer"
+        className={className}
+        data-var={underReview || undefined}
+        data-status-live
+        onClick={() => track('live_opened', { project: project.slug, from: 'status' })}
+      >
         {words}
         <span aria-hidden="true"> ↗</span>
       </a>
@@ -189,6 +197,22 @@ export function ProjectPage({ project }: { project: Project }) {
       <p className={s.tagline} data-in>
         {project.tagline}
       </p>
+      {/* Where it runs on the web, the way to it is the first thing to press on the page. */}
+      {project.links.live && (
+        <a
+          href={project.links.live}
+          target="_blank"
+          rel="noreferrer"
+          className={s.go}
+          data-go-live
+          data-in
+          onClick={() => track('live_opened', { project: project.slug, from: 'hero' })}
+        >
+          <span>Try it live</span>
+          <small>{new URL(project.links.live).host}</small>
+          <span aria-hidden="true">↗</span>
+        </a>
+      )}
     </div>
   );
 
@@ -362,8 +386,15 @@ export function ProjectPage({ project }: { project: Project }) {
               Code on GitHub
             </a>
             {project.links.live && (
-              <a href={project.links.live} target="_blank" rel="noreferrer" data-live>
-                Open it live
+              <a
+                href={project.links.live}
+                target="_blank"
+                rel="noreferrer"
+                className={s.liveLink}
+                data-live
+                onClick={() => track('live_opened', { project: project.slug, from: 'end' })}
+              >
+                Open it live ↗
               </a>
             )}
           </p>
@@ -374,7 +405,9 @@ export function ProjectPage({ project }: { project: Project }) {
           <Link
             to={`/work/${next.slug}`}
             className={s.upNext}
-            style={{ '--bg': next.palette.bg, '--fg': next.palette.fg, '--accent': next.palette.accent } as CSSProperties}
+            style={
+              { '--bg': next.palette.bg, '--fg': next.palette.fg, '--accent': next.palette.accent, '--chars': longestWord(next.title) } as CSSProperties
+            }
             ref={upNext}
             data-next
             preventScrollReset

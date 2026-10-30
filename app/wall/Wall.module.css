@@ -40,7 +40,8 @@
 
 .centre {
   grid-column: 1 / -1;
-  aspect-ratio: 2 / 1;
+  /* On a phone the board's height comes from its lines and its own row, not from a ratio. */
+  aspect-ratio: auto;
   /* Room for the cat, which sits on the first poster and would cover the name line. */
   margin-bottom: 1.5rem;
 }
