@@ -1,11 +1,10 @@
-import type { AnimationEvent, CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import portrait from "~/assets/portrait.webp";
 import { useState } from "react";
 import { Link } from "react-router";
 
 import { projects, timeline, you } from "~/content";
 import { track } from "~/lib/analytics";
-import { sound } from "~/lib/sound";
 import { Paragraphs } from "~/lib/Paragraphs";
 
 import s from "./You.module.css";
@@ -22,17 +21,6 @@ for (const language of you.stack.languages) {
       );
 }
 
-// When the thrown photo hits the wall: 55% of its 520 ms slap, in You.module.css.
-const HIT = 286;
-
-/** The photo is heard as well as seen: thrown, hitting the wall, then taped. */
-function slapSound(event: AnimationEvent<HTMLElement>) {
-  if (event.pseudoElement === "::before") return sound("tape");
-  if (!/slap/.test(event.animationName)) return;
-  sound("throw");
-  setTimeout(() => sound("slap"), HIT);
-}
-
 const MOVES = { signed: 'Signed', loan: 'Loan', academy: 'Academy' } as const;
 
 export function You() {
@@ -43,7 +31,7 @@ export function You() {
     <section id="you" className={s.you} aria-labelledby="you-title">
       {/* Two columns on a wide screen: the photo with the tools under it, and the words with the history. */}
       <div className={s.side}>
-        <figure className={s.portrait} data-reveal onAnimationStart={slapSound}>
+        <figure className={s.portrait} data-reveal>
           <div className={s.print}>
             <img
               src={portrait}

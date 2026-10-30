@@ -1,7 +1,6 @@
 import gsap from 'gsap';
 
 import { prefersReducedMotion } from '~/lib/motion';
-import { sound } from '~/lib/sound';
 
 export const PENDING = 'entry-pending';
 
@@ -175,9 +174,7 @@ export function playEntry(wall: HTMLElement): void {
           },
           at,
         )
-        .to(sheet, { opacity: 1, duration: 0.25, ease: 'power1.out' }, at)
-        // A soft tap of paper as it comes to rest.
-        .call(() => sound('land'), [], at + LAND * 0.4);
+        .to(sheet, { opacity: 1, duration: 0.25, ease: 'power1.out' }, at);
     });
 }
 
@@ -208,9 +205,9 @@ function playBoot(timeline: gsap.core.Timeline, { screen, head, lines, load, fil
       const count = { mb: 0 };
       timeline
         .to(count, { mb: MEMORY, duration: 0.3, ease: 'power1.in', onUpdate: () => void (result.textContent = `${Math.round(count.mb)} MB`) }, at + 0.05)
-        .call(() => void ((result.textContent = 'OK'), sound('blip')), [], at + 0.4);
+        .call(() => void (result.textContent = 'OK'), [], at + 0.4);
     } else {
-      timeline.call(() => void ((result.textContent = 'OK'), sound('blip')), [], at + 0.22);
+      timeline.call(() => void (result.textContent = 'OK'), [], at + 0.22);
     }
   });
 
@@ -221,7 +218,6 @@ function playBoot(timeline: gsap.core.Timeline, { screen, head, lines, load, fil
     // 2. The screen gives way to the word.
     .set(centre.children[0], { opacity: 1 }, BOOTED)
     .to(screen, { opacity: 0, duration: 0.25, ease: 'power1.in' }, BOOTED)
-    .call(() => sound('whoosh'), [], BOOTED)
     // 3. The view pulls back: soft at the start and at the end.
     .to(grid, { scale: 1, duration: 1.15, ease: 'power3.inOut' }, BOOTED + 0.13)
     .to([...centre.children].slice(1), { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.1 }, BOOTED + 0.78);
