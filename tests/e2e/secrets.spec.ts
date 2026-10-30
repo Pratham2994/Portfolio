@@ -29,7 +29,7 @@ test('typing "lights out" runs a race start and times the reaction', async ({ pa
   await expect(page.locator('.race-time')).toHaveText(/^\d\.\d{3}s$/);
   await expect(page.locator('[data-race]')).toHaveCount(0, { timeout: 10000 });
   expect(await leftovers(page)).toBe(0);
-  await expect(page.locator('[data-cheat]')).toContainText('1/29');
+  await expect(page.locator('[data-cheat]')).toContainText('1 found');
   // A poster still opens afterwards.
   await page.locator('[data-poster="scrub"]').click();
   await expect(page.locator('#project-title')).toHaveText('Scrub');
@@ -58,15 +58,37 @@ test('the list names every secret, and a click on one starts it', async ({ page 
   await expect(page.locator('#secret-list li')).toHaveCount(29);
   await page.getByRole('button', { name: 'kohli' }).click();
   await expect(page.locator('.sport[data-sport="kohli"]')).toHaveCount(1);
-  await expect(page.locator('[data-cheat]')).toContainText('1/29');
+  await expect(page.locator('[data-cheat]')).toContainText('1 found');
 });
 
 test('with every secret found, the counter goes gold and the hint says so', async ({ page }) => {
   await page.evaluate((all) => localStorage.setItem('wall-secrets', JSON.stringify(all)), ['meow', 'lights', 'boxbox', 'messi', 'siuu', 'kohli', 'rcb', 'federer', 'smash', 'ace', 'naruto', 'creeper', 'domain', 'titan', 'geass', 'jajanken', 'alchemy', 'mob', 'rezero', 'bakuman', 'water', 'kamehameha', 'kira', 'gearfive', 'rasengan', 'purple', 'arise', 'moonwalk', 'batman']);
   await open(page, '/');
-  await expect(page.locator('[data-cheat]')).toContainText('29/29');
+  await expect(page.locator('[data-cheat]')).toHaveText('All 29 secrets found');
   await expect(page.locator('[data-cheat]')).toHaveAttribute('data-all');
   await expect(page.locator('[data-hint]')).toContainText('all of them');
+});
+
+test('once a visit, a while after the opening, the counter blinks and its hint lights up', async ({ page }) => {
+  test.setTimeout(60_000);
+  await expect(page.locator('[data-cheat]')).toHaveText('29 secrets on this wall · 0 found');
+  const nudge = page.locator('[data-secrets][data-nudge]');
+  await expect(nudge).toHaveCount(0);
+  await expect(nudge).toHaveCount(1, { timeout: 16000 });
+  await expect(nudge).toHaveCount(0, { timeout: 8000 });
+  // Not again in the same visit.
+  await page.reload();
+  await expect(page.locator('[data-wall][data-entered]')).toHaveCount(1, { timeout: 15000 });
+  await page.waitForTimeout(12000);
+  await expect(nudge).toHaveCount(0);
+});
+
+test('no nudge for a visitor who has found one already', async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.keyboard.type('meow', { delay: 20 });
+  await expect(page.locator('[data-cheat]')).toContainText('1 found');
+  await page.waitForTimeout(14000);
+  await expect(page.locator('[data-secrets][data-nudge]')).toHaveCount(0);
 });
 
 test('"meow" moves the hint on to the next secret', async ({ page }) => {

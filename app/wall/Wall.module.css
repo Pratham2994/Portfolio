@@ -334,19 +334,52 @@
 
 .hint {
   opacity: 0.55;
+  transition:
+    opacity 0.6s linear,
+    color 0.6s linear;
 }
 
+/* Set like the threads at the top: a button that asks to be pressed, not a line of small print. */
 .cheat {
-  padding: 0.3em 0.6em;
+  padding: 0.45em 0.7em;
   border: 1px solid var(--line);
   border-radius: 2px;
   background: var(--wall-shade);
-  color: var(--dim);
+  color: var(--bone);
   font: inherit;
   letter-spacing: inherit;
+  text-transform: uppercase;
   transition:
     color var(--dur-fast) linear,
     border-color var(--dur-fast) linear;
+}
+
+.cheat span {
+  color: var(--dim);
+}
+
+/* The nudge: the hint is lit for a moment, and the counter blinks twice. */
+.secrets[data-nudge] .hint {
+  opacity: 1;
+  color: var(--bone);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .secrets[data-nudge] .cheat {
+    animation: nudge 0.5s steps(1) 2;
+  }
+}
+
+@keyframes nudge {
+  0% {
+    border-color: var(--signal);
+    background: var(--signal);
+  }
+
+  50% {
+    border-color: var(--line);
+    background: var(--wall-shade);
+  }
 }
 
 .cheat[data-all] {

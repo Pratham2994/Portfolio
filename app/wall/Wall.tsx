@@ -71,6 +71,10 @@ function Cell({ id, index, children }: { id: string; index: number; children: Re
   );
 }
 
+// The nudge to the secrets: once a visit, this long after the opening.
+const NUDGED = 'wall-nudged';
+const NUDGE_AFTER = 10_000;
+
 export function Wall() {
   const columns = useColumns();
   const wall = useRef<HTMLElement>(null);
@@ -125,6 +129,49 @@ export function Wall() {
     window.addEventListener('wall:secrets', open);
     return () => window.removeEventListener('wall:secrets', open);
   }, []);
+  // Once a visit, a while after the opening, the counter blinks and its hint lights up, so the
+  // secrets are seen at least once. On a phone the counter is at the foot of the wall, so it
+  // waits until it is on screen. Not over an open project page.
+  const [nudge, setNudge] = useState(false);
+  useEffect(() => {
+    const section = wall.current;
+    const counter = section?.querySelector<HTMLElement>('[data-cheat]');
+    if (!section || !counter) return;
+    let wait = 0;
+    let off = 0;
+    const play = () => {
+      seen.disconnect();
+      if ('projectOpen' in document.documentElement.dataset) {
+        wait = window.setTimeout(play, 2000);
+        return;
+      }
+      try {
+        if (sessionStorage.getItem(NUDGED)) return;
+        sessionStorage.setItem(NUDGED, '1');
+      } catch {
+        // No storage: it plays, and may play again on the next visit.
+      }
+      setNudge(true);
+      off = window.setTimeout(() => setNudge(false), 4500);
+    };
+    const seen = new IntersectionObserver(([entry]) => entry.isIntersecting && play());
+    const start = () => {
+      wait = window.setTimeout(() => seen.observe(counter), NUDGE_AFTER);
+    };
+    const entered = new MutationObserver(() => {
+      if (!('entered' in section.dataset)) return;
+      entered.disconnect();
+      start();
+    });
+    if ('entered' in section.dataset) start();
+    else entered.observe(section, { attributes: true, attributeFilter: ['data-entered'] });
+    return () => {
+      entered.disconnect();
+      seen.disconnect();
+      window.clearTimeout(wait);
+      window.clearTimeout(off);
+    };
+  }, []);
   // Every one of them found: the counter goes gold, and the hint says so.
   const all = found.length === SECRETS.length;
   const hint = all ? 'all of them. you know me better than my resume does.' : HINTS[!found.includes('meow') ? 0 : !found.includes('lights') ? 1 : 2];
@@ -167,9 +214,21 @@ export function Wall() {
       </aside>
       <Shipped />
       {/* A footer, not a div: the grid stays the only div directly in the wall. */}
-      <footer className={styles.secrets} data-secrets data-open={listOpen || undefined}>
+      <footer
+        className={styles.secrets}
+        data-secrets
+        data-open={listOpen || undefined}
+        // Only for someone who has not found one yet.
+        data-nudge={(nudge && !found.length && !listOpen) || undefined}
+      >
         <button type="button" className={styles.cheat} aria-expanded={listOpen} aria-controls="secret-list" onClick={() => setListOpen((open) => !open)} data-cheat data-all={all || undefined}>
-          secrets {found.length}/{SECRETS.length}
+          {all ? (
+            `All ${SECRETS.length} secrets found`
+          ) : (
+            <>
+              {SECRETS.length} secrets on this wall <span>· {found.length} found</span>
+            </>
+          )}
         </button>
         {/* One line along the bottom of the wall, so the list covers nothing. */}
         {listOpen && (
